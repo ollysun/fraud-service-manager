@@ -22,7 +22,7 @@ public class Account implements Serializable {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private BigInteger id;
+	private Long id;
 
 	@NotBlank(message = "Account number cannot be empty")
 	@Column(name = "account_no")

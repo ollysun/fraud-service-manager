@@ -14,11 +14,11 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name = "card_product")
-public class CardProduct {
+@Table(name = "account_product")
+public class AccountProduct {
 
     @EmbeddedId
-    private CardProductKey id;
+    private AccountProductKey id;
 
     @ManyToOne
     @MapsId("code")
@@ -26,9 +26,9 @@ public class CardProduct {
     private Product product;
 
     @ManyToOne
-    @MapsId("cardId")
-    @JoinColumn(name = "card_id")
-    private Card card;
+    @MapsId("accountId")
+    @JoinColumn(name = "account_id")
+    private Account account;
 
     @Column(nullable = false, name = "status", columnDefinition = "TINYINT", length = 1)
     @Enumerated(EnumType.ORDINAL)
