@@ -1,13 +1,16 @@
 package com.etz.fraudeagleeyemanager.entity;
 
+import com.etz.fraudeagleeyemanager.constant.BooleanStatus;
 import com.etz.fraudeagleeyemanager.constant.Status;
-import com.etz.fraudeagleeyemanager.constant.UseStatus;
-import lombok.*;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
+import java.io.Serializable;
 import java.time.LocalDateTime;
-import java.io.*;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -16,7 +19,6 @@ import java.util.Set;
         columnNames = {"code", "name"}))
 @Getter
 @Setter
-@ToString
 @RequiredArgsConstructor
 @IdClass(ProductId.class)
 public class Product implements Serializable {
@@ -27,6 +29,10 @@ public class Product implements Serializable {
     @Id
     private String code;
 
+    @OneToMany(mappedBy = "product", fetch = FetchType.LAZY,
+            cascade = CascadeType.ALL)
+    private Set<ProductRule> productRules;
+
     @NotBlank(message = "Product Name cannot be empty")
     @Column(nullable = false, name = "name")
     private String name;
@@ -36,11 +42,11 @@ public class Product implements Serializable {
 
     @Column(nullable = false, name = "use_card", columnDefinition = "TINYINT", length = 1)
     @Enumerated(EnumType.ORDINAL)
-    private UseStatus useCard;
+    private BooleanStatus useCard;
 
     @Column(nullable = false,name = "use_account", columnDefinition = "TINYINT", length = 1)
     @Enumerated(EnumType.ORDINAL)
-    private UseStatus useAccount;
+    private BooleanStatus useAccount;
 
     @Column(name = "callback_url")
     private String callbackURL;
@@ -78,5 +84,22 @@ public class Product implements Serializable {
     @Override
     public int hashCode() {
         return 335418294;
+    }
+
+    @Override
+    public String toString() {
+        return "Product(" +
+                "id = " + id + ", " +
+                "code = " + code + ", " +
+                "name = " + name + ", " +
+                "description = " + description + ", " +
+                "useCard = " + useCard + ", " +
+                "useAccount = " + useAccount + ", " +
+                "callbackURL = " + callbackURL + ", " +
+                "status = " + status + ", " +
+                "createdBy = " + createdBy + ", " +
+                "createdAt = " + createdAt + ", " +
+                "updatedBy = " + updatedBy + ", " +
+                "updatedAt = " + updatedAt + ")";
     }
 }

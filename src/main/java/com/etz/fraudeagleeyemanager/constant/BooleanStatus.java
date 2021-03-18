@@ -1,5 +1,5 @@
 package com.etz.fraudeagleeyemanager.constant;
 
-public enum UseStatus {
+public enum BooleanStatus {
     FALSE, TRUE;
 }

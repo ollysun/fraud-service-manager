@@ -1,7 +1,7 @@
 package com.etz.fraudeagleeyemanager.entity;
 
 import com.etz.fraudeagleeyemanager.constant.Status;
-import com.etz.fraudeagleeyemanager.constant.UseStatus;
+import com.etz.fraudeagleeyemanager.constant.BooleanStatus;
 import lombok.*;
 
 import javax.persistence.*;
@@ -36,7 +36,7 @@ public class ProductDataset implements Serializable {
 
 	@Column(nullable = false, name = "mandatory", columnDefinition = "TINYINT", length = 1)
 	@Enumerated(EnumType.ORDINAL)
-	private UseStatus mandatory;
+	private BooleanStatus mandatory;
 	
 	@Column(nullable = false, name = "authorised", columnDefinition = "TINYINT", length = 1)
 	@Enumerated(EnumType.ORDINAL)
