@@ -15,7 +15,7 @@ import java.time.LocalDateTime;
 @Setter
 @ToString
 @RequiredArgsConstructor
-public class TransactionLogEntity {
+public class TransactionLog {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -74,7 +74,7 @@ public class TransactionLogEntity {
 	public boolean equals(Object o) {
 		if (this == o) return true;
 		if (o == null || getClass() != o.getClass()) return false;
-		TransactionLogEntity that = (TransactionLogEntity) o;
+		TransactionLog that = (TransactionLog) o;
 
 		return id != null && id.equals(that.id);
 	}
