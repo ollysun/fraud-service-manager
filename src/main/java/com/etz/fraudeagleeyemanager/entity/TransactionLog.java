@@ -22,7 +22,6 @@ public class TransactionLog {
 	@Column(name = "id")
 	private Long id;
 
-	@NotBlank(message = "Card brand cannot be empty")
 	@Column(name = "transaction_id", unique = true)
 	private String transactionId;
 
@@ -34,9 +33,6 @@ public class TransactionLog {
 	@Enumerated(EnumType.ORDINAL)
 	private BooleanStatus isFraud;
 
-	@Column(name = "flagged_rule")
-	private Long flaggedRule;
-
 	@Column(name = "product_id")
 	private String productId;
 	
@@ -44,15 +40,9 @@ public class TransactionLog {
 	@Enumerated(EnumType.ORDINAL)
 	private BooleanStatus useCard;
 
-	@Column(name = "card_id")
-	private Long cardId;
-
 	@Column(name = "use_account")
 	@Enumerated(EnumType.ORDINAL)
 	private BooleanStatus useAccount;
-	
-	@Column(name = "account_id")
-	private Long accountId;
 
 	@Column(name = "channel")
 	@Enumerated(EnumType.STRING)
@@ -70,6 +60,26 @@ public class TransactionLog {
 	@Column(name = "created_at")
 	private LocalDateTime createdAt;
 
+	@ToString.Exclude
+	@ManyToOne(fetch = FetchType.LAZY, optional = false)
+	@JoinColumn(name = "flagged_rule",  referencedColumnName="id",nullable = false)
+	private ProductRule productRule;
+
+	@ToString.Exclude
+	@ManyToOne(fetch = FetchType.LAZY, optional = false)
+	@JoinColumn(name = "product_code", referencedColumnName="code", nullable = false)
+	private Product product;
+
+	@ToString.Exclude
+	@ManyToOne(fetch = FetchType.LAZY, optional = false)
+	@JoinColumn(name = "card_id", referencedColumnName="id", nullable = false)
+	private Card card;
+
+	@ToString.Exclude
+	@ManyToOne(fetch = FetchType.LAZY, optional = false)
+	@JoinColumn(name = "account_id", referencedColumnName="id")
+	private Account account;
+
 	@Override
 	public boolean equals(Object o) {
 		if (this == o) return true;
@@ -81,6 +91,6 @@ public class TransactionLog {
 
 	@Override
 	public int hashCode() {
-		return 1424028082;
+		return getClass().hashCode();
 	}
 }

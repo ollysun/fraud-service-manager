@@ -4,7 +4,9 @@ import lombok.*;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
-import java.time.LocalDateTime;
+import java.io.Serializable;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Table(name = "report")
@@ -12,7 +14,7 @@ import java.time.LocalDateTime;
 @Setter
 @ToString
 @RequiredArgsConstructor
-public class Report {
+public class Report extends BaseEntity implements Serializable {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -26,18 +28,10 @@ public class Report {
 	@Column(name = "description")
 	private String description;
 
-	@NotBlank(message = "createdBy cannot be empty")
-	@Column(name = "created_by")
-	private String createdBy;
-	
-	@Column(name = "created_at")
-	private LocalDateTime createdAt;
-
-	@Column(name = "updated_by")
-	private String updatedBy;
-	
-	@Column(name = "updated_at")
-	private LocalDateTime updatedAt;
+	@ToString.Exclude
+	@OneToMany(mappedBy = "report", fetch = FetchType.LAZY,
+			cascade = CascadeType.ALL)
+	Set<ReportScheduler> reportSchedulers = new HashSet<>();
 
 	@Override
 	public boolean equals(Object o) {

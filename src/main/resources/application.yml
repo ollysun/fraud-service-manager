@@ -1,0 +1,125 @@
+
+server:
+  port: 9190
+
+kafka:
+  pocketmoni:
+    topic: fraud-pocketmoni
+
+  mobilegate:
+    topic: fraud-mobilegate
+
+  corporate:
+    topic: fraud-corporatepay
+
+  switchit:
+    topic: fraud-switchit
+
+
+spring:
+  application:
+    name: fraud-engine-service
+
+  redis:
+    pocketmoni:
+      host: 127.0.0.1
+      port: 6379
+      database: 0
+
+    mobilegate:
+      host: 127.0.0.1
+      port: 6379
+      database: 0
+
+    corporatepay:
+      host: 127.0.0.1
+      port: 6379
+      database: 0
+
+    switchit:
+      host: 127.0.0.1
+      port: 6379
+      database: 0
+
+  cloud:
+    consul:
+      host: http://consul.staging.etranzactng.net
+
+  sleuth:
+    enabled: true
+
+  zipkin:
+    baseUrl: http://172.17.10.83:9411
+    sender:
+      type: web
+
+  datasource:
+    username: root
+    password: root
+    url: jdbc:mysql://localhost:3306/eagle_eye?useLegacyDatetimeCode=false&serverTimezone=Africa/Lagos
+    driverClassName: com.mysql.cj.jdbc.Driver
+  jackson:
+    default-property-inclusion: NON_NULL
+    mapper:
+      accept-case-insensitive-properties: true
+
+  flyway:
+    user: root
+    password: root
+    locations: classpath:db/migration
+    baseline-on-migrate: true
+    check-location: true
+
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQL5Dialect
+
+  kafka:
+    bootstrap-servers: localhost:9092 #10.0.0.178:9092
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+
+  main:
+    allow-bean-definition-overriding: true
+
+management:
+  server:
+    port: 9190
+  health:
+    db.enabled: true
+    show-details: ALWAYS
+  endpoints:
+    web.exposure.include: "*"
+
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+
+logging:
+  file:
+    name: logs/application.log
+    max-history: 20
+    max-size: 20MB
+  level:
+    org.apache.http: INFO
+    org.springframework.cloud.sleuth: INFO
+    org.springframework.web: INFO
+    com.netflix.discovery.DiscoveryClient: INFO
+    org.springframework.security: INFO
+    org.hibernate: ERROR
+    com.etz.fraudengine: INFO
+    org.apache.kafka: WARN
+
+hystrix:
+  command:
+    default:
+      execution.isolation.thread.timeoutInMilliseconds: 5000
+      circuitBreaker.errorThresholdPercentage: 60
+      circuitBreaker.sleepWindowInMilliseconds: 20000
+      circuitBreaker.requestVolumeThreshold: 10
+

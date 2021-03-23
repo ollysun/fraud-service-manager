@@ -1,10 +1,7 @@
 package com.etz.fraudeagleeyemanager.entity;
 
 import com.etz.fraudeagleeyemanager.constant.Status;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
@@ -13,21 +10,26 @@ import java.time.LocalDateTime;
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
+@ToString
 @Entity
+@IdClass(AccountProductKey.class)
 @Table(name = "account_product")
 public class AccountProduct {
 
-    @EmbeddedId
-    private AccountProductKey id;
+    @Id
+    private String productCode;
+
+    @Id
+    private Long accountId;
 
     @ManyToOne
-    @MapsId("code")
-    @JoinColumn(name = "code")
+    @MapsId("productCode")
+    @JoinColumn(name = "product_code",  referencedColumnName="code")
     private Product product;
 
     @ManyToOne
     @MapsId("accountId")
-    @JoinColumn(name = "account_id")
+    @JoinColumn(name = "account_id", referencedColumnName="id")
     private Account account;
 
     @Column(nullable = false, name = "status", columnDefinition = "TINYINT", length = 1)

@@ -6,20 +6,19 @@ import lombok.*;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
-import java.time.LocalDateTime;
 import java.io.*;
 import java.util.HashSet;
 import java.util.Set;
 
 @Entity
 @Table(name = "card", 
-		uniqueConstraints = @UniqueConstraint(
+		uniqueConstraints = @UniqueConstraint(name="UC_CARD",
 				columnNames = {"card_bin", "iso_country_code"}))
 @Getter
 @Setter
 @ToString
 @RequiredArgsConstructor
-public class Card implements Serializable {
+public class Card extends BaseEntity implements Serializable {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -66,21 +65,24 @@ public class Card implements Serializable {
 	@NotBlank(message = "Iso Country Code cannot be empty")
 	@Column(name = "iso_country_code")
 	private Integer isoCountryCode;
-	
+
+	@Column(name = "suspicion_count")
+	private Integer suspicionCount;
+
+	@Column(name = "block_reason")
+	private String blockReason;
+
 	@Column(nullable = false, name = "status", columnDefinition = "TINYINT", length = 1)
 	@Enumerated(EnumType.ORDINAL)
 	private Status status;
-	
-	@Column(name = "created_at")
-	private LocalDateTime createdAt;
-
-	@Column(name = "updated_by")
-	private String updatedBy;
-	
-	@Column(name = "updated_at")
-	private LocalDateTime updatedAt;
 
 	@ToString.Exclude
 	@OneToMany(mappedBy = "card")
 	Set<CardProduct> cardProduct = new HashSet<>();
+
+	@ToString.Exclude
+	@OneToMany(mappedBy = "card", fetch = FetchType.LAZY,
+			cascade = CascadeType.ALL)
+	Set<TransactionLog> transactionLog = new HashSet<>();
 }
+

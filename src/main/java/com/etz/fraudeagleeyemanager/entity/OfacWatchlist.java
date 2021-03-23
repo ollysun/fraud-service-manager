@@ -7,7 +7,7 @@ import lombok.*;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
-import java.time.LocalDateTime;
+import java.io.Serializable;
 
 
 @Entity
@@ -16,7 +16,7 @@ import java.time.LocalDateTime;
 @Setter
 @ToString
 @RequiredArgsConstructor
-public class OfacWatchlist {
+public class OfacWatchlist extends BaseEntity implements Serializable {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -24,8 +24,8 @@ public class OfacWatchlist {
 	private Long id;
 
 	@NotBlank(message = "Full name cannot be empty")
-	@Column(name = "fullname")
-	private String fullname;
+	@Column(name = "full_name")
+	private String fullName;
 
 	@Column(name = "category")
 	@Enumerated(EnumType.STRING)
@@ -42,18 +42,6 @@ public class OfacWatchlist {
 	@Column(name = "authorised")
 	@Enumerated(EnumType.ORDINAL)
 	private BooleanStatus authorised;
-	
-	@Column(name = "created_by")
-	private String createdBy;
-	
-	@Column(name = "created_at")
-	private LocalDateTime createdAt;
-	
-	@Column(name = "updated_by")
-	private String updatedBy;
-	
-	@Column(name = "updated_at")
-	private LocalDateTime updatedAt;
 
 	@Override
 	public boolean equals(Object o) {

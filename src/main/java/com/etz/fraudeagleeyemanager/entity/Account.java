@@ -6,8 +6,9 @@ import lombok.*;
 import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
 import java.io.Serializable;
-import java.math.BigInteger;
 import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.Set;
 
 
 @Entity
@@ -47,6 +48,21 @@ public class Account implements Serializable {
 	@Column(name = "created_at", nullable = false)
 	private LocalDateTime createdAt;
 
+	@Column(name = "suspicion_count")
+	private Integer suspicionCount;
+
+	@Column(name = "block_reason")
+	private String blockReason;
+
+	@ToString.Exclude
+	@OneToMany(mappedBy = "account")
+	Set<AccountProduct> accountProducts = new HashSet<>();
+
+	@ToString.Exclude
+	@OneToMany(mappedBy = "account", fetch = FetchType.LAZY,
+			cascade = CascadeType.ALL)
+	Set<TransactionLog> transactionLog = new HashSet<>();
+
 	@Override
 	public boolean equals(Object o) {
 		if (this == o) return true;
@@ -58,6 +74,6 @@ public class Account implements Serializable {
 
 	@Override
 	public int hashCode() {
-		return 1402876057;
+		return getClass().hashCode();
 	}
 }

@@ -1,36 +1,35 @@
 package com.etz.fraudeagleeyemanager.entity;
 
-import com.etz.fraudeagleeyemanager.constant.Status;
 import com.etz.fraudeagleeyemanager.constant.BooleanStatus;
-import lombok.*;
+import com.etz.fraudeagleeyemanager.constant.Status;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
-import java.time.LocalDateTime;
-import java.io.*;
+import java.io.Serializable;
+
 
 @Entity
-@Table(name = "product_dataset", uniqueConstraints = @UniqueConstraint(
-		columnNames = {"product_code"}))
+@Table(name = "product_dataset")
 @Getter
 @Setter
-@ToString
 @RequiredArgsConstructor
-public class ProductDataset implements Serializable {
-	
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Long id;
+@ToString
+@IdClass(ProductDatasetKey.class)
+public class ProductDataset extends BaseEntity implements Serializable {
 
-	@NotBlank(message = "Account number cannot be empty")
+	@Id
 	@Column(name = "product_code")
 	private String productCode;
 
-	@NotBlank(message = "Account number cannot be empty")
+	@Id
 	@Column(name = "field_name")
 	private String fieldName;
 
-	@NotBlank(message = "Account number cannot be empty")
+	@NotBlank(message = "data type cannot be empty")
 	@Column(name = "data_type")
 	private String dataType;
 
@@ -41,17 +40,13 @@ public class ProductDataset implements Serializable {
 	@Column(nullable = false, name = "authorised", columnDefinition = "TINYINT", length = 1)
 	@Enumerated(EnumType.ORDINAL)
 	private Status authorised;
-	
-	@Column(name = "created_by")
-	private String createdBy;
-	
-	@Column(name = "created_at")
-	private LocalDateTime createdAt;
-	
-	@Column(name = "updated_by")
-	private String updatedBy;
-	
-	@Column(name = "updated_at")
-	private LocalDateTime updatedAt;
-	
+
+	@ToString.Exclude
+	@ManyToOne(fetch = FetchType.LAZY, optional = false)
+	@MapsId("productCode")
+	@JoinColumn(foreignKey = @ForeignKey(name = "FK_PRODUCT_CODE"),
+			name = "product_code",
+			referencedColumnName="code")
+	private Product product;
+
 }

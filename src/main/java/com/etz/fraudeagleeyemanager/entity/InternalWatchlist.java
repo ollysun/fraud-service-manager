@@ -6,7 +6,7 @@ import lombok.*;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
-import java.time.LocalDateTime;
+import java.io.Serializable;
 
 
 @Entity
@@ -15,7 +15,7 @@ import java.time.LocalDateTime;
 @Setter
 @ToString
 @RequiredArgsConstructor
-public class InternalWatchlist {
+public class InternalWatchlist extends BaseEntity implements Serializable {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -36,19 +36,6 @@ public class InternalWatchlist {
 	@Column(nullable = false, name = "authorised", columnDefinition = "TINYINT", length = 1)
 	@Enumerated(EnumType.ORDINAL)
 	private BooleanStatus authorised;
-
-	@NotBlank(message = "createdBy cannot be empty")
-	@Column(name = "created_by")
-	private String createdBy;
-	
-	@Column(name = "created_at")
-	private LocalDateTime createdAt;
-	
-	@Column(name = "updated_by")
-	private String updatedBy;
-	
-	@Column(name = "updated_at")
-	private LocalDateTime updatedAt;
 
 	@Override
 	public boolean equals(Object o) {

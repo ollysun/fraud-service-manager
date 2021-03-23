@@ -6,7 +6,6 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.persistence.Column;
-import javax.persistence.Embeddable;
 import java.io.*;
 import java.util.Objects;
 
@@ -14,25 +13,24 @@ import java.util.Objects;
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
-@Embeddable
 public class AccountProductKey implements Serializable{
 
-    @Column(name = "code")
-    private String code;
+    @Column(name = "product_code")
+    private String productCode;
 
     @Column(name = "account_id")
-    private Long account_id;
+    private Long accountId;
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof AccountProductKey)) return false;
         AccountProductKey that = (AccountProductKey) o;
-        return code.equals(that.code) && account_id.equals(that.account_id);
+        return productCode.equals(that.productCode) && accountId.equals(that.accountId);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(code, account_id);
+        return Objects.hash(productCode, accountId);
     }
 }

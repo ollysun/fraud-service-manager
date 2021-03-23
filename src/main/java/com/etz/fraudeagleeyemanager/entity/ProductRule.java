@@ -5,27 +5,29 @@ import com.etz.fraudeagleeyemanager.constant.Status;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
+import lombok.ToString;
 
 import javax.persistence.*;
-import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
-import java.time.LocalDateTime;
+import java.io.Serializable;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Table(name = "product_rule", 
 uniqueConstraints = @UniqueConstraint(
-		columnNames = {"product_code", "rule_id"}))
+		columnNames = {"rule_id", "product_code"}))
 @Getter
 @Setter
 @RequiredArgsConstructor
-public class ProductRule {
+@ToString
+public class ProductRule extends BaseEntity implements Serializable {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "id")
 	private Long id;
 
-	@Email(message="please enter valid email")
 	@NotBlank(message = "Rule Id cannot be empty")
 	@Column(name = "rule_id")
 	private Long ruleId;
@@ -33,9 +35,6 @@ public class ProductRule {
 	@Column(name = "notify_admin", columnDefinition = "TINYINT", length = 1)
 	@Enumerated(EnumType.ORDINAL)
 	private BooleanStatus notifyAdmin;
-	
-	@Column(name = "email_group")
-	private Long emailGroup;
 			
 	@Column(nullable = false, name = "notify_customer", columnDefinition = "TINYINT", length = 1)
 	@Enumerated(EnumType.ORDINAL)
@@ -49,40 +48,20 @@ public class ProductRule {
 	@Enumerated(EnumType.ORDINAL)
 	private Status authorised;
 
-	@NotBlank(message = "Created By cannot be empty")
-	@Column(name = "created_by")
-	private String createdBy;
-	
-	@Column(name = "created_at")
-	private LocalDateTime createdAt;
-	
-	@Column(name = "updated_by")
-	private String updatedBy;
-	
-	@Column(name = "updated_at")
-	private LocalDateTime updatedAt;
-
+	@ToString.Exclude
 	@ManyToOne(fetch = FetchType.LAZY, optional = false)
-	@JoinColumn(name = "code", nullable = false)
+	@JoinColumn(name = "product_code", nullable = false)
 	private Product product;
 
-	@Override
-	public String toString() {
-		return "ProductRule{" +
-				"id=" + id +
-				", ruleId=" + ruleId +
-				", notifyAdmin=" + notifyAdmin +
-				", emailGroup=" + emailGroup +
-				", notifyCustomer=" + notifyCustomer +
-				", status=" + status +
-				", authorised=" + authorised +
-				", createdBy='" + createdBy + '\'' +
-				", createdAt=" + createdAt +
-				", updatedBy='" + updatedBy + '\'' +
-				", updatedAt=" + updatedAt +
-				", product=" + product +
-				'}';
-	}
+	@ToString.Exclude
+	@ManyToOne(fetch = FetchType.LAZY, optional = false)
+	@JoinColumn(name = "email_group")
+	private EmailGroup emailGroup;
+
+	@ToString.Exclude
+	@OneToMany(mappedBy = "productRule", fetch = FetchType.LAZY,
+			cascade = CascadeType.ALL)
+	Set<TransactionLog> transactionLog = new HashSet<>();
 
 	@Override
 	public boolean equals(Object o) {

@@ -6,15 +6,18 @@ import lombok.*;
 import javax.persistence.*;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
-import java.time.LocalDateTime;
+import java.io.Serializable;
+import java.util.HashSet;
+import java.util.Set;
 
-@Entity
-@Table(name = "email_group")
+
 @Getter
 @Setter
 @ToString
 @RequiredArgsConstructor
-public class EmailGroup {
+@Entity
+@Table(name="email_group")
+public class EmailGroup extends BaseEntity implements Serializable {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -33,18 +36,16 @@ public class EmailGroup {
 	@Column(nullable = false, name = "status", columnDefinition = "TINYINT", length = 1)
 	@Enumerated(EnumType.ORDINAL)
 	private Status status;
-	
-	@Column(name = "created_by")
-	private String createdBy;
-	
-	@Column(name = "created_at")
-	private LocalDateTime createdAt;
-	
-	@Column(name = "updated_by")
-	private String updatedBy;
-	
-	@Column(name = "updated_at")
-	private LocalDateTime updatedAt;
+
+	@ToString.Exclude
+	@OneToMany(mappedBy = "emailGroup", fetch = FetchType.LAZY,
+			cascade = CascadeType.ALL, orphanRemoval = true)
+	private Set<ProductRule> productRules = new HashSet<>();
+
+	@ToString.Exclude
+	@OneToMany(mappedBy = "emailGroup", fetch = FetchType.LAZY,
+			cascade = CascadeType.ALL, orphanRemoval = true)
+	private Set<ReportScheduler> reportSchedulers = new HashSet<>();
 
 	@Override
 	public boolean equals(Object o) {
