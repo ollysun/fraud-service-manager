@@ -5,6 +5,7 @@ import lombok.*;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
+import java.io.Serializable;
 
 @Setter
 @Getter
@@ -14,7 +15,9 @@ import java.time.LocalDateTime;
 @Entity
 @IdClass(CardProductKey.class)
 @Table(name = "card_product")
-public class CardProduct {
+public class CardProduct implements Serializable {
+
+
     @Id
     private String productCode;
 
