@@ -70,10 +70,6 @@ public class Product extends BaseEntity implements Serializable {
             cascade = CascadeType.ALL)
     private Set<ProductRule> productRules = new HashSet<>();
 
-    @ToString.Exclude
-    @OneToMany(mappedBy = "product", fetch = FetchType.LAZY,
-            cascade = CascadeType.ALL)
-    Set<TransactionLog> transactionLog = new HashSet<>();
 
 
 

@@ -33,12 +33,10 @@ public class ProductRule extends BaseEntity implements Serializable {
 	private Long ruleId;
 	
 	@Column(name = "notify_admin", columnDefinition = "TINYINT", length = 1)
-	@Enumerated(EnumType.ORDINAL)
-	private BooleanStatus notifyAdmin;
+	private Boolean notifyAdmin;
 			
 	@Column(nullable = false, name = "notify_customer", columnDefinition = "TINYINT", length = 1)
-	@Enumerated(EnumType.ORDINAL)
-	private BooleanStatus notifyCustomer;
+	private Boolean notifyCustomer;
 	
 	@Column(nullable = false, name = "status", columnDefinition = "TINYINT", length = 1)
 	@Enumerated(EnumType.ORDINAL)
@@ -58,10 +56,6 @@ public class ProductRule extends BaseEntity implements Serializable {
 	@JoinColumn(name = "email_group")
 	private EmailGroup emailGroup;
 
-	@ToString.Exclude
-	@OneToMany(mappedBy = "productRule", fetch = FetchType.LAZY,
-			cascade = CascadeType.ALL)
-	Set<TransactionLog> transactionLog = new HashSet<>();
 
 	@Override
 	public boolean equals(Object o) {
