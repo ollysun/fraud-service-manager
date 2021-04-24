@@ -1,7 +1,7 @@
 package com.etz.fraudeagleeyemanager.dto.response;
 
-import com.etz.fraudengine.util.MetaData;
-import com.etz.fraudengine.util.RequestUtil;
+import com.etz.fraudeagleeyemanager.util.MetaData;
+import com.etz.fraudeagleeyemanager.util.RequestUtil;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 import lombok.Setter;

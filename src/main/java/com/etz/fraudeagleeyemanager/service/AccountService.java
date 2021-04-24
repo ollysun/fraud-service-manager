@@ -34,7 +34,7 @@ public class AccountService {
 		accountEntity.setAccountName(request.getAccountName());
 		accountEntity.setBankCode(request.getBankCode());
 		accountEntity.setBankName(request.getBankName());
-		accountEntity.setStatus(request.getStatus());
+		//accountEntity.setStatus(request.getStatus());
 		accountEntity.setCreatedAt(LocalDateTime.now());		
 		return accountRepository.save(accountEntity);
 	}
@@ -56,7 +56,7 @@ public class AccountService {
 		AccountProduct accountProductEntity = new AccountProduct();
 		accountProductEntity.setProductCode(request.getProductCode()); //
 		accountProductEntity.setAccountId(request.getAccountId().longValue());
-		accountProductEntity.setStatus(request.getStatus());
+		//accountProductEntity.setStatus(request.getStatus());
 		accountProductEntity.setCreatedAt(LocalDateTime.now());
 
 		return accountProductRepository.save(accountProductEntity);
@@ -65,7 +65,7 @@ public class AccountService {
 	public Account updateAccount(UpdateAccountRequest request) {
 		Account accountEntity = accountRepository.findById(request.getAccountId().longValue()).get();
 
-		accountEntity.setStatus(request.getStatus());
+		//accountEntity.setStatus(request.getStatus());
 		accountEntity.setUpdatedBy(request.getUpdatedBy());
 
 		return accountRepository.save(accountEntity);

@@ -4,41 +4,25 @@ import com.etz.fraudeagleeyemanager.constant.Status;
 import lombok.*;
 
 import javax.persistence.*;
-import java.time.LocalDateTime;
 import java.io.Serializable;
 
-@Setter
-@Getter
-@AllArgsConstructor
-@NoArgsConstructor
-@ToString
-@Entity
-@IdClass(CardProductKey.class)
+@EqualsAndHashCode(callSuper = true)
+@Data
 @Table(name = "card_product")
-public class CardProduct implements Serializable {
-
+@Entity
+public class CardProduct extends BaseEntity implements Serializable {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(name = "product_code")
     private String productCode;
 
-    @Id
+    @Column(name = "card_id", columnDefinition = "bigint")
     private Long cardId;
 
-    @ManyToOne
-    @MapsId("productCode")
-    @JoinColumn(name = "product_code", referencedColumnName="code")
-    private Product product;
-
-    @ManyToOne
-    @MapsId("cardId")
-    @JoinColumn(name = "card_id", referencedColumnName="id")
-    private Card card;
-
     @Column(nullable = false, name = "status", columnDefinition = "TINYINT", length = 1)
-    @Enumerated(EnumType.ORDINAL)
-    private Status status;
-
-    @Column(nullable = false,name = "created_at")
-    private LocalDateTime createdAt;
+    private Boolean status;
 
 }

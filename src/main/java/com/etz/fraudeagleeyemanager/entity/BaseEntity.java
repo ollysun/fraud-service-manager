@@ -5,6 +5,7 @@ import lombok.Setter;
 import lombok.ToString;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
+import org.springframework.data.annotation.LastModifiedDate;
 
 import javax.persistence.Column;
 import javax.persistence.MappedSuperclass;
@@ -27,6 +28,7 @@ public class BaseEntity {
  
     @Column(name = "updated_at")
     @UpdateTimestamp
+    @LastModifiedDate
     private LocalDateTime updatedAt;
  
     @Column(name = "updated_by")

@@ -1,6 +1,6 @@
 package com.etz.fraudeagleeyemanager.dto.response;
 
-import com.etz.fraudengine.util.RequestUtil;
+import com.etz.fraudeagleeyemanager.util.RequestUtil;
 import lombok.*;
 
 @Getter

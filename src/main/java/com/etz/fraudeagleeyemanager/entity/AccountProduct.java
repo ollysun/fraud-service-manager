@@ -1,42 +1,28 @@
 package com.etz.fraudeagleeyemanager.entity;
 
-import com.etz.fraudeagleeyemanager.constant.Status;
 import lombok.*;
 
 import javax.persistence.*;
-import java.time.LocalDateTime;
+import java.io.Serializable;
 
-@Setter
-@Getter
-@AllArgsConstructor
-@NoArgsConstructor
-@ToString
+@EqualsAndHashCode(callSuper = true)
+@Data
 @Entity
-@IdClass(AccountProductKey.class)
 @Table(name = "account_product")
-public class AccountProduct {
+public class AccountProduct extends BaseEntity implements Serializable {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(name = "product_code")
     private String productCode;
 
-    @Id
+    @Column(name = "account_id", columnDefinition = "bigint")
     private Long accountId;
 
-    @ManyToOne
-    @MapsId("productCode")
-    @JoinColumn(name = "product_code",  referencedColumnName="code")
-    private Product product;
-
-    @ManyToOne
-    @MapsId("accountId")
-    @JoinColumn(name = "account_id", referencedColumnName="id")
-    private Account account;
-
     @Column(nullable = false, name = "status", columnDefinition = "TINYINT", length = 1)
-    @Enumerated(EnumType.ORDINAL)
-    private Status status;
+    private Boolean status;
 
-    @Column(nullable = false,name = "created_at")
-    private LocalDateTime createdAt;
 
 }

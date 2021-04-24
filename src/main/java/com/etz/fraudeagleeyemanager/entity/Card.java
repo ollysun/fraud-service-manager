@@ -7,8 +7,8 @@ import lombok.*;
 import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
 import java.io.*;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "card", 
@@ -73,16 +73,10 @@ public class Card extends BaseEntity implements Serializable {
 	private String blockReason;
 
 	@Column(nullable = false, name = "status", columnDefinition = "TINYINT", length = 1)
-	@Enumerated(EnumType.ORDINAL)
-	private Status status;
+	private Boolean status;
 
-	@ToString.Exclude
-	@OneToMany(mappedBy = "card")
-	Set<CardProduct> cardProduct = new HashSet<>();
+	@ManyToMany(mappedBy = "cards", cascade = CascadeType.PERSIST, fetch = FetchType.EAGER)
+	private List<Product> products = new ArrayList<>();
 
-	@ToString.Exclude
-	@OneToMany(mappedBy = "card", fetch = FetchType.LAZY,
-			cascade = CascadeType.ALL)
-	Set<TransactionLog> transactionLog = new HashSet<>();
 }
 

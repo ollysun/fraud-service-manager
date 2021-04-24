@@ -1,6 +1,6 @@
 package com.etz.fraudeagleeyemanager.dto.response;
 
-import com.etz.fraudengine.util.RequestUtil;
+import com.etz.fraudeagleeyemanager.util.RequestUtil;
 import lombok.*;
 
 @Getter
@@ -9,7 +9,7 @@ import lombok.*;
 @ToString
 @NoArgsConstructor
 @AllArgsConstructor
-public class BooleanResponse{
+public class BooleanResponse {
 
 
 	private Integer status;

@@ -18,7 +18,7 @@ kafka:
 
 spring:
   application:
-    name: fraud-engine-service
+    name: fraud-eagle-eye-manager-service
 
   redis:
     pocketmoni:
@@ -56,26 +56,27 @@ spring:
   datasource:
     username: root
     password: root
-    url: jdbc:mysql://localhost:3306/eagle_eye?useLegacyDatetimeCode=false&serverTimezone=Africa/Lagos
+    url: jdbc:mysql://localhost:3306/eagle_eye?useLegacyDatetimeCode=false&serverTimezone=Africa/Lagos&createDatabaseIfNotExist=true
     driverClassName: com.mysql.cj.jdbc.Driver
   jackson:
     default-property-inclusion: NON_NULL
     mapper:
       accept-case-insensitive-properties: true
 
-  flyway:
-    user: root
-    password: root
-    locations: classpath:db/migration
-    baseline-on-migrate: true
-    check-location: true
+#  flyway:
+#    user: root
+#    password: root
+#    locations: classpath:db/migration
+#    baseline-on-migrate: true
+#    check-location: true
 
   jpa:
     hibernate:
-      ddl-auto: create-drop
+      ddl-auto: create
     properties:
       hibernate:
         dialect: org.hibernate.dialect.MySQL5Dialect
+    show-sql: true
 
   kafka:
     bootstrap-servers: localhost:9092 #10.0.0.178:9092

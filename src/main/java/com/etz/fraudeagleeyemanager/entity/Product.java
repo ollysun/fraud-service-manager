@@ -1,6 +1,5 @@
 package com.etz.fraudeagleeyemanager.entity;
 
-import com.etz.fraudeagleeyemanager.constant.BooleanStatus;
 import com.etz.fraudeagleeyemanager.constant.Status;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -10,67 +9,67 @@ import lombok.ToString;
 import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
 import java.io.Serializable;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 
-@Entity
-@Table(name = "product", uniqueConstraints = @UniqueConstraint(
-        columnNames = {"code", "name"}))
+
 @Getter
 @Setter
 @ToString
 @RequiredArgsConstructor
-@IdClass(ProductId.class)
+@Entity
+@Table(name = "product")
 public class Product extends BaseEntity implements Serializable {
 
     @Id
-    @NotBlank(message = "Product Code cannot be empty")
-    @Column(name = "code")
+    @Column(name = "code", unique=true,columnDefinition="VARCHAR(100)")
     private String code;
 
     @NotBlank(message = "Product Name cannot be empty")
-    @Column(nullable = false, name = "name")
+    @Column(nullable = false, name = "name", unique = true, length = 200)
     private String name;
 
     @Column(name = "description")
     private String description;
 
-    @Column(nullable = false, name = "use_card", columnDefinition = "TINYINT", length = 1)
-    @Enumerated(EnumType.ORDINAL)
-    private BooleanStatus useCard;
+
+    @Column(nullable = false, name = "use_card", columnDefinition = "TINYINT default true", length = 1)
+    private Boolean useCard;
 
     @Column(nullable = false,name = "use_account", columnDefinition = "TINYINT", length = 1)
-    @Enumerated(EnumType.ORDINAL)
-    private BooleanStatus useAccount;
+    private Boolean useAccount;
 
     @Column(name = "callback_url")
     private String callbackURL;
 
+    @Column(nullable = false, name = "support_hold", columnDefinition = "TINYINT default false", length = 1)
+    private Status supportHold;
+
     @Column(nullable = false, name = "status", columnDefinition = "TINYINT", length = 1)
-    @Enumerated(EnumType.ORDINAL)
     private Status status;
 
-    @ToString.Exclude
-    @OneToMany(mappedBy = "product", fetch = FetchType.LAZY,
-            cascade = CascadeType.ALL)
-    Set<CardProduct> cardProducts = new HashSet<>();
+
+    @OneToMany(mappedBy = "product",
+            cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ProductDataset> productDataset;
 
     @ToString.Exclude
     @OneToMany(mappedBy = "product", fetch = FetchType.LAZY,
             cascade = CascadeType.ALL)
-    Set<AccountProduct> accountProducts = new HashSet<>();
+    private List<ProductRule> productRules;
+
+
+    @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
+    @JoinTable(name = "card_product",
+            joinColumns = @JoinColumn(name = "product_code"),
+            inverseJoinColumns = @JoinColumn(name = "card_id"))
+    private List<Card> cards = new ArrayList<>();
 
     @ToString.Exclude
-    @OneToMany(mappedBy = "product", fetch = FetchType.LAZY,
-            cascade = CascadeType.ALL)
-    Set<ProductDataset> productDataset = new HashSet<>();
-
-    @ToString.Exclude
-    @OneToMany(mappedBy = "product", fetch = FetchType.LAZY,
-            cascade = CascadeType.ALL)
-    private Set<ProductRule> productRules = new HashSet<>();
-
-
+    @ManyToMany(mappedBy = "products",
+            cascade = CascadeType.PERSIST,
+            fetch = FetchType.LAZY)
+    private List<Account> accounts = new ArrayList<>();
 
 
 

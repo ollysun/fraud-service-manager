@@ -1,6 +1,6 @@
 package com.etz.fraudeagleeyemanager.interceptor;
 
-import com.etz.fraudengine.util.RequestUtil;
+import com.etz.fraudeagleeyemanager.util.RequestUtil;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.ModelAndView;

@@ -28,8 +28,8 @@ public class ProductService {
 		productEntity.setCode(request.getProductCode());
 		productEntity.setName(request.getProductName());
 		productEntity.setDescription(request.getProductDesc());
-		productEntity.setUseCard(request.getUseCard());
-		productEntity.setUseAccount(request.getUseAccount());
+	//	productEntity.setUseCard(request.getUseCard());
+	//	productEntity.setUseAccount(request.getUseAccount());
 		productEntity.setCallbackURL(request.getCallback());
 		productEntity.setStatus(request.getStatus());
 		productEntity.setCreatedBy(request.getCreatedBy());
@@ -51,8 +51,8 @@ public class ProductService {
 		Product productEntity = productRepository.findById(request.getProductCode()).get();
 		productEntity.setName(request.getProductName());
 		productEntity.setDescription(request.getProductDesc());
-		productEntity.setUseCard(request.getUseCard());
-		productEntity.setUseAccount(request.getUseAccount());
+	//	productEntity.setUseCard(request.getUseCard());
+	//	productEntity.setUseAccount(request.getUseAccount());
 		productEntity.setCallbackURL(request.getCallback());
 		productEntity.setStatus(request.getStatus());
 		productEntity.setUpdatedBy(request.getUpdatedBy());
@@ -69,11 +69,11 @@ public class ProductService {
 
 	public ProductDataset addProductDataset(DatasetProductRequest request) {
 		ProductDataset prodDatasetEntity = new ProductDataset();
-		prodDatasetEntity.setProductCode(request.getProductCode());
-		prodDatasetEntity.setFieldName(request.getFieldName());
+		//prodDatasetEntity.setProductCode(request.getProductCode());
+		//prodDatasetEntity.setFieldName(request.getFieldName());
 		prodDatasetEntity.setDataType(request.getDataType());
-		prodDatasetEntity.setMandatory(request.getMandatory());
-		prodDatasetEntity.setAuthorised(request.getAuthorised());
+	//	prodDatasetEntity.setMandatory(request.getMandatory());
+		//prodDatasetEntity.setAuthorised(request.getAuthorised());
 		prodDatasetEntity.setCreatedBy(request.getCreatedBy());
 		prodDatasetEntity.setCreatedAt(LocalDateTime.now());
 		// productDataset.setUpdatedBy("");
@@ -88,17 +88,17 @@ public class ProductService {
 		}
 
 		List<ProductDataset> productDatasetList = new ArrayList<>();
-		productDatasetList.add(productDatasetRepository.findByProductCode(productCode));
+		//productDatasetList.add(productDatasetRepository.findByProductCode(productCode));
 		return productDatasetList;
 	}
 
 	public ProductDataset updateProductDataset(DatasetProductRequest request) {
 		ProductDataset productDatasetEntity = getProductDataset(request.getProductCode()).get(0);
-		productDatasetEntity.setProductCode(request.getProductCode());
-		productDatasetEntity.setFieldName(request.getFieldName());
+		//productDatasetEntity.setProductCode(request.getProductCode());
+		//productDatasetEntity.setFieldName(request.getFieldName());
 		productDatasetEntity.setDataType(request.getDataType());
-		productDatasetEntity.setMandatory(request.getMandatory());
-		productDatasetEntity.setAuthorised(request.getAuthorised());
+		//productDatasetEntity.setMandatory(request.getMandatory());
+		//productDatasetEntity.setAuthorised(request.getAuthorised());
 		productDatasetEntity.setUpdatedBy(request.getCreatedBy());
 		productDatasetEntity.setUpdatedAt(LocalDateTime.now());
 
@@ -106,7 +106,7 @@ public class ProductService {
 	}
 
 	public boolean deleteProductDataset(String productCode) {
-		productDatasetRepository.deleteByProductCode(productCode);
+		//productDatasetRepository.deleteByProductCode(productCode);
 		return true;
 	}
 

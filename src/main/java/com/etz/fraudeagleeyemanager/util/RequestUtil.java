@@ -4,8 +4,9 @@ import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
 import javax.servlet.http.HttpServletRequest;
+import static com.etz.fraudeagleeyemanager.constant.AppConstant.PAGE;
 
-import static com.etz.fraudengine.constant.AppConstant.PAGE;
+
 
 public class RequestUtil {
 
