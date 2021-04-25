@@ -16,11 +16,11 @@ public class ProductDataset extends BaseEntity implements Serializable {
 
 
 	@Id
-	@Column(name = "product_code", unique = true, nullable = false, columnDefinition="VARCHAR(100)")
+	@Column(name = "product_code",  nullable = false, columnDefinition="VARCHAR(100)")
 	private String productCode;
 
 	@Id
-	@Column(name = "field_name", unique = true, nullable = false, columnDefinition="VARCHAR(100)")
+	@Column(name = "field_name",  nullable = false, columnDefinition="VARCHAR(100)")
 	private String fieldName;
 
 	@NotBlank(message = "data type cannot be empty")

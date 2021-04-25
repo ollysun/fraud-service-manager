@@ -11,6 +11,7 @@ import javax.validation.constraints.NotBlank;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 
 @Getter
@@ -55,23 +56,13 @@ public class Product extends BaseEntity implements Serializable {
 
     @ToString.Exclude
     @OneToMany(mappedBy = "product", fetch = FetchType.LAZY,
-            cascade = CascadeType.ALL)
-    private List<ProductRule> productRules;
+            cascade = CascadeType.REMOVE)
+    private Set<ProductRule> productRules;
 
 
-    @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
-    @JoinTable(name = "card_product",
-            joinColumns = @JoinColumn(name = "product_code"),
-            inverseJoinColumns = @JoinColumn(name = "card_id"))
-    private List<Card> cards = new ArrayList<>();
+    @OneToMany(mappedBy = "product", cascade = CascadeType.REMOVE)
+    private Set<CardProduct> products;
 
-    @ToString.Exclude
-    @ManyToMany(mappedBy = "products",
-            cascade = CascadeType.PERSIST,
-            fetch = FetchType.LAZY)
-    private List<Account> accounts = new ArrayList<>();
-
-
-
-
+    @OneToMany(mappedBy = "product", cascade = CascadeType.REMOVE)
+    private Set<AccountProduct> productLists;
 }

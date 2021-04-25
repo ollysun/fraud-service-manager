@@ -9,6 +9,7 @@ import javax.validation.constraints.NotBlank;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 @Table(name = "card", 
@@ -22,7 +23,6 @@ public class Card extends BaseEntity implements Serializable {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	@Column(name = "id")
 	private Long id;
 
 	@NotBlank(message = "Card holder name cannot be empty")
@@ -75,8 +75,10 @@ public class Card extends BaseEntity implements Serializable {
 	@Column(nullable = false, name = "status", columnDefinition = "TINYINT", length = 1)
 	private Boolean status;
 
-	@ManyToMany(mappedBy = "cards", cascade = CascadeType.PERSIST, fetch = FetchType.EAGER)
-	private List<Product> products = new ArrayList<>();
+
+
+	@OneToMany(mappedBy = "card")
+	private Set<CardProduct> cards;
 
 }
 

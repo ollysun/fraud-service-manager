@@ -31,7 +31,7 @@ public class Report extends BaseEntity implements Serializable {
 	@ToString.Exclude
 	@OneToMany(mappedBy = "report", fetch = FetchType.LAZY,
 			cascade = CascadeType.ALL)
-	Set<ReportScheduler> reportSchedulers = new HashSet<>();
+	private Set<ReportScheduler> reportSchedulers = new HashSet<>();
 
 	@Override
 	public boolean equals(Object o) {

@@ -1,13 +1,11 @@
 package com.etz.fraudeagleeyemanager.entity;
 
-import com.etz.fraudeagleeyemanager.constant.Status;
 import lombok.*;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Set;
 
 
 @EqualsAndHashCode(callSuper = true)
@@ -47,10 +45,7 @@ public class Account extends BaseEntity implements Serializable {
 	@Column(name = "block_reason")
 	private String blockReason;
 
-	@ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.PERSIST)
-	@JoinTable(name = "account_product",
-			joinColumns = @JoinColumn(name = "product_code"),
-			inverseJoinColumns = @JoinColumn(name = "account_id"))
-	private List<Product> products = new ArrayList<>();
+	@OneToMany(mappedBy = "account")
+	private Set<AccountProduct> accounts;
 
 }

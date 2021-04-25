@@ -2,17 +2,20 @@ package com.etz.fraudeagleeyemanager.entity;
 
 import com.etz.fraudeagleeyemanager.constant.Status;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import javax.persistence.*;
+import java.io.Serializable;
+import java.util.Set;
 
+@EqualsAndHashCode(callSuper = true)
 @Entity
 @Table(name = "rule")
 @Data
-public class Rule extends BaseEntity{
+public class Rule extends BaseEntity implements Serializable {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	@Column(name = "id")
 	private Long id;
 	
 	@Column(name = "source_value_1")
@@ -48,12 +51,14 @@ public class Rule extends BaseEntity{
 	@Column(name = "action")
 	private String action;
 		
-	@Column(name = "status")
+	@Column(name = "status", columnDefinition = "TINYINT", length = 1)
 	@Enumerated(EnumType.ORDINAL)
 	private Status status;
 	
 	@Column(name = "authorised")
 	private Boolean authorised;
 
+	@OneToMany(mappedBy = "rule", cascade = CascadeType.REMOVE)
+	private Set<ProductRule> productRules;
 		
 }

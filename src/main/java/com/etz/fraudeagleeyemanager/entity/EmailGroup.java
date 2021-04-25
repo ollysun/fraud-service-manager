@@ -21,7 +21,6 @@ public class EmailGroup extends BaseEntity implements Serializable {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	@Column(name = "id")
 	private Long id;
 
 	@NotBlank(message = "group name cannot be empty")
@@ -30,7 +29,7 @@ public class EmailGroup extends BaseEntity implements Serializable {
 
 	@Email(message="please enter valid email")
 	@NotBlank(message = "email cannot be empty")
-	@Column(name = "email")
+	@Column(name = "email", columnDefinition = "TEXT")
 	private String email;
 	
 	@Column(nullable = false, name = "status", columnDefinition = "TINYINT", length = 1)
@@ -39,12 +38,12 @@ public class EmailGroup extends BaseEntity implements Serializable {
 
 	@ToString.Exclude
 	@OneToMany(mappedBy = "emailGroup", fetch = FetchType.LAZY,
-			cascade = CascadeType.ALL, orphanRemoval = true)
+			cascade = CascadeType.ALL)
 	private Set<ProductRule> productRules = new HashSet<>();
 
 	@ToString.Exclude
 	@OneToMany(mappedBy = "emailGroup", fetch = FetchType.LAZY,
-			cascade = CascadeType.ALL, orphanRemoval = true)
+			cascade = CascadeType.ALL)
 	private Set<ReportScheduler> reportSchedulers = new HashSet<>();
 
 	@Override
