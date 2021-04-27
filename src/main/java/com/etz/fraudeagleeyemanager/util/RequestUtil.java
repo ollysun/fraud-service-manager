@@ -1,12 +1,14 @@
 package com.etz.fraudeagleeyemanager.util;
 
-import org.springframework.web.context.request.RequestContextHolder;
-import org.springframework.web.context.request.ServletRequestAttributes;
-
-import javax.servlet.http.HttpServletRequest;
 import static com.etz.fraudeagleeyemanager.constant.AppConstant.PAGE;
 
+import java.util.Map;
 
+import javax.servlet.http.HttpServletRequest;
+
+import org.springframework.security.oauth2.provider.OAuth2Authentication;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
 public class RequestUtil {
 
@@ -94,4 +96,30 @@ public class RequestUtil {
         return (Long) getRequest().getAttribute("start_time");
     }
 
+    public static String getSourceURL() {
+    	//getRequest().getRequestURI();
+    	return getRequest().getRequestURL().toString();
+    }
+
+    @SuppressWarnings("unchecked")
+	public static void setAccessTokenClaim(OAuth2Authentication authentication) {
+    	//OAuth2AuthenticationDetails oauthDetails = (OAuth2AuthenticationDetails)SecurityContextHolder.getContext().getAuthentication().getDetails();
+    	//OAuth2AuthenticationDetails oauthDetails = (OAuth2AuthenticationDetails) authentication.getDetails();
+    	//Map<String, Object> claims = (Map<String, Object>) oauthDetails.getDecodedDetails();
+    	Map<String, Object> claims = (Map<String, Object>) authentication.getDetails();
+    	getRequest().setAttribute("access_token_claim", claims);
+    }
+    
+    @SuppressWarnings("unchecked")
+	public static String getAccessTokenClaim(String claim) {
+    	Map<String, Object> claims = (Map<String, Object>)getRequest().getAttribute("access_token_claim");
+    	
+    	String claimValue = "";
+    	if (claims.containsKey(claim)) {
+    		claimValue = (String) claims.get(claim);
+    	}
+    	System.out.println("Username==========>" + claimValue);
+    	return claimValue;
+    }
+    
 }
