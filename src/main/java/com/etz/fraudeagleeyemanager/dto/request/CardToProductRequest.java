@@ -1,14 +1,14 @@
 package com.etz.fraudeagleeyemanager.dto.request;
 
-import com.fasterxml.jackson.annotation.JsonAlias;
 import lombok.Data;
+import javax.validation.constraints.NotNull;
 
 @Data
 public class CardToProductRequest {
-
+	@NotNull(message = "please enter the productCode")
 	private String productCode;
-	@JsonAlias("cardID")
+	@NotNull(message="Please enter the cardId")
 	private Integer cardId;
-	private Boolean status;
-	
+	@NotNull(message="CreatedBy cannot be null")
+	private String createdBy;
 }

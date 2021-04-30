@@ -40,18 +40,16 @@ public class ProductRule extends BaseEntity implements Serializable {
 	private Boolean notifyCustomer;
 	
 	@Column(nullable = false, name = "status", columnDefinition = "TINYINT", length = 1)
-	@Enumerated(EnumType.ORDINAL)
-	private Status status;
+	private Boolean status;
 	
 	@Column(nullable = false, name = "authorised", columnDefinition = "TINYINT", length = 1)
-	@Enumerated(EnumType.ORDINAL)
-	private Status authorised;
+	private Boolean authorised;
 
 	@ToString.Exclude
 	@ManyToOne(fetch = FetchType.LAZY, optional = false)
 	@JoinColumn(name = "product_code", foreignKey = @ForeignKey(name = "FK_PRODUCT_RULE_CODE"),
 			referencedColumnName="code", insertable = false, updatable = false)
-	private Product product;
+	private ProductEntity productEntity;
 
 	@ToString.Exclude
 	@ManyToOne(fetch = FetchType.LAZY, optional = false)

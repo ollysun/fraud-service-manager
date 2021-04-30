@@ -8,7 +8,8 @@ import java.io.Serializable;
 @EqualsAndHashCode(callSuper = true)
 @Data
 @Entity
-@Table(name = "account_product")
+@Table(name = "account_product", uniqueConstraints = @UniqueConstraint(name="UC_ACCOUNT_PRODUCT",
+        columnNames = {"account_id"}))
 @IdClass(AccountProductId.class)
 public class AccountProduct extends BaseEntity implements Serializable {
 
@@ -27,7 +28,7 @@ public class AccountProduct extends BaseEntity implements Serializable {
     @JoinColumn(foreignKey = @ForeignKey(name = "FK_ACCOUNT_PRODUCT_PRODUCT_CODE"),
             name = "product_code",
             referencedColumnName="code")
-    private Product product;
+    private ProductEntity productEntity;
 
     @ManyToOne
     @MapsId("accountId")

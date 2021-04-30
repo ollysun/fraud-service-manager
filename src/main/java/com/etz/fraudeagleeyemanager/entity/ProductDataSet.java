@@ -12,8 +12,10 @@ import java.io.Serializable;
 @Entity
 @Table(name = "product_dataset")
 @IdClass(ProductDatasetId.class)
-public class ProductDataset extends BaseEntity implements Serializable {
-
+public class ProductDataSet extends BaseEntity implements Serializable {
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Long id;
 
 	@Id
 	@Column(name = "product_code",  nullable = false, columnDefinition="VARCHAR(100)")
@@ -39,6 +41,6 @@ public class ProductDataset extends BaseEntity implements Serializable {
 	@JoinColumn(foreignKey = @ForeignKey(name = "FK_PRODUCT_CODE"),
 			name = "product_code",
 			referencedColumnName="code")
-	private Product product;
+	private ProductEntity productEntity;
 
 }

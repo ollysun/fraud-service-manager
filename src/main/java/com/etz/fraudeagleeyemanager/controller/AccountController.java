@@ -3,7 +3,7 @@ package com.etz.fraudeagleeyemanager.controller;
 
 import com.etz.fraudeagleeyemanager.dto.request.AccountToProductRequest;
 import com.etz.fraudeagleeyemanager.dto.request.AddAccountRequest;
-import com.etz.fraudeagleeyemanager.dto.request.UpdateAccountRequest;
+import com.etz.fraudeagleeyemanager.dto.request.UpdateAccountProductRequest;
 import com.etz.fraudeagleeyemanager.dto.response.ModelResponse;
 import com.etz.fraudeagleeyemanager.dto.response.PageResponse;
 import com.etz.fraudeagleeyemanager.entity.Account;
@@ -50,7 +50,7 @@ public class AccountController {
 
 	@PutMapping(path = "/{accountID}")
 	public ModelResponse<Account> updateAccount(@PathVariable(name = "accountID", required = true) Integer cardId,
-			@RequestBody UpdateAccountRequest request) {
+			@RequestBody UpdateAccountProductRequest request) {
 		request.setAccountId(cardId);
 		return new ModelResponse<Account>(accountService.updateAccount(request));
 	}

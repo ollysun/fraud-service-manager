@@ -1,6 +1,5 @@
 package com.etz.fraudeagleeyemanager.entity;
 
-import com.etz.fraudeagleeyemanager.constant.Status;
 import lombok.*;
 
 import javax.persistence.*;
@@ -8,7 +7,8 @@ import java.io.Serializable;
 
 @EqualsAndHashCode(callSuper = true)
 @Data
-@Table(name = "card_product")
+@Table(name = "card_product", uniqueConstraints = @UniqueConstraint(name="UC_CARD_PRODUCT",
+        columnNames = {"card_id"}))
 @Entity
 @IdClass(CardProductId.class)
 public class CardProduct extends BaseEntity implements Serializable {
@@ -22,7 +22,7 @@ public class CardProduct extends BaseEntity implements Serializable {
     private String productCode;
 
     @Id
-    @Column(name = "card_id", nullable = false, columnDefinition = "bigint")
+    @Column(name = "card_id", nullable = false,  columnDefinition = "bigint")
     private Long cardId;
 
     @ManyToOne
@@ -30,7 +30,7 @@ public class CardProduct extends BaseEntity implements Serializable {
     @JoinColumn(foreignKey = @ForeignKey(name = "FK_CARD_PRODUCT_CODE"),
             name = "product_code",
             referencedColumnName="code")
-    private Product product;
+    private ProductEntity productEntity;
 
     @ManyToOne
     @MapsId("cardId")

@@ -2,11 +2,13 @@ package com.etz.fraudeagleeyemanager.service;
 
 import com.etz.fraudeagleeyemanager.dto.request.CreateProductRequest;
 import com.etz.fraudeagleeyemanager.dto.request.DatasetProductRequest;
+import com.etz.fraudeagleeyemanager.dto.request.UpdateDataSetRequest;
 import com.etz.fraudeagleeyemanager.dto.request.UpdateProductRequest;
-import com.etz.fraudeagleeyemanager.entity.Product;
-import com.etz.fraudeagleeyemanager.entity.ProductDataset;
-import com.etz.fraudeagleeyemanager.repository.ProductDatasetRepository;
-import com.etz.fraudeagleeyemanager.repository.ProductRepository;
+import com.etz.fraudeagleeyemanager.entity.ProductDataSet;
+import com.etz.fraudeagleeyemanager.entity.ProductEntity;
+import com.etz.fraudeagleeyemanager.exception.ResourceNotFoundException;
+import com.etz.fraudeagleeyemanager.repository.ProductDataSetRepository;
+import com.etz.fraudeagleeyemanager.repository.ProductEntityRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -18,96 +20,92 @@ import java.util.List;
 public class ProductService {
 
 	@Autowired
-	ProductRepository productRepository;
+	private ProductEntityRepository productEntityRepository;
 
 	@Autowired
-	ProductDatasetRepository productDatasetRepository;
+	private ProductDataSetRepository productDataSetRepository;
 
-	public Product createProduct(CreateProductRequest request) {
-		Product productEntity = new Product();
+	public ProductEntity createProduct(CreateProductRequest request) {
+		ProductEntity productEntity = new ProductEntity();
 		productEntity.setCode(request.getProductCode());
 		productEntity.setName(request.getProductName());
 		productEntity.setDescription(request.getProductDesc());
-	//	productEntity.setUseCard(request.getUseCard());
-	//	productEntity.setUseAccount(request.getUseAccount());
+		productEntity.setUseCard(request.getUseCard());
+		productEntity.setUseAccount(request.getUseAccount());
 		productEntity.setCallbackURL(request.getCallback());
 		productEntity.setStatus(request.getStatus());
 		productEntity.setCreatedBy(request.getCreatedBy());
 
-		return productRepository.save(productEntity);
+		return productEntityRepository.save(productEntity);
 	}
 
-	public List<Product> getProduct(String productCode) {
+	public List<ProductEntity> getProduct(String productCode) {
 		if (productCode.isEmpty()) {
-			return productRepository.findAll();
+			return productEntityRepository.findAll();
 		}
 
-		List<Product> productList = new ArrayList<>();
-		productList.add(productRepository.findById(productCode).get());
+		List<ProductEntity> productList = new ArrayList<>();
+		productList.add(productEntityRepository.findByProductCode(productCode));
 		return productList;
 	}
 
-	public Product updateProduct(UpdateProductRequest request) {
-		Product productEntity = productRepository.findById(request.getProductCode()).get();
+	public ProductEntity updateProduct(UpdateProductRequest request) {
+		ProductEntity productEntity = productEntityRepository.findByProductCode(request.getProductCode());
+		if (productEntity == null){
+			throw new ResourceNotFoundException("Product not found for Code" + request.getProductCode());
+		}
 		productEntity.setName(request.getProductName());
 		productEntity.setDescription(request.getProductDesc());
-	//	productEntity.setUseCard(request.getUseCard());
-	//	productEntity.setUseAccount(request.getUseAccount());
+		productEntity.setUseCard(request.getUseCard());
+		productEntity.setUseAccount(request.getUseAccount());
 		productEntity.setCallbackURL(request.getCallback());
 		productEntity.setStatus(request.getStatus());
 		productEntity.setUpdatedBy(request.getUpdatedBy());
 		productEntity.setUpdatedAt(LocalDateTime.now());
 
-		return productRepository.save(productEntity);
+		return productEntityRepository.save(productEntity);
 	}
 
 	public boolean deleteProduct(String productCode) {
-		productRepository.deleteById(productCode);
 		// child records have to be deleted
-		return true;
+		return productEntityRepository.deleteByProductCode(productCode);
 	}
 
-	public ProductDataset addProductDataset(DatasetProductRequest request) {
-		ProductDataset prodDatasetEntity = new ProductDataset();
-		//prodDatasetEntity.setProductCode(request.getProductCode());
-		//prodDatasetEntity.setFieldName(request.getFieldName());
+	public ProductDataSet createProductDataset(DatasetProductRequest request) {
+		ProductDataSet prodDatasetEntity = new ProductDataSet();
+		prodDatasetEntity.setProductCode(request.getProductCode());
+		prodDatasetEntity.setFieldName(request.getFieldName());
 		prodDatasetEntity.setDataType(request.getDataType());
-	//	prodDatasetEntity.setMandatory(request.getMandatory());
-		//prodDatasetEntity.setAuthorised(request.getAuthorised());
+		prodDatasetEntity.setMandatory(request.getCompulsory());
+		prodDatasetEntity.setAuthorised(request.getAuthorised());
 		prodDatasetEntity.setCreatedBy(request.getCreatedBy());
-		prodDatasetEntity.setCreatedAt(LocalDateTime.now());
-		// productDataset.setUpdatedBy("");
-		// productDataset.setUpdatedAt(LocalDateTime.now());
 
-		return productDatasetRepository.save(prodDatasetEntity);
+		return productDataSetRepository.save(prodDatasetEntity);
 	}
 
-	public List<ProductDataset> getProductDataset(String productCode) {
+	public List<ProductDataSet> getProductDataset(String productCode) {
 		if (productCode.isEmpty()) {
-			return productDatasetRepository.findAll();
+			return productDataSetRepository.findAll();
 		}
 
-		List<ProductDataset> productDatasetList = new ArrayList<>();
-		//productDatasetList.add(productDatasetRepository.findByProductCode(productCode));
+		List<ProductDataSet> productDatasetList = new ArrayList<>();
+		productDatasetList.add(productDataSetRepository.findByProductCode(productCode));
 		return productDatasetList;
 	}
 
-	public ProductDataset updateProductDataset(DatasetProductRequest request) {
-		ProductDataset productDatasetEntity = getProductDataset(request.getProductCode()).get(0);
-		//productDatasetEntity.setProductCode(request.getProductCode());
-		//productDatasetEntity.setFieldName(request.getFieldName());
+	public ProductDataSet updateProductDataset(UpdateDataSetRequest request) {
+		ProductDataSet productDatasetEntity = getProductDataset(request.getProductCode()).get(0);
+		productDatasetEntity.setProductCode(request.getProductCode());
+		productDatasetEntity.setFieldName(request.getFieldName());
 		productDatasetEntity.setDataType(request.getDataType());
-		//productDatasetEntity.setMandatory(request.getMandatory());
-		//productDatasetEntity.setAuthorised(request.getAuthorised());
-		productDatasetEntity.setUpdatedBy(request.getCreatedBy());
-		productDatasetEntity.setUpdatedAt(LocalDateTime.now());
-
-		return productDatasetRepository.save(productDatasetEntity);
+		productDatasetEntity.setMandatory(request.getCompulsory());
+		productDatasetEntity.setAuthorised(request.getAuthorised());
+		productDatasetEntity.setUpdatedBy(request.getUpdatedBy());
+		return productDataSetRepository.save(productDatasetEntity);
 	}
 
 	public boolean deleteProductDataset(String productCode) {
-		//productDatasetRepository.deleteByProductCode(productCode);
-		return true;
+		return productDataSetRepository.deleteByProductCode(productCode);
 	}
 
 }

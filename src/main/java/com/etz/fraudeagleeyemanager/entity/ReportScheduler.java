@@ -1,6 +1,5 @@
 package com.etz.fraudeagleeyemanager.entity;
 
-import com.etz.fraudeagleeyemanager.constant.BooleanStatus;
 import com.etz.fraudeagleeyemanager.constant.IntervalType;
 import com.etz.fraudeagleeyemanager.constant.Status;
 import lombok.*;
@@ -21,7 +20,6 @@ public class ReportScheduler extends BaseEntity implements Serializable {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	@Column(name = "id")
 	private Long id;
 
 	@Column(name = "interval_value")
@@ -32,8 +30,7 @@ public class ReportScheduler extends BaseEntity implements Serializable {
 	private IntervalType intervalType;
 	
 	@Column(nullable = false, name = "loop", columnDefinition = "TINYINT", length = 1)
-	@Enumerated(EnumType.ORDINAL)
-	private BooleanStatus loop;
+	private Boolean loop;
 
 	@Column(nullable = false, name = "status", columnDefinition = "TINYINT", length = 1)
 	@Enumerated(EnumType.ORDINAL)

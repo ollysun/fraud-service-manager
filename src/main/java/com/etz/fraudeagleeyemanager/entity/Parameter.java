@@ -17,14 +17,11 @@ public class Parameter extends BaseEntity {
 		
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	@Column(name = "id")
 	private Long id;
 
-	@NotBlank(message = "Name cannot be empty")
 	@Column(name = "name", columnDefinition="VARCHAR(150)")
 	private String name;
 
-	@NotBlank(message = "Operator cannot be empty")
 	@Column(name = "operator",  columnDefinition="VARCHAR(100)")
 	private String operator;
 

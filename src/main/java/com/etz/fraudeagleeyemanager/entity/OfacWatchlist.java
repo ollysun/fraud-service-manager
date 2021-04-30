@@ -20,7 +20,6 @@ public class OfacWatchlist extends BaseEntity implements Serializable {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	@Column(name = "id")
 	private Long id;
 
 	@NotBlank(message = "Full name cannot be empty")
@@ -40,8 +39,7 @@ public class OfacWatchlist extends BaseEntity implements Serializable {
 	private Status status;
 
 	@Column(name = "authorised")
-	@Enumerated(EnumType.ORDINAL)
-	private BooleanStatus authorised;
+	private Boolean authorised;
 
 	@Override
 	public boolean equals(Object o) {

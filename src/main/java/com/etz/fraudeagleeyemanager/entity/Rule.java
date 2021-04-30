@@ -1,6 +1,9 @@
 package com.etz.fraudeagleeyemanager.entity;
 
+import com.etz.fraudeagleeyemanager.constant.DataSource;
+import com.etz.fraudeagleeyemanager.constant.LogicOperator;
 import com.etz.fraudeagleeyemanager.constant.Status;
+import com.etz.fraudeagleeyemanager.constant.SuspicionLevel;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -25,13 +28,15 @@ public class Rule extends BaseEntity implements Serializable {
 	private String operatorOne;
 
 	@Column(name = "compare_value_1")
-	private String compareValueOne;
+	private Integer compareValueOne;
 
 	@Column(name = "data_source_1")
-	private String dataSourceOne;
+	@Enumerated(EnumType.STRING)
+	private DataSource dataSourceOne;
 
 	@Column(name = "logic_operator")
-	private String logicOperator;
+	@Enumerated(EnumType.STRING)
+	private LogicOperator logicOperator;
 
 	@Column(name = "source_value_2")
 	private String sourceValueTwo;
@@ -40,20 +45,21 @@ public class Rule extends BaseEntity implements Serializable {
 	private String operatorTwo;
 
 	@Column(name = "compare_value_2")
-	private String compareValueTwo;
+	private Integer compareValueTwo;
 
 	@Column(name = "data_source_2")
-	private String dataSourceTwo;
+	@Enumerated(EnumType.STRING)
+	private DataSource dataSourceTwo;
 
-	@Column(name = "suspicion_level")
-	private Integer suspicionLevel;
+	@Column(name = "suspicion_level", columnDefinition = "INT", length = 10)
+	@Enumerated(EnumType.ORDINAL)
+	private SuspicionLevel suspicionLevel;
 
 	@Column(name = "action")
 	private String action;
 		
 	@Column(name = "status", columnDefinition = "TINYINT", length = 1)
-	@Enumerated(EnumType.ORDINAL)
-	private Status status;
+	private Boolean status;
 	
 	@Column(name = "authorised")
 	private Boolean authorised;

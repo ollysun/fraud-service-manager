@@ -8,8 +8,8 @@ import com.etz.fraudeagleeyemanager.dto.request.UpdateProductRequest;
 import com.etz.fraudeagleeyemanager.dto.response.BooleanResponse;
 import com.etz.fraudeagleeyemanager.dto.response.CollectionResponse;
 import com.etz.fraudeagleeyemanager.dto.response.ModelResponse;
-import com.etz.fraudeagleeyemanager.entity.Product;
-import com.etz.fraudeagleeyemanager.entity.ProductDataset;
+import com.etz.fraudeagleeyemanager.entity.ProductEntity;
+import com.etz.fraudeagleeyemanager.entity.ProductDataSet;
 import com.etz.fraudeagleeyemanager.service.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -28,18 +28,18 @@ public class ProductController {
 	ProductService productService;
 	
 	@PostMapping
-	public ResponseEntity<ModelResponse<Product>> createProduct(
-			@RequestBody @Valid CreateProductRequest request){
-		ModelResponse<Product> response = new ModelResponse<Product>(productService.createProduct(request));
-		response.setStatus(201);
+	public ResponseEntity<ModelResponse<ProductEntity>> createProduct(
+			@Valid @RequestBody  CreateProductRequest request){
+		ModelResponse<ProductEntity> response = new ModelResponse<ProductEntity>(productService.createProduct(request));
+		response.setStatus(HttpStatus.CREATED.value());
 		return new ResponseEntity<>(response, HttpStatus.CREATED);
 	}
 		
-	@PutMapping(path = "/{product_code}")
-	public ModelResponse<Product> updateProduct(@PathVariable(name = "product_code") String productCode,
+	@PutMapping
+	public ModelResponse<ProductEntity> updateProduct(@PathVariable(name = "product_code") String productCode,
 			@RequestBody @Valid UpdateProductRequest request){
 		request.setProductCode(productCode);
-		return new ModelResponse<Product>(productService.updateProduct(request));
+		return new ModelResponse<>(productService.updateProduct(request));
 	}
 	
 	@DeleteMapping(path = "/{product_code}")
@@ -48,15 +48,16 @@ public class ProductController {
 	}
 	
 	@GetMapping
-	public CollectionResponse<Product> queryProduct(@RequestParam(name = "productCode", defaultValue = "") String productCode){
+	public CollectionResponse<ProductEntity> queryProduct(@RequestParam(name = "productCode", defaultValue = "")
+																	  String productCode){
 		return new CollectionResponse<>(productService.getProduct(productCode.trim()));
 	}
 	
 	@PostMapping(path = "/dataset")
-	public ResponseEntity<ModelResponse<ProductDataset>> addProductDataset(@RequestBody @Valid DatasetProductRequest request){
-		ModelResponse<ProductDataset> response = new ModelResponse<ProductDataset>(productService.addProductDataset(request));
+	public ResponseEntity<ModelResponse<ProductDataSet>> addProductDataset(@RequestBody @Valid DatasetProductRequest request){
+		ModelResponse<ProductDataSet> response = new ModelResponse<ProductDataset>(productService.addProductDataset(request));
 		response.setStatus(201);
-		return new ResponseEntity<ModelResponse<ProductDataset>>(response, HttpStatus.CREATED);
+		return new ResponseEntity<ModelResponse<ProductDataSet>>(response, HttpStatus.CREATED);
 	}
 	
 	@GetMapping(path = "/dataset")

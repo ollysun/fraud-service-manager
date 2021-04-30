@@ -1,32 +1,26 @@
 package com.etz.fraudeagleeyemanager.entity;
 
 import com.etz.fraudeagleeyemanager.constant.Status;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
 
-@Getter
-@Setter
-@ToString
-@RequiredArgsConstructor
 @Entity
 @Table(name = "product")
-public class Product extends BaseEntity implements Serializable {
+@EqualsAndHashCode(callSuper = true)
+@Data
+public class ProductEntity extends BaseEntity implements Serializable {
 
     @Id
     @Column(name = "code", unique=true,columnDefinition="VARCHAR(100)")
     private String code;
 
-    @NotBlank(message = "Product Name cannot be empty")
+    @NotBlank(message = "ProductEntity Name cannot be empty")
     @Column(nullable = false, name = "name", unique = true, length = 200)
     private String name;
 
@@ -52,7 +46,7 @@ public class Product extends BaseEntity implements Serializable {
 
     @OneToMany(mappedBy = "product",
             cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<ProductDataset> productDataset;
+    private List<ProductDataSet> productDataset;
 
     @ToString.Exclude
     @OneToMany(mappedBy = "product", fetch = FetchType.LAZY,
