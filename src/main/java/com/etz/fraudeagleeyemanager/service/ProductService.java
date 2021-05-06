@@ -1,5 +1,12 @@
 package com.etz.fraudeagleeyemanager.service;
 
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
 import com.etz.fraudeagleeyemanager.dto.request.CreateProductRequest;
 import com.etz.fraudeagleeyemanager.dto.request.DatasetProductRequest;
 import com.etz.fraudeagleeyemanager.dto.request.UpdateProductRequest;
@@ -7,12 +14,7 @@ import com.etz.fraudeagleeyemanager.entity.Product;
 import com.etz.fraudeagleeyemanager.entity.ProductDataset;
 import com.etz.fraudeagleeyemanager.repository.ProductDatasetRepository;
 import com.etz.fraudeagleeyemanager.repository.ProductRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
+import com.etz.fraudeagleeyemanager.util.JsonConverter;
 
 @Service
 public class ProductService {
@@ -34,6 +36,10 @@ public class ProductService {
 		productEntity.setStatus(request.getStatus());
 		productEntity.setCreatedBy(request.getCreatedBy());
 
+		// for auditing purpose
+		productEntity.setEntityId(null);
+		productEntity.setRecordBefore(null);
+		productEntity.setRequestDump(request);
 		return productRepository.save(productEntity);
 	}
 
@@ -58,11 +64,23 @@ public class ProductService {
 		productEntity.setUpdatedBy(request.getUpdatedBy());
 		productEntity.setUpdatedAt(LocalDateTime.now());
 
+		// for auditing purpose
+		productEntity.setEntityId(request.getProductCode());
+		productEntity.setRecordBefore(JsonConverter.objectToJson(productEntity));
+		productEntity.setRequestDump(request);
 		return productRepository.save(productEntity);
 	}
 
 	public boolean deleteProduct(String productCode) {
-		productRepository.deleteById(productCode);
+		Product productEntity = productRepository.findById(productCode).get();
+		// for auditing purpose
+		productEntity.setEntityId(productCode);
+		productEntity.setRecordBefore(JsonConverter.objectToJson(productEntity));
+		productEntity.setRecordAfter(null);
+		productEntity.setRequestDump(productCode);
+		
+		productRepository.delete(productEntity);
+		//productRepository.deleteById(productCode);
 		// child records have to be deleted
 		return true;
 	}

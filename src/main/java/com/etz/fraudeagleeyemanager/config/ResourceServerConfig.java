@@ -24,6 +24,8 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 //@Slf4j
 public class ResourceServerConfig extends ResourceServerConfigurerAdapter {
 	
+	private static final String SIGNING_KEY = "AuthETransactNgView2021";
+	
     @Value("${security.oauth2.resource.id}")
     private String oauth2ResourceId;
 
@@ -56,8 +58,8 @@ public class ResourceServerConfig extends ResourceServerConfigurerAdapter {
         //http.addFilterBefore(new CustomFilter(), OAuth2LoginAuthenticationFilter.class);
 
         // Patterns to be added once we can test with a token
-        http.authorizeRequests().antMatchers("/v1/**")
-                .authenticated();
+        //http.authorizeRequests().antMatchers("/v1/**").authenticated();
+        http.authorizeRequests().antMatchers("/**").permitAll();
     }
 
 
@@ -71,7 +73,7 @@ public class ResourceServerConfig extends ResourceServerConfigurerAdapter {
         JwtAccessTokenConverter converter = new JwtAccessTokenConverter();
         converter.setAccessTokenConverter(new CustomJwtAccessTokenConverter());
         //converter.setVerifierKey(oauth2VerifierKey);
-        converter.setSigningKey("AuthETransactNgView2021");
+        converter.setSigningKey(SIGNING_KEY);
         return converter;
     }
     

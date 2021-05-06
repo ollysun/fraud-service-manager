@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 
-@Validated
+//@Validated
 @RestController
 @RequestMapping("/product")
 public class ProductController {
@@ -29,7 +29,7 @@ public class ProductController {
 	
 	@PostMapping
 	public ResponseEntity<ModelResponse<Product>> createProduct(
-			@RequestBody @Valid CreateProductRequest request){
+			@RequestBody  CreateProductRequest request){
 		ModelResponse<Product> response = new ModelResponse<Product>(productService.createProduct(request));
 		response.setStatus(201);
 		return new ResponseEntity<>(response, HttpStatus.CREATED);
