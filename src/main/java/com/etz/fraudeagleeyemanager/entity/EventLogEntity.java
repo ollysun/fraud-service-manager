@@ -10,6 +10,8 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
+import org.hibernate.annotations.Type;
+
 import lombok.Data;
 
 @Entity
@@ -24,16 +26,38 @@ public class EventLogEntity implements Serializable {
 	@Column(name = "id")
 	private Long id;
 
-	@Column(name = "event_time", nullable = false)
-	private LocalDateTime eventTime;
+	@Column(name = "entity")
+	private String entity;
 	
-	@Column(name = "event_type", nullable = false)
-	private String eventType;
+	@Column(name = "entity_id")
+	private String entityId;
 	
 	@Column(name = "event_desc")
 	private String eventDesc;
 
+	@Column(name = "record_before")
+	@Type(type = "text")
+	private String recordBefore;
+	
+	@Column(name = "record_after")
+	@Type(type = "text")
+	private String recordAfter;
+	
+	@Column(name = "endpoint")
+	private String endpoint;
+	
+	@Column(name = "request_dump")
+	@Type(type = "text")
+	private String requestDump;
+	
 	@Column(name = "user_id", nullable = false)
 	private Long userId;
+
+	@Column(name = "event_type", nullable = false)
+	private String eventType;
+
+	@Column(name = "event_time", nullable = false)
+	private LocalDateTime eventTime;
+
 
 }

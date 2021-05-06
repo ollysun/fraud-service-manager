@@ -16,7 +16,7 @@ import java.time.LocalDateTime;
 @Setter
 @ToString
 @MappedSuperclass
-public class BaseEntity {
+public class BaseEntity extends BaseAuditEntity{
 
     @Column(name = "created_at", nullable = false)
     @CreationTimestamp

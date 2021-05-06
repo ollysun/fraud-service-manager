@@ -8,21 +8,14 @@ import org.springframework.security.oauth2.provider.token.DefaultAccessTokenConv
 import com.etz.fraudeagleeyemanager.util.RequestUtil;
 
 public class CustomJwtAccessTokenConverter extends DefaultAccessTokenConverter {
-		//implements JwtAccessTokenConverterConfigurer {
 
 	@Override
 	public OAuth2Authentication extractAuthentication(Map<String, ?> map) {
 		OAuth2Authentication authentication = super.extractAuthentication(map);
 		authentication.setDetails(map);
 		RequestUtil.setAccessTokenClaim(authentication);
-		RequestUtil.getAccessTokenClaim("user_name");
+		//RequestUtil.getAccessTokenClaim("user_name");
 		return authentication;
 	}
-
-//	@Override
-//	public void configure(JwtAccessTokenConverter converter) {
-//		 converter.setAccessTokenConverter(this);
-//		 converter.setVerifierKey(oauth2VerifierKey);
-//	}
 
 }
