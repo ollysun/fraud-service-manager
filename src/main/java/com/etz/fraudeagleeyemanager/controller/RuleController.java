@@ -15,8 +15,12 @@ import com.etz.fraudeagleeyemanager.service.RuleService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
+
+@Validated
 @RestController
 @RequestMapping("/rule")
 public class RuleController {
@@ -25,14 +29,14 @@ public class RuleController {
 	RuleService ruleService;
 	
 	@PostMapping
-	public ResponseEntity<ModelResponse<Rule>> createRule(@RequestBody CreateRuleRequest request){
+	public ResponseEntity<ModelResponse<Rule>> createRule(@RequestBody @Valid CreateRuleRequest request){
 		ModelResponse<Rule> response = new ModelResponse<Rule>(ruleService.createRule(request));
 		response.setStatus(HttpStatus.CREATED.value());
 		return new ResponseEntity<>(response, HttpStatus.CREATED);
 	}
 	
 	@PutMapping
-	public ModelResponse<Rule> updateRule(@RequestBody UpdateRuleRequest request){
+	public ModelResponse<Rule> updateRule(@RequestBody @Valid UpdateRuleRequest request){
 		return new ModelResponse<>(ruleService.updateRule(request));
 	}
 	
@@ -48,12 +52,12 @@ public class RuleController {
 		
 	
 	@PostMapping(path = "/product")
-	public ResponseEntity<ProductRule> mapRuleToProduct(@RequestBody MapRuleToProductRequest request){
+	public ResponseEntity<ProductRule> mapRuleToProduct(@RequestBody @Valid MapRuleToProductRequest request){
 		return new ResponseEntity<>(ruleService.mapRuleToProduct(request), HttpStatus.CREATED);
 	}
 	
 	@PutMapping(path = "/product")
-	public ModelResponse<ProductRule> updateProductRule(@RequestBody UpdateMapRuleToProductRequest request){
+	public ModelResponse<ProductRule> updateProductRule(@RequestBody @Valid UpdateMapRuleToProductRequest request){
 		return new ModelResponse<>(ruleService.updateProductRule(request));
 	}
 	

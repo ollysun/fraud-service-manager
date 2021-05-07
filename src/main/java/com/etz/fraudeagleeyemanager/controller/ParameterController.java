@@ -12,6 +12,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
+
 @RestController
 @RequestMapping("/parameter")
 public class ParameterController {
@@ -21,7 +23,7 @@ public class ParameterController {
 	
 	@PostMapping
 	public ResponseEntity<ModelResponse<Parameter>> createParameter(
-							@RequestBody CreateParameterRequest request){
+							@RequestBody @Valid CreateParameterRequest request){
 		ModelResponse<Parameter> response = new ModelResponse<Parameter>(parameterService.createParameter(request));
 		response.setStatus(201);
 		return new ResponseEntity<>(response, HttpStatus.CREATED);

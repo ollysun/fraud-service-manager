@@ -47,10 +47,6 @@ public class AccountService {
 		Account accountEntity = new Account();
 
 		// check for account number digits
-		int digits = 1 + (int)Math.floor(Math.log10(request.getAccountNo()));
-		if ( digits < 10){
-			throw new FraudEngineException("Wrong Account Number");
-		}
 		accountEntity.setAccountName(request.getAccountName());
 		accountEntity.setBankCode(request.getBankCode());
 		accountEntity.setBankName(request.getBankName());
@@ -58,9 +54,9 @@ public class AccountService {
 		accountEntity.setCreatedBy(request.getCreatedBy());
 		accountEntity.setSuspicionCount(request.getSuspicion());
 		accountEntity.setBlockReason(request.getBlockReason());
-
+// saving to database
 		Account account = accountRepository.save(accountEntity);
-
+ // redis saving
 		accountRedisRepository.setHashOperations(redisTemplate);
 		accountRedisRepository.create(account);
 		return account;
@@ -106,7 +102,7 @@ public class AccountService {
 		accountEntity.setUpdatedBy(request.getUpdatedBy());
 		accountEntity.setProductCode(request.getProductCode());
 		AccountProduct accountProduct = accountProductRepository.save(accountEntity);
-
+//  todo fetch from redis and update as well just like Database update
 		accountProductRedisRepository.setHashOperations(redisTemplate);
 		accountProductRedisRepository.update(accountProduct);
 		return accountProduct;

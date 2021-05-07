@@ -4,6 +4,7 @@ import lombok.*;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Size;
 import java.io.Serializable;
 import java.util.Set;
 
@@ -21,7 +22,7 @@ public class Account extends BaseEntity implements Serializable {
 	private Long id;
 
 	@Column(name = "account_no", unique = true)
-	private Long accountNo;
+	private String accountNo;
 
 	@NotBlank(message = "Account name cannot be empty")
 	@Column(name = "account_name", nullable = false)

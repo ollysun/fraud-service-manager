@@ -25,8 +25,9 @@ public class AccountController {
 	@Autowired
 	AccountService accountService;
 
+ // todo set preauthorise permission
 	@PostMapping
-	public ResponseEntity<ModelResponse<Account>> createAccount(@RequestBody AddAccountRequest request) {
+	public ResponseEntity<ModelResponse<Account>> createAccount(@RequestBody @Valid AddAccountRequest request) {
 		ModelResponse<Account> response = new ModelResponse<>(accountService.createAccount(request));
 		response.setStatus(HttpStatus.CREATED.value());
 

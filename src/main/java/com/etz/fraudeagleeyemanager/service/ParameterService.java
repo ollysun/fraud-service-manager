@@ -67,6 +67,7 @@ public class ParameterService {
 		return updatedEntity;
 	}
 
+	// todo disable parameter
 	public boolean deleteParameter(Long parameterId) {
 		log.info("Delete parameter ID: INFO >>>>>>>>>>>>>> {}", parameterId);
 		if(Objects.isNull(parameterId)){

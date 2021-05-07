@@ -3,7 +3,6 @@ package com.etz.fraudeagleeyemanager.redisrepository;
 import com.etz.fraudeagleeyemanager.constant.FraudRedisKey;
 import com.etz.fraudeagleeyemanager.entity.Account;
 import com.etz.fraudeagleeyemanager.repository.RedisRepository;
-import org.springframework.context.annotation.Bean;
 import org.springframework.data.redis.core.HashOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Repository;
@@ -11,9 +10,9 @@ import org.springframework.stereotype.Repository;
 import java.util.Map;
 
 @Repository
-public class AccountRedisRepository implements RedisRepository<Account, Long> {
+public class AccountRedisRepository implements RedisRepository<Account, String> {
 	
-    private HashOperations<String, Long, Account> hashOperations;
+    private HashOperations<String, String, Account> hashOperations;
 	
 //	//@Autowired	
 //    public AccountRedisRepository(RedisTemplate<FraudRedisKey, Object> redisTemplate) {
@@ -29,12 +28,12 @@ public class AccountRedisRepository implements RedisRepository<Account, Long> {
 	}
 
 	@Override
-	public Map<Long, Account> findAll() {
+	public Map<String, Account> findAll() {
         return hashOperations.entries(FraudRedisKey.ACCOUNT.name());
 	}
 
 	@Override
-	public Account findById(Long accountNumber) {
+	public Account findById(String accountNumber) {
 		return hashOperations.get(FraudRedisKey.ACCOUNT.name(), accountNumber);
 	}
 
@@ -44,7 +43,7 @@ public class AccountRedisRepository implements RedisRepository<Account, Long> {
 	}
 
 	@Override
-	public void delete(Long accountNumber) {
+	public void delete(String accountNumber) {
         hashOperations.delete(FraudRedisKey.ACCOUNT.name(), accountNumber);
 	}
 		

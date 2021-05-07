@@ -11,8 +11,12 @@ import com.etz.fraudeagleeyemanager.service.CardService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
+
+@Validated
 @RestController
 @RequestMapping("/v1/card")
 public class CardController {
@@ -22,7 +26,7 @@ public class CardController {
 	
 	@PostMapping
 	public ResponseEntity<ModelResponse<Card>> createCard(
-			@RequestBody CardRequest request){
+			@RequestBody @Valid CardRequest request){
 		ModelResponse<Card> response = new ModelResponse<>(cardService.createCard(request));
 		response.setStatus(HttpStatus.CREATED.value());
 		return new ResponseEntity<>(response, HttpStatus.CREATED);
@@ -35,7 +39,7 @@ public class CardController {
 	}
 		
 	@PostMapping(path = "/product")
-	public ResponseEntity<ModelResponse<CardProduct>> mapCardToProduct(CardToProductRequest request){
+	public ResponseEntity<ModelResponse<CardProduct>> mapCardToProduct(@RequestBody @Valid CardToProductRequest request){
 		ModelResponse<CardProduct> response = new ModelResponse<>(cardService.cardToProduct(request));
 		response.setStatus(HttpStatus.CREATED.value());
 		return new ResponseEntity<>(response, HttpStatus.CREATED);

@@ -78,6 +78,8 @@ public class CardService {
 		}
 		Card cardEntity  = cardRepository.findById(cardId).orElseThrow(() -> new ResourceNotFoundException("Card Not found " + cardId));
 		cardEntity.setId(cardId);
+
+		// todo fetch from Redis
 		return cardRepository.findAll(Example.of(cardEntity), PageRequestUtil.getPageRequest());
 	}
 
@@ -101,7 +103,7 @@ public class CardService {
 		cardToProdEntity.setStatus(request.getStatus());
 		cardToProdEntity.setUpdatedBy(request.getUpdatedBy());
 		cardToProdEntity.setProductCode(request.getProductCode());
-
+// todo fetch and update on redis as well
 		CardProduct cardProduct = cardProductRepository.save(cardToProdEntity);
 		cardProductRedisRepository.setHashOperations(fraudEngineRedisTemplate);
 		cardProductRedisRepository.update(cardProduct);
