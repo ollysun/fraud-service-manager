@@ -6,8 +6,7 @@ import javax.validation.constraints.NotNull;
 
 @Data
 public class AccountToProductRequest {
-
-	@NotNull(message="Please enter the product Coe")
+	@NotNull(message="Please enter the product Code")
 	private String productCode;
 	@NotNull(message="Please enter the accountId")
 	private Long accountId;

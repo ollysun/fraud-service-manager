@@ -155,7 +155,7 @@ public class RuleService {
 	}
 
 	public ProductRule updateProductRule(UpdateMapRuleToProductRequest request) {
-		ProductRule prodRuleEntity = productRuleRepository.findById(request.getProductRuleId())
+		ProductRule prodRuleEntity = productRuleRepository.findById(request.getProductRuleId().longValue())
 				.orElseThrow(() -> new ResourceNotFoundException("ProductRule Not found for Id " + request.getProductRuleId() ));
 		prodRuleEntity.setNotifyAdmin(request.getNotifyAdmin());
 		prodRuleEntity.setEmailGroupId(request.getEmailGroupId().longValue());

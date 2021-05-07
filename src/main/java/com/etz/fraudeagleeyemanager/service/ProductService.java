@@ -63,12 +63,12 @@ public class ProductService {
 		}
 
 		List<ProductEntity> productList = new ArrayList<>();
-		productList.add(productEntityRepository.findByProductCode(productCode));
+		productList.add(productEntityRepository.findByCode(productCode));
 		return productList;
 	}
 
 	public ProductEntity updateProduct(UpdateProductRequest request) {
-		ProductEntity productEntity = productEntityRepository.findByProductCode(request.getProductCode());
+		ProductEntity productEntity = productEntityRepository.findByCode(request.getProductCode());
 		if (productEntity == null){
 			throw new ResourceNotFoundException("Product not found for Code" + request.getProductCode());
 		}
@@ -88,11 +88,11 @@ public class ProductService {
 	}
 
 	public Boolean deleteProduct(String productCode) {
-		ProductEntity productEntity = productEntityRepository.findByProductCode(productCode);
+		ProductEntity productEntity = productEntityRepository.findByCode(productCode);
 		if (productEntity == null){
 			throw new ResourceNotFoundException("Product Entity not found for productCode " + productCode);
 		}
-		productEntityRepository.deleteByProductCode(productCode);
+		productEntityRepository.deleteByCode(productCode);
 		productRedisRepository.setHashOperations(fraudEngineRedisTemplate);
 		productRedisRepository.delete(productCode);
 		return Boolean.TRUE;

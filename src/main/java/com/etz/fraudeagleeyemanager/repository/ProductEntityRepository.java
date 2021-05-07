@@ -7,7 +7,7 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface ProductEntityRepository extends JpaRepository<ProductEntity, String> {
 
-    ProductEntity findByProductCode(String code);
+    ProductEntity findByCode(String code);
 
-    Boolean deleteByProductCode(String code);
+    Boolean deleteByCode(String code);
 }

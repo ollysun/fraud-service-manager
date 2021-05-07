@@ -44,19 +44,19 @@ public class ProductEntity extends BaseEntity implements Serializable {
     private Status status;
 
 
-    @OneToMany(mappedBy = "product",
+    @OneToMany(mappedBy = "productEntity",
             cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ProductDataSet> productDataset;
 
     @ToString.Exclude
-    @OneToMany(mappedBy = "product", fetch = FetchType.LAZY,
+    @OneToMany(mappedBy = "productEntity", fetch = FetchType.LAZY,
             cascade = CascadeType.REMOVE)
     private Set<ProductRule> productRules;
 
 
-    @OneToMany(mappedBy = "product", cascade = CascadeType.REMOVE)
+    @OneToMany(mappedBy = "productEntity", cascade = CascadeType.REMOVE)
     private Set<CardProduct> products;
 
-    @OneToMany(mappedBy = "product", cascade = CascadeType.REMOVE)
+    @OneToMany(mappedBy = "productEntity", cascade = CascadeType.REMOVE)
     private Set<AccountProduct> productLists;
 }

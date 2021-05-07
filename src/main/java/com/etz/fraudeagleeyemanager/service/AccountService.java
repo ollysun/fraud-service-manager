@@ -25,6 +25,11 @@ import java.util.Objects;
 
 @Service
 public class AccountService {
+
+	private RedisTemplate<String, Object> redisTemplate;
+
+//	@Autowired @Qualifier("redisTemplate")
+//	private RedisTemplate<String, AccountProduct> fraudEngineAcctProductRedisTemplate;
 	
 	@Autowired
 	AccountRepository accountRepository;
@@ -38,8 +43,7 @@ public class AccountService {
 	@Autowired
 	AccountProductRedisRepository accountProductRedisRepository;
 
-	@Autowired @Qualifier("redisTemplate")
-	private RedisTemplate<String, Object> fraudEngineRedisTemplate;
+
 	
 		
 	public Account createAccount(AddAccountRequest request) {
@@ -60,7 +64,7 @@ public class AccountService {
 
 		Account account = accountRepository.save(accountEntity);
 
-		accountRedisRepository.setHashOperations(fraudEngineRedisTemplate);
+		accountRedisRepository.setHashOperations(redisTemplate);
 		accountRedisRepository.create(account);
 		return account;
 	}
@@ -94,7 +98,7 @@ public class AccountService {
 
 		AccountProduct accountProduct = accountProductRepository.save(accountProductEntity);
 
-		accountProductRedisRepository.setHashOperations(fraudEngineRedisTemplate);
+		accountProductRedisRepository.setHashOperations(redisTemplate);
 		accountProductRedisRepository.update(accountProduct);
 		return accountProduct;
 	}
@@ -106,7 +110,7 @@ public class AccountService {
 		accountEntity.setProductCode(request.getProductCode());
 		AccountProduct accountProduct = accountProductRepository.save(accountEntity);
 
-		accountProductRedisRepository.setHashOperations(fraudEngineRedisTemplate);
+		accountProductRedisRepository.setHashOperations(redisTemplate);
 		accountProductRedisRepository.update(accountProduct);
 		return accountProduct;
 	}
