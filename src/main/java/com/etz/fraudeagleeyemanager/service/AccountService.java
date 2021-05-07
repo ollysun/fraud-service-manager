@@ -25,12 +25,9 @@ import java.util.Objects;
 
 @Service
 public class AccountService {
-
+	@Autowired
 	private RedisTemplate<String, Object> redisTemplate;
 
-//	@Autowired @Qualifier("redisTemplate")
-//	private RedisTemplate<String, AccountProduct> fraudEngineAcctProductRedisTemplate;
-	
 	@Autowired
 	AccountRepository accountRepository;
 		
