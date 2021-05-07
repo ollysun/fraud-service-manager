@@ -1,17 +1,16 @@
 package com.etz.fraudeagleeyemanager.dto.request;
 
-import com.etz.fraudeagleeyemanager.constant.Status;
-import com.fasterxml.jackson.annotation.JsonAlias;
 import lombok.Data;
 
 import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
+import javax.validation.constraints.PositiveOrZero;
 
 @Data
 public class AddAccountRequest {
 
 	@NotBlank(message = "Please enter the account number")
-	private String accountNo;
+	@PositiveOrZero(message = "Please enter the number")
+	private Long accountNo;
 	
 	@NotBlank(message = "Please enter the account name")
 	private String accountName;

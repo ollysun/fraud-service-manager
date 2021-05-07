@@ -60,11 +60,13 @@ public class ProductRuleRedisRepository implements RedisRepository<ProductRule, 
 		ScanOptions options = ScanOptions.scanOptions().match(keyPatternToMatch).count(Integer.MAX_VALUE).build();
 		Cursor<Map.Entry<String, ProductRule>> cursor = hashOperations.scan(FraudRedisKey.PRODUCTRULE.name(), options);
 		while (cursor.hasNext()) {
-			foundKeys.add(new String(cursor.next().getKey()));
+			foundKeys.add(cursor.next().getKey());
 		}
 		try {
 			cursor.close();
-		} catch (IOException e) {}
+		} catch (IOException e) {
+
+		}
 		return foundKeys;
 	}
 	

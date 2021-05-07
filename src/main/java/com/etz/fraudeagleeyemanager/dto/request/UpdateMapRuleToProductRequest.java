@@ -7,7 +7,7 @@ import javax.validation.constraints.NotNull;
 @Data
 public class UpdateMapRuleToProductRequest {
 	@NotNull(message="productRuleId cannot be empty")
-	private Integer productRuleId;
+	private Long productRuleId;
 	private Boolean notifyAdmin;
 	private Integer emailGroupId;
 	private Boolean notifyCustomer;

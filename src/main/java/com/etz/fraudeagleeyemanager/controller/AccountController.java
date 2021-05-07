@@ -27,32 +27,30 @@ public class AccountController {
 
 	@PostMapping
 	public ResponseEntity<ModelResponse<Account>> createAccount(@RequestBody AddAccountRequest request) {
-		ModelResponse<Account> response = new ModelResponse<Account>(accountService.createAccount(request));
-		response.setStatus(201);
+		ModelResponse<Account> response = new ModelResponse<>(accountService.createAccount(request));
+		response.setStatus(HttpStatus.CREATED.value());
 
 		return new ResponseEntity<>(response, HttpStatus.CREATED);
 	}
 
 	@GetMapping
 	public PageResponse<Account> queryAccount(
-			@RequestParam(name = "accountID", defaultValue = "-1") String accountId) {
-		return new PageResponse<>(accountService.getAccount(Long.parseLong(accountId.trim())));
+			@RequestParam(name = "accountId", required = false) Long accountId) {
+		return new PageResponse<>(accountService.getAccount(accountId));
 	}
 
 	@PostMapping(path = "/product")
 	public ResponseEntity<ModelResponse<AccountProduct>> mapAccountToProduct(
 			@RequestBody @Valid AccountToProductRequest request) {
-		ModelResponse<AccountProduct> response = new ModelResponse<AccountProduct>(
-				accountService.accountProductMap(request));
-		response.setStatus(201);
+		ModelResponse<AccountProduct> response = new ModelResponse<>(
+				accountService.mapAccountProduct(request));
+		response.setStatus(HttpStatus.CREATED.value());
 		return new ResponseEntity<>(response, HttpStatus.CREATED);
 	}
 
-	@PutMapping(path = "/{accountID}")
-	public ModelResponse<Account> updateAccount(@PathVariable(name = "accountID", required = true) Integer cardId,
-			@RequestBody UpdateAccountProductRequest request) {
-		request.setAccountId(cardId);
-		return new ModelResponse<Account>(accountService.updateAccount(request));
+	@PutMapping(path = "/product")
+	public ModelResponse<AccountProduct> updateAccount(@RequestBody UpdateAccountProductRequest request) {
+		return new ModelResponse<>(accountService.updateAccountProduct(request));
 	}
 
 }

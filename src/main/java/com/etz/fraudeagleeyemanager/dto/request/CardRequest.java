@@ -10,20 +10,20 @@ import java.io.Serializable;
 
 @Data
 public class CardRequest implements Serializable {
-	@NotNull(message="Please enter the product Card Holder Name")
+	@NotNull(message="Please enter the  Card Holder Name")
 	private String holderName;
 
-	@NotNull(message="Please enter the product Card Holder Name")
+	@NotNull(message="Please enter the Card Bin")
 	@PositiveOrZero
 	private Integer cardBin;
 
-	@NotNull(message="Please enter the product Card Holder Name")
+	@NotNull(message="Please enter the CardBrand")
 	private CardBrand cardBrand;
 
-	@NotNull(message="Please enter the product Card Holder Name")
+	@NotNull(message="Please enter the Card Type")
 	private CardType cardType;
 
-	@NotNull(message="Please enter the product Card Holder Name")
+	@NotNull(message="Please enter the product Card expiry")
 	private String expiry;
 
 	@NotNull(message="Please enter the product Card Holder Name")

@@ -11,7 +11,7 @@ import java.util.Set;
 @EqualsAndHashCode(callSuper = true)
 @Entity
 @Table(name = "account", 
-		uniqueConstraints = @UniqueConstraint(
+		uniqueConstraints = @UniqueConstraint(name="UC_ACCOUNT",
 				columnNames = {"account_no", "bank_code"}))
 @Data
 public class Account extends BaseEntity implements Serializable {
@@ -20,9 +20,8 @@ public class Account extends BaseEntity implements Serializable {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
-	@NotBlank(message = "Account number cannot be empty")
-	@Column(name = "account_no", unique = true, length = 200)
-	private String accountNo;
+	@Column(name = "account_no", unique = true)
+	private Long accountNo;
 
 	@NotBlank(message = "Account name cannot be empty")
 	@Column(name = "account_name", nullable = false)

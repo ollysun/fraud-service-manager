@@ -4,6 +4,7 @@ package com.etz.fraudeagleeyemanager.controller;
 
 import com.etz.fraudeagleeyemanager.dto.request.CreateProductRequest;
 import com.etz.fraudeagleeyemanager.dto.request.DatasetProductRequest;
+import com.etz.fraudeagleeyemanager.dto.request.UpdateDataSetRequest;
 import com.etz.fraudeagleeyemanager.dto.request.UpdateProductRequest;
 import com.etz.fraudeagleeyemanager.dto.response.BooleanResponse;
 import com.etz.fraudeagleeyemanager.dto.response.CollectionResponse;
@@ -55,22 +56,22 @@ public class ProductController {
 	
 	@PostMapping(path = "/dataset")
 	public ResponseEntity<ModelResponse<ProductDataSet>> addProductDataset(@RequestBody @Valid DatasetProductRequest request){
-		ModelResponse<ProductDataSet> response = new ModelResponse<ProductDataset>(productService.addProductDataset(request));
+		ModelResponse<ProductDataSet> response = new ModelResponse<>(productService.createProductDataset(request));
 		response.setStatus(201);
-		return new ResponseEntity<ModelResponse<ProductDataSet>>(response, HttpStatus.CREATED);
+		return new ResponseEntity<>(response, HttpStatus.CREATED);
 	}
 	
 	@GetMapping(path = "/dataset")
-	public CollectionResponse<ProductDataset> queryProductDataset(
+	public CollectionResponse<ProductDataSet> queryProductDataset(
 			@RequestParam(name = "productCode", defaultValue = "") String productCode){
 		return new CollectionResponse<>(productService.getProductDataset(productCode.trim()));
 	}
 	
 	@PutMapping(path = "/dataset/{product_code}")
-	public ModelResponse<ProductDataset> updateProductDataset(@PathVariable(name = "product_code") String productCode,
-                                                              @RequestBody DatasetProductRequest request){
+	public ModelResponse<ProductDataSet> updateProductDataset(@PathVariable(name = "product_code") String productCode,
+                                                              @RequestBody UpdateDataSetRequest request){
 		request.setProductCode(productCode);
-		return new ModelResponse<ProductDataset>(productService.updateProductDataset(request));
+		return new ModelResponse<>(productService.updateProductDataset(request));
 	}
 	
 	@DeleteMapping(path = "/dataset/{product_code}")

@@ -4,12 +4,18 @@ import com.etz.fraudeagleeyemanager.dto.request.CreateProductRequest;
 import com.etz.fraudeagleeyemanager.dto.request.DatasetProductRequest;
 import com.etz.fraudeagleeyemanager.dto.request.UpdateDataSetRequest;
 import com.etz.fraudeagleeyemanager.dto.request.UpdateProductRequest;
+import com.etz.fraudeagleeyemanager.entity.Card;
 import com.etz.fraudeagleeyemanager.entity.ProductDataSet;
 import com.etz.fraudeagleeyemanager.entity.ProductEntity;
 import com.etz.fraudeagleeyemanager.exception.ResourceNotFoundException;
+import com.etz.fraudeagleeyemanager.redisrepository.CardRedisRepository;
+import com.etz.fraudeagleeyemanager.redisrepository.ProductDatasetRedisRepository;
+import com.etz.fraudeagleeyemanager.redisrepository.ProductRedisRepository;
 import com.etz.fraudeagleeyemanager.repository.ProductDataSetRepository;
 import com.etz.fraudeagleeyemanager.repository.ProductEntityRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -25,6 +31,15 @@ public class ProductService {
 	@Autowired
 	private ProductDataSetRepository productDataSetRepository;
 
+	@Autowired
+	private ProductRedisRepository productRedisRepository;
+
+	@Autowired
+	private ProductDatasetRedisRepository productDatasetRedisRepository;
+
+	@Autowired @Qualifier("redisTemplate")
+	private RedisTemplate<String, Object> fraudEngineRedisTemplate;
+
 	public ProductEntity createProduct(CreateProductRequest request) {
 		ProductEntity productEntity = new ProductEntity();
 		productEntity.setCode(request.getProductCode());
@@ -36,7 +51,10 @@ public class ProductService {
 		productEntity.setStatus(request.getStatus());
 		productEntity.setCreatedBy(request.getCreatedBy());
 
-		return productEntityRepository.save(productEntity);
+		ProductEntity savedProduct = productEntityRepository.save(productEntity);
+		productRedisRepository.setHashOperations(fraudEngineRedisTemplate);
+		productRedisRepository.create(savedProduct);
+		return savedProduct;
 	}
 
 	public List<ProductEntity> getProduct(String productCode) {
@@ -63,12 +81,21 @@ public class ProductService {
 		productEntity.setUpdatedBy(request.getUpdatedBy());
 		productEntity.setUpdatedAt(LocalDateTime.now());
 
-		return productEntityRepository.save(productEntity);
+		ProductEntity savedProduct = productEntityRepository.save(productEntity);
+		productRedisRepository.setHashOperations(fraudEngineRedisTemplate);
+		productRedisRepository.update(savedProduct);
+		return savedProduct;
 	}
 
-	public boolean deleteProduct(String productCode) {
-		// child records have to be deleted
-		return productEntityRepository.deleteByProductCode(productCode);
+	public Boolean deleteProduct(String productCode) {
+		ProductEntity productEntity = productEntityRepository.findByProductCode(productCode);
+		if (productEntity == null){
+			throw new ResourceNotFoundException("Product Entity not found for productCode " + productCode);
+		}
+		productEntityRepository.deleteByProductCode(productCode);
+		productRedisRepository.setHashOperations(fraudEngineRedisTemplate);
+		productRedisRepository.delete(productCode);
+		return Boolean.TRUE;
 	}
 
 	public ProductDataSet createProductDataset(DatasetProductRequest request) {
@@ -80,11 +107,14 @@ public class ProductService {
 		prodDatasetEntity.setAuthorised(request.getAuthorised());
 		prodDatasetEntity.setCreatedBy(request.getCreatedBy());
 
-		return productDataSetRepository.save(prodDatasetEntity);
+		ProductDataSet savedProductDataset = productDataSetRepository.save(prodDatasetEntity);
+		productDatasetRedisRepository.setHashOperations(fraudEngineRedisTemplate);
+		productDatasetRedisRepository.create(savedProductDataset);
+		return savedProductDataset;
 	}
 
 	public List<ProductDataSet> getProductDataset(String productCode) {
-		if (productCode.isEmpty()) {
+		if (productCode == null) {
 			return productDataSetRepository.findAll();
 		}
 
@@ -94,18 +124,32 @@ public class ProductService {
 	}
 
 	public ProductDataSet updateProductDataset(UpdateDataSetRequest request) {
-		ProductDataSet productDatasetEntity = getProductDataset(request.getProductCode()).get(0);
+		ProductDataSet productDatasetEntity = productDataSetRepository.findByProductCode(request.getProductCode());
+		if (productDatasetEntity == null){
+			throw new ResourceNotFoundException("Product dataset details not found for this code " + request.getProductCode());
+		}
 		productDatasetEntity.setProductCode(request.getProductCode());
 		productDatasetEntity.setFieldName(request.getFieldName());
 		productDatasetEntity.setDataType(request.getDataType());
 		productDatasetEntity.setMandatory(request.getCompulsory());
 		productDatasetEntity.setAuthorised(request.getAuthorised());
 		productDatasetEntity.setUpdatedBy(request.getUpdatedBy());
-		return productDataSetRepository.save(productDatasetEntity);
+
+		ProductDataSet savedProductDataset = productDataSetRepository.save(productDatasetEntity);
+		productDatasetRedisRepository.setHashOperations(fraudEngineRedisTemplate);
+		productDatasetRedisRepository.update(savedProductDataset);
+		return savedProductDataset;
 	}
 
 	public boolean deleteProductDataset(String productCode) {
-		return productDataSetRepository.deleteByProductCode(productCode);
+		ProductDataSet productDatasetEntity = productDataSetRepository.findByProductCode(productCode);
+		if (productDatasetEntity == null){
+			throw new ResourceNotFoundException("Product dataset details not found for this code " + productCode);
+		}
+		productDataSetRepository.deleteByProductCode(productCode);
+		productDatasetRedisRepository.setHashOperations(fraudEngineRedisTemplate);
+		productDatasetRedisRepository.delete(productDatasetEntity.getId());
+		return true;
 	}
 
 }
