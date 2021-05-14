@@ -31,7 +31,7 @@ public class ProductController {
 	@PostMapping
 	public ResponseEntity<ModelResponse<ProductEntity>> createProduct(
 			@Valid @RequestBody  CreateProductRequest request){
-		ModelResponse<ProductEntity> response = new ModelResponse<ProductEntity>(productService.createProduct(request));
+		ModelResponse<ProductEntity> response = new ModelResponse<>(productService.createProduct(request));
 		response.setStatus(HttpStatus.CREATED.value());
 		return new ResponseEntity<>(response, HttpStatus.CREATED);
 	}

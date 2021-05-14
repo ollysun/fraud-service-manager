@@ -102,9 +102,12 @@ public class AccountService {
 		accountEntity.setUpdatedBy(request.getUpdatedBy());
 		accountEntity.setProductCode(request.getProductCode());
 		AccountProduct accountProduct = accountProductRepository.save(accountEntity);
-//  todo fetch from redis and update as well just like Database update
 		accountProductRedisRepository.setHashOperations(redisTemplate);
-		accountProductRedisRepository.update(accountProduct);
+		AccountProduct account = accountProductRedisRepository.findById(request.getAccountId());
+		account.setStatus(request.getStatus());
+		account.setUpdatedBy(request.getUpdatedBy());
+		account.setProductCode(request.getProductCode());
+		accountProductRedisRepository.update(account);
 		return accountProduct;
 	}
 	
