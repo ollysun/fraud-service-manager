@@ -19,7 +19,6 @@ public class InternalWatchlist extends BaseEntity implements Serializable {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	@Column(name = "id")
 	private Long id;
 
 	@NotBlank(message = "Bvn number cannot be empty")
@@ -34,8 +33,7 @@ public class InternalWatchlist extends BaseEntity implements Serializable {
 	private Status status;
 
 	@Column(nullable = false, name = "authorised", columnDefinition = "TINYINT", length = 1)
-	@Enumerated(EnumType.ORDINAL)
-	private BooleanStatus authorised;
+	private Boolean authorised;
 
 	@Override
 	public boolean equals(Object o) {

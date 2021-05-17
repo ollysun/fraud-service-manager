@@ -1,14 +1,13 @@
 package com.etz.fraudeagleeyemanager.entity;
 
 import com.etz.fraudeagleeyemanager.constant.CardBrand;
-import com.etz.fraudeagleeyemanager.constant.Status;
+import com.etz.fraudeagleeyemanager.constant.CardType;
 import lombok.*;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
 import java.io.*;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Set;
 
 @Entity
 @Table(name = "card", 
@@ -22,10 +21,8 @@ public class Card extends BaseEntity implements Serializable {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	@Column(name = "id")
 	private Long id;
 
-	@NotBlank(message = "Card holder name cannot be empty")
 	@Column(name = "cardholder_name")
 	private String cardholderName;
 
@@ -40,7 +37,8 @@ public class Card extends BaseEntity implements Serializable {
 
 	@NotBlank(message = "Card Type cannot be empty")
 	@Column(name = "card_type")
-	private String cardType;
+	@Enumerated(EnumType.STRING)
+	private CardType cardType;
 
 	@NotBlank(message = "Card Expiry cannot be empty")
 	@Column(name = "card_expiry")
@@ -75,8 +73,10 @@ public class Card extends BaseEntity implements Serializable {
 	@Column(nullable = false, name = "status", columnDefinition = "TINYINT", length = 1)
 	private Boolean status;
 
-	@ManyToMany(mappedBy = "cards", cascade = CascadeType.PERSIST, fetch = FetchType.EAGER)
-	private List<Product> products = new ArrayList<>();
+
+
+	@OneToMany(mappedBy = "card")
+	private Set<CardProduct> cards;
 
 }
 

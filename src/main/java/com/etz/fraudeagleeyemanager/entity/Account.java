@@ -1,19 +1,18 @@
 package com.etz.fraudeagleeyemanager.entity;
 
-import com.etz.fraudeagleeyemanager.constant.Status;
 import lombok.*;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Size;
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Set;
 
 
 @EqualsAndHashCode(callSuper = true)
 @Entity
 @Table(name = "account", 
-		uniqueConstraints = @UniqueConstraint(
+		uniqueConstraints = @UniqueConstraint(name="UC_ACCOUNT",
 				columnNames = {"account_no", "bank_code"}))
 @Data
 public class Account extends BaseEntity implements Serializable {
@@ -22,8 +21,7 @@ public class Account extends BaseEntity implements Serializable {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
-	@NotBlank(message = "Account number cannot be empty")
-	@Column(name = "account_no", unique = true, length = 200)
+	@Column(name = "account_no", unique = true)
 	private String accountNo;
 
 	@NotBlank(message = "Account name cannot be empty")
@@ -47,10 +45,7 @@ public class Account extends BaseEntity implements Serializable {
 	@Column(name = "block_reason")
 	private String blockReason;
 
-	@ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.PERSIST)
-	@JoinTable(name = "account_product",
-			joinColumns = @JoinColumn(name = "product_code"),
-			inverseJoinColumns = @JoinColumn(name = "account_id"))
-	private List<Product> products = new ArrayList<>();
+	@OneToMany(mappedBy = "account")
+	private Set<AccountProduct> accounts;
 
 }

@@ -3,72 +3,109 @@ package com.etz.fraudeagleeyemanager.service;
 
 import com.etz.fraudeagleeyemanager.dto.request.AccountToProductRequest;
 import com.etz.fraudeagleeyemanager.dto.request.AddAccountRequest;
-import com.etz.fraudeagleeyemanager.dto.request.UpdateAccountRequest;
+import com.etz.fraudeagleeyemanager.dto.request.UpdateAccountProductRequest;
 import com.etz.fraudeagleeyemanager.entity.Account;
 import com.etz.fraudeagleeyemanager.entity.AccountProduct;
+import com.etz.fraudeagleeyemanager.exception.FraudEngineException;
+import com.etz.fraudeagleeyemanager.exception.ResourceNotFoundException;
+import com.etz.fraudeagleeyemanager.redisrepository.AccountProductRedisRepository;
+import com.etz.fraudeagleeyemanager.redisrepository.AccountRedisRepository;
 import com.etz.fraudeagleeyemanager.repository.AccountProductRepository;
 import com.etz.fraudeagleeyemanager.repository.AccountRepository;
 import com.etz.fraudeagleeyemanager.util.PageRequestUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.Page;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
+import java.util.Objects;
 
 
 @Service
 public class AccountService {
-	
+	@Autowired
+	private RedisTemplate<String, Object> redisTemplate;
+
 	@Autowired
 	AccountRepository accountRepository;
 		
 	@Autowired
 	AccountProductRepository accountProductRepository;
+
+	@Autowired
+	AccountRedisRepository accountRedisRepository;
+
+	@Autowired
+	AccountProductRedisRepository accountProductRedisRepository;
+
+
 	
 		
 	public Account createAccount(AddAccountRequest request) {
-		
 		Account accountEntity = new Account();
-		accountEntity.setAccountNo(request.getAccountNo());
+
+		// check for account number digits
 		accountEntity.setAccountName(request.getAccountName());
 		accountEntity.setBankCode(request.getBankCode());
 		accountEntity.setBankName(request.getBankName());
-		//accountEntity.setStatus(request.getStatus());
-		accountEntity.setCreatedAt(LocalDateTime.now());		
-		return accountRepository.save(accountEntity);
+		accountEntity.setStatus(Boolean.TRUE);
+		accountEntity.setCreatedBy(request.getCreatedBy());
+		accountEntity.setSuspicionCount(request.getSuspicion());
+		accountEntity.setBlockReason(request.getBlockReason());
+// saving to database
+		Account account = accountRepository.save(accountEntity);
+ // redis saving
+		accountRedisRepository.setHashOperations(redisTemplate);
+		accountRedisRepository.create(account);
+		return account;
+	}
+
+	// update account to increment suspicious count
+	public Account updateAccount(Long accountNumber, int count, Boolean status, String blockReason){
+		Account account = accountRepository.findByAccountNo(accountNumber)
+				.orElseThrow(() ->  new ResourceNotFoundException("Account details not found for account number " + accountNumber));
+		account.setSuspicionCount(count);
+		account.setBlockReason(blockReason);
+		account.setStatus(status);
+		return account;
 	}
 
 	public Page<Account> getAccount(Long accountId){
 				
-		if (accountId < 0) {
+		if (Objects.isNull(accountId)) {
 			return accountRepository.findAll(PageRequestUtil.getPageRequest());
 		}
-				
-		Account account = new Account();
+		Account account = accountRepository.findById(accountId).orElseThrow(() -> new ResourceNotFoundException("Account Not found " + accountId));
 		account.setId(accountId);
-		
 		return accountRepository.findAll(Example.of(account), PageRequestUtil.getPageRequest());		
 	}
 	
-	public AccountProduct accountProductMap(AccountToProductRequest request) {
-		
+	public AccountProduct mapAccountProduct(AccountToProductRequest request) {
 		AccountProduct accountProductEntity = new AccountProduct();
-		accountProductEntity.setProductCode(request.getProductCode()); //
-		accountProductEntity.setAccountId(request.getAccountId().longValue());
-		//accountProductEntity.setStatus(request.getStatus());
-		accountProductEntity.setCreatedAt(LocalDateTime.now());
+		accountProductEntity.setProductCode(request.getProductCode());
+		accountProductEntity.setAccountId(request.getAccountId());
+		accountProductEntity.setStatus(Boolean.TRUE);
+		accountProductEntity.setCreatedBy(request.getCreatedBy());
 
-		return accountProductRepository.save(accountProductEntity);
+		AccountProduct accountProduct = accountProductRepository.save(accountProductEntity);
+
+		accountProductRedisRepository.setHashOperations(redisTemplate);
+		accountProductRedisRepository.update(accountProduct);
+		return accountProduct;
 	}
 	
-	public Account updateAccount(UpdateAccountRequest request) {
-		Account accountEntity = accountRepository.findById(request.getAccountId().longValue()).get();
-
-		//accountEntity.setStatus(request.getStatus());
+	public AccountProduct updateAccountProduct(UpdateAccountProductRequest request) {
+		AccountProduct accountEntity = accountProductRepository.findByAccountId(request.getAccountId());
+		accountEntity.setStatus(request.getStatus());
 		accountEntity.setUpdatedBy(request.getUpdatedBy());
-
-		return accountRepository.save(accountEntity);
+		accountEntity.setProductCode(request.getProductCode());
+		AccountProduct accountProduct = accountProductRepository.save(accountEntity);
+//  todo fetch from redis and update as well just like Database update
+		accountProductRedisRepository.setHashOperations(redisTemplate);
+		accountProductRedisRepository.update(accountProduct);
+		return accountProduct;
 	}
 	
 }

@@ -1,31 +1,33 @@
 package com.etz.fraudeagleeyemanager.dto.request;
 
-import com.etz.fraudeagleeyemanager.constant.Status;
-import com.fasterxml.jackson.annotation.JsonAlias;
 import lombok.Data;
 
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.PositiveOrZero;
+import javax.validation.constraints.Size;
 
 @Data
 public class AddAccountRequest {
 
-	@NotBlank(message = "account.accountNo.not-blank")
+	@NotBlank(message = "Please enter the account number")
+	@PositiveOrZero(message = "Please enter the number")
+	@Size(max = 10, min = 10, message="Please enter ")
 	private String accountNo;
 	
-	@NotBlank(message = "account.accountName.not-blank")
+	@NotBlank(message = "Please enter the account name")
 	private String accountName;
 
-	@NotBlank(message = "account.bankCode.not-blank")
+	@NotBlank(message = "Please enter the bank code")
 	private String bankCode;
 	
-	@NotBlank(message = "account.bankName.not-blank")
+	@NotBlank(message = "Please enter the bank name")
 	private String bankName;
 
-	@NotBlank(message = "account.status.not-blank")
-	private Status status;
+	@NotBlank(message = "Please enter your name")
+	private String createdBy;
 	
-	@JsonAlias("accountID")
-	private Integer accountId;
+	private String blockReason;
 	private Integer suspicion;
 	
 }

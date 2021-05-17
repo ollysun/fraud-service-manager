@@ -1,28 +1,33 @@
 package com.etz.fraudeagleeyemanager.dto.request;
 
-import com.fasterxml.jackson.annotation.JsonAlias;
+import com.etz.fraudeagleeyemanager.constant.DataSource;
+import com.etz.fraudeagleeyemanager.constant.LogicOperator;
+import com.etz.fraudeagleeyemanager.constant.SuspicionLevel;
 import lombok.Data;
+
+import javax.validation.constraints.NotNull;
 
 @Data
 public class CreateRuleRequest {
-
+	   @NotNull(message="firstSourceVal cannot be empty")
 	   private String firstSourceVal;
+	   @NotNull(message="firstOperator cannot be empty")
 	   private String firstOperator;
-	   private Integer firstCompareVal;
-	   private String firstDataSource;
-	   private String logicOperator;
+	@NotNull(message="firstCompareVal cannot be empty")
+	private Integer firstCompareVal;
+	@NotNull(message="firstDataSource cannot be empty")
+	private DataSource firstDataSource;
+	   private LogicOperator logicOperator;
 	   private String secondSourceVal;
 	   private String secondOperator;
 	   private Integer secondCompareVal;
-	   private String secondDataSource;
-	   private Integer suspicion;
+	private DataSource secondDataSource;
+	@NotNull(message="suspicion cannot be empty")
+	private SuspicionLevel suspicion;
+	@NotNull(message="suspicion cannot be empty")
 	   private String action;
-	   private String createdBy;
-	   private Boolean authorised;
-	   
-	   @JsonAlias("ruleID")
-	   private Integer ruleId;
-	   private String createdAt;
-	   private String updatedBy;
-	   private String updatedAt;
+	@NotNull(message="suspicion cannot be empty")
+	private String createdBy;
+	@NotNull(message="suspicion cannot be empty")
+	private Boolean authorised;
 }

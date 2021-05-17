@@ -1,0 +1,30 @@
+2021-05-07 04:54:05.120  INFO 18892 --- [main] f.FraudEagleEyeManagerServiceApplication : Starting FraudEagleEyeManagerServiceApplication using Java 1.8.0_271 on ETZ-WISDOM-TECH with PID 18892 (C:\Users\wisdom.essien\eclipse-workspace\etranzact\fraud-eagle-eye-manager-service\target\classes started by wisdom.essien in C:\Users\wisdom.essien\eclipse-workspace\etranzact\fraud-eagle-eye-manager-service)
+2021-05-07 04:54:05.142  INFO 18892 --- [main] f.FraudEagleEyeManagerServiceApplication : No active profile set, falling back to default profiles: default
+2021-05-07 04:54:06.798  INFO 18892 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2021-05-07 04:54:07.060  INFO 18892 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 246 ms. Found 16 JPA repository interfaces.
+2021-05-07 04:54:08.225  INFO 18892 --- [main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port(s): 9190 (http)
+2021-05-07 04:54:08.243  INFO 18892 --- [main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2021-05-07 04:54:08.244  INFO 18892 --- [main] org.apache.catalina.core.StandardEngine  : Starting Servlet engine: [Apache Tomcat/9.0.43]
+2021-05-07 04:54:08.533  INFO 18892 --- [main] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+2021-05-07 04:54:08.534  INFO 18892 --- [main] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 3242 ms
+2021-05-07 04:54:09.631  INFO 18892 --- [main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2021-05-07 04:54:10.669  INFO 18892 --- [main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2021-05-07 04:54:13.417  INFO 18892 --- [main] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2021-05-07 04:54:14.555  WARN 18892 --- [main] JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2021-05-07 04:54:14.645  WARN 18892 --- [main] o.s.s.o.p.t.s.JwtAccessTokenConverter    : Unable to create an RSA verifier from verifierKey (ignoreable if using MAC)
+2021-05-07 04:54:14.797  INFO 18892 --- [main] .s.s.UserDetailsServiceAutoConfiguration : 
+
+Using generated security password: 1167e1c3-8349-4eca-a3a6-b02d4725a8ac
+
+2021-05-07 04:54:15.260  INFO 18892 --- [main] o.s.s.web.DefaultSecurityFilterChain     : Will secure any request with [org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter@63cff421, org.springframework.security.web.context.SecurityContextPersistenceFilter@5eba0cc5, org.springframework.security.web.header.HeaderWriterFilter@1aaa3406, org.springframework.web.filter.CorsFilter@27e42fe8, org.springframework.security.web.authentication.logout.LogoutFilter@7c1e5d14, org.springframework.security.oauth2.provider.authentication.OAuth2AuthenticationProcessingFilter@346e76ad, org.springframework.security.web.savedrequest.RequestCacheAwareFilter@19e67cc2, org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter@7aac6d13, org.springframework.security.web.authentication.AnonymousAuthenticationFilter@219bad15, org.springframework.security.web.session.SessionManagementFilter@17616c07, org.springframework.security.web.access.ExceptionTranslationFilter@4b60ff1c, org.springframework.security.web.access.intercept.FilterSecurityInterceptor@6db160b4]
+2021-05-07 04:54:15.507  INFO 18892 --- [main] o.s.s.concurrent.ThreadPoolTaskExecutor  : Initializing ExecutorService 'applicationTaskExecutor'
+2021-05-07 04:54:16.137  INFO 18892 --- [main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port(s): 9190 (http) with context path ''
+2021-05-07 04:54:16.148  INFO 18892 --- [main] f.FraudEagleEyeManagerServiceApplication : Started FraudEagleEyeManagerServiceApplication in 12.382 seconds (JVM running for 14.557)
+2021-05-07 04:54:24.970  INFO 18892 --- [http-nio-9190-exec-2] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring DispatcherServlet 'dispatcherServlet'
+2021-05-07 04:54:24.971  INFO 18892 --- [http-nio-9190-exec-2] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
+2021-05-07 04:54:24.978  INFO 18892 --- [http-nio-9190-exec-2] o.s.web.servlet.DispatcherServlet        : Completed initialization in 7 ms
+2021-05-07 04:58:36.967  INFO 18892 --- [RMI TCP Connection(8)-127.0.0.1] inMXBeanRegistrar$SpringApplicationAdmin : Application shutdown requested.
+2021-05-07 04:58:37.293  INFO 18892 --- [RMI TCP Connection(8)-127.0.0.1] o.s.s.concurrent.ThreadPoolTaskExecutor  : Shutting down ExecutorService 'applicationTaskExecutor'
+2021-05-07 04:58:37.296  INFO 18892 --- [RMI TCP Connection(8)-127.0.0.1] j.LocalContainerEntityManagerFactoryBean : Closing JPA EntityManagerFactory for persistence unit 'default'
+2021-05-07 04:58:37.302  INFO 18892 --- [RMI TCP Connection(8)-127.0.0.1] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown initiated...
+2021-05-07 04:58:37.323  INFO 18892 --- [RMI TCP Connection(8)-127.0.0.1] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown completed.

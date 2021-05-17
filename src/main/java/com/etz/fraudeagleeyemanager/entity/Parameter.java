@@ -2,33 +2,31 @@ package com.etz.fraudeagleeyemanager.entity;
 
 import com.etz.fraudeagleeyemanager.constant.Status;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
 
+@EqualsAndHashCode(callSuper = true)
 @Entity
 @Table(name = "parameter", 
 uniqueConstraints = @UniqueConstraint(
-		columnNames = {"name", "operator"}))
+		columnNames = {"name", "operator"}, name = "UC_Parameter"))
 @Data
 public class Parameter extends BaseEntity {
 		
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	@Column(name = "id")
 	private Long id;
 
-	@NotBlank(message = "Account number cannot be empty")
-	@Column(name = "name")
+	@Column(name = "name", columnDefinition="VARCHAR(150)")
 	private String name;
 
-	@NotBlank(message = "Account number cannot be empty")
-	@Column(name = "operator")
+	@Column(name = "operator",  columnDefinition="VARCHAR(100)")
 	private String operator;
 
 	@Column(name = "require_value")
-	@Enumerated(EnumType.ORDINAL)
-	private Status requireValue;
+	private Boolean requireValue;
 	
 	@Column(name = "authorised")
 	private Boolean authorised;

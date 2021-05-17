@@ -1,18 +1,24 @@
 package com.etz.fraudeagleeyemanager.entity;
 
+import com.etz.fraudeagleeyemanager.constant.DataSource;
+import com.etz.fraudeagleeyemanager.constant.LogicOperator;
 import com.etz.fraudeagleeyemanager.constant.Status;
+import com.etz.fraudeagleeyemanager.constant.SuspicionLevel;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import javax.persistence.*;
+import java.io.Serializable;
+import java.util.Set;
 
+@EqualsAndHashCode(callSuper = true)
 @Entity
 @Table(name = "rule")
 @Data
-public class Rule extends BaseEntity{
+public class Rule extends BaseEntity implements Serializable {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	@Column(name = "id")
 	private Long id;
 	
 	@Column(name = "source_value_1")
@@ -22,13 +28,15 @@ public class Rule extends BaseEntity{
 	private String operatorOne;
 
 	@Column(name = "compare_value_1")
-	private String compareValueOne;
+	private Integer compareValueOne;
 
 	@Column(name = "data_source_1")
-	private String dataSourceOne;
+	@Enumerated(EnumType.STRING)
+	private DataSource dataSourceOne;
 
 	@Column(name = "logic_operator")
-	private String logicOperator;
+	@Enumerated(EnumType.STRING)
+	private LogicOperator logicOperator;
 
 	@Column(name = "source_value_2")
 	private String sourceValueTwo;
@@ -37,23 +45,26 @@ public class Rule extends BaseEntity{
 	private String operatorTwo;
 
 	@Column(name = "compare_value_2")
-	private String compareValueTwo;
+	private Integer compareValueTwo;
 
 	@Column(name = "data_source_2")
-	private String dataSourceTwo;
+	@Enumerated(EnumType.STRING)
+	private DataSource dataSourceTwo;
 
-	@Column(name = "suspicion_level")
-	private Integer suspicionLevel;
+	@Column(name = "suspicion_level", columnDefinition = "INT", length = 10)
+	@Enumerated(EnumType.ORDINAL)
+	private SuspicionLevel suspicionLevel;
 
 	@Column(name = "action")
 	private String action;
 		
-	@Column(name = "status")
-	@Enumerated(EnumType.ORDINAL)
-	private Status status;
+	@Column(name = "status", columnDefinition = "TINYINT", length = 1)
+	private Boolean status;
 	
 	@Column(name = "authorised")
 	private Boolean authorised;
 
+	@OneToMany(mappedBy = "rule", cascade = CascadeType.REMOVE)
+	private Set<ProductRule> productRules;
 		
 }

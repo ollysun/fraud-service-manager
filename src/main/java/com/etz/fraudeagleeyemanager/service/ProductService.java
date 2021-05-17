@@ -5,64 +5,85 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 import com.etz.fraudeagleeyemanager.constant.Status;
 import com.etz.fraudeagleeyemanager.dto.request.CreateProductRequest;
 import com.etz.fraudeagleeyemanager.dto.request.DatasetProductRequest;
+import com.etz.fraudeagleeyemanager.dto.request.UpdateDataSetRequest;
 import com.etz.fraudeagleeyemanager.dto.request.UpdateProductRequest;
-import com.etz.fraudeagleeyemanager.entity.Product;
-import com.etz.fraudeagleeyemanager.entity.ProductDataset;
-import com.etz.fraudeagleeyemanager.repository.ProductDatasetRepository;
-import com.etz.fraudeagleeyemanager.repository.ProductRepository;
+import com.etz.fraudeagleeyemanager.entity.ProductDataSet;
+import com.etz.fraudeagleeyemanager.entity.ProductEntity;
+import com.etz.fraudeagleeyemanager.exception.ResourceNotFoundException;
+import com.etz.fraudeagleeyemanager.redisrepository.ProductDatasetRedisRepository;
+import com.etz.fraudeagleeyemanager.redisrepository.ProductRedisRepository;
+import com.etz.fraudeagleeyemanager.repository.ProductDataSetRepository;
+import com.etz.fraudeagleeyemanager.repository.ProductEntityRepository;
 import com.etz.fraudeagleeyemanager.util.JsonConverter;
 
 @Service
 public class ProductService {
 
 	@Autowired
-	ProductRepository productRepository;
+	private ProductEntityRepository productEntityRepository;
 
 	@Autowired
-	ProductDatasetRepository productDatasetRepository;
+	private ProductDataSetRepository productDataSetRepository;
 
-	public Product createProduct(CreateProductRequest request) {
-		Product productEntity = new Product();
-		//productEntity.setCode(request.getProductCode());
+	@Autowired
+	private ProductRedisRepository productRedisRepository;
+
+	@Autowired
+	private ProductDatasetRedisRepository productDatasetRedisRepository;
+
+	@Autowired @Qualifier("redisTemplate")
+	private RedisTemplate<String, Object> fraudEngineRedisTemplate;
+
+	public ProductEntity createProduct(CreateProductRequest request) {
+		ProductEntity productEntity = new ProductEntity();
+		productEntity.setCode(request.getProductCode());
 		productEntity.setName(request.getProductName());
 		productEntity.setDescription(request.getProductDesc());
-		
-		productEntity.setUseCard(true);
-		productEntity.setUseAccount(false);
+		productEntity.setUseCard(request.getUseCard());
+		productEntity.setUseAccount(request.getUseAccount());
+
 		productEntity.setSupportHold(Status.ENABLED);
-		
+
 		productEntity.setCallbackURL(request.getCallback());
 		productEntity.setStatus(request.getStatus());
 		productEntity.setCreatedBy(request.getCreatedBy());
-
 		// for auditing purpose
 		productEntity.setEntityId(null);
 		productEntity.setRecordBefore(null);
 		productEntity.setRequestDump(request);
-		return productRepository.save(productEntity);
+		
+		ProductEntity savedProduct = productEntityRepository.save(productEntity);
+		productRedisRepository.setHashOperations(fraudEngineRedisTemplate);
+		productRedisRepository.create(savedProduct);
+		return savedProduct;
 	}
 
-	public List<Product> getProduct(String productCode) {
+	public List<ProductEntity> getProduct(String productCode) {
 		if (productCode.isEmpty()) {
-			return productRepository.findAll();
+			return productEntityRepository.findAll();
 		}
 
-		List<Product> productList = new ArrayList<>();
-		productList.add(productRepository.findById(productCode).get());
+		List<ProductEntity> productList = new ArrayList<>();
+		productList.add(productEntityRepository.findByCode(productCode));
 		return productList;
 	}
 
-	public Product updateProduct(UpdateProductRequest request) {
-		Product productEntity = productRepository.findById(request.getProductCode()).get();
+	public ProductEntity updateProduct(UpdateProductRequest request) {
+		ProductEntity productEntity = productEntityRepository.findByCode(request.getProductCode());
+		if (productEntity == null){
+			throw new ResourceNotFoundException("Product not found for Code" + request.getProductCode());
+		}
 		productEntity.setName(request.getProductName());
 		productEntity.setDescription(request.getProductDesc());
-	//	productEntity.setUseCard(request.getUseCard());
-	//	productEntity.setUseAccount(request.getUseAccount());
+		productEntity.setUseCard(request.getUseCard());
+		productEntity.setUseAccount(request.getUseAccount());
 		productEntity.setCallbackURL(request.getCallback());
 		productEntity.setStatus(request.getStatus());
 		productEntity.setUpdatedBy(request.getUpdatedBy());
@@ -72,63 +93,82 @@ public class ProductService {
 		productEntity.setEntityId(request.getProductCode());
 		productEntity.setRecordBefore(JsonConverter.objectToJson(productEntity));
 		productEntity.setRequestDump(request);
-		return productRepository.save(productEntity);
+		
+		ProductEntity savedProduct = productEntityRepository.save(productEntity);
+		productRedisRepository.setHashOperations(fraudEngineRedisTemplate);
+		productRedisRepository.update(savedProduct);
+		return savedProduct;
 	}
 
-	public boolean deleteProduct(String productCode) {
-		Product productEntity = productRepository.findById(productCode).get();
+	public Boolean deleteProduct(String productCode) {
+		ProductEntity productEntity = productEntityRepository.findByCode(productCode);
+		if (productEntity == null){
+			throw new ResourceNotFoundException("Product Entity not found for productCode " + productCode);
+		}
+		
 		// for auditing purpose
 		productEntity.setEntityId(productCode);
 		productEntity.setRecordBefore(JsonConverter.objectToJson(productEntity));
 		productEntity.setRecordAfter(null);
 		productEntity.setRequestDump(productCode);
 		
-		productRepository.delete(productEntity);
-		//productRepository.deleteById(productCode);
-		// child records have to be deleted
-		return true;
+		productEntityRepository.deleteByCode(productCode);
+		productRedisRepository.setHashOperations(fraudEngineRedisTemplate);
+		productRedisRepository.delete(productCode);
+		return Boolean.TRUE;
 	}
 
-	public ProductDataset addProductDataset(DatasetProductRequest request) {
-		ProductDataset prodDatasetEntity = new ProductDataset();
-		//prodDatasetEntity.setProductCode(request.getProductCode());
-		//prodDatasetEntity.setFieldName(request.getFieldName());
+	public ProductDataSet createProductDataset(DatasetProductRequest request) {
+		ProductDataSet prodDatasetEntity = new ProductDataSet();
+		prodDatasetEntity.setProductCode(request.getProductCode());
+		prodDatasetEntity.setFieldName(request.getFieldName());
 		prodDatasetEntity.setDataType(request.getDataType());
-	//	prodDatasetEntity.setMandatory(request.getMandatory());
-		//prodDatasetEntity.setAuthorised(request.getAuthorised());
+		prodDatasetEntity.setMandatory(request.getCompulsory());
+		prodDatasetEntity.setAuthorised(request.getAuthorised());
 		prodDatasetEntity.setCreatedBy(request.getCreatedBy());
-		prodDatasetEntity.setCreatedAt(LocalDateTime.now());
-		// productDataset.setUpdatedBy("");
-		// productDataset.setUpdatedAt(LocalDateTime.now());
 
-		return productDatasetRepository.save(prodDatasetEntity);
+		ProductDataSet savedProductDataset = productDataSetRepository.save(prodDatasetEntity);
+		productDatasetRedisRepository.setHashOperations(fraudEngineRedisTemplate);
+		productDatasetRedisRepository.create(savedProductDataset);
+		return savedProductDataset;
 	}
 
-	public List<ProductDataset> getProductDataset(String productCode) {
-		if (productCode.isEmpty()) {
-			return productDatasetRepository.findAll();
+	public List<ProductDataSet> getProductDataset(String productCode) {
+		if (productCode == null) {
+			return productDataSetRepository.findAll();
 		}
 
-		List<ProductDataset> productDatasetList = new ArrayList<>();
-		//productDatasetList.add(productDatasetRepository.findByProductCode(productCode));
+		List<ProductDataSet> productDatasetList = new ArrayList<>();
+		productDatasetList.add(productDataSetRepository.findByProductCode(productCode));
 		return productDatasetList;
 	}
 
-	public ProductDataset updateProductDataset(DatasetProductRequest request) {
-		ProductDataset productDatasetEntity = getProductDataset(request.getProductCode()).get(0);
-		//productDatasetEntity.setProductCode(request.getProductCode());
-		//productDatasetEntity.setFieldName(request.getFieldName());
+	public ProductDataSet updateProductDataset(UpdateDataSetRequest request) {
+		ProductDataSet productDatasetEntity = productDataSetRepository.findByProductCode(request.getProductCode());
+		if (productDatasetEntity == null){
+			throw new ResourceNotFoundException("Product dataset details not found for this code " + request.getProductCode());
+		}
+		productDatasetEntity.setProductCode(request.getProductCode());
+		productDatasetEntity.setFieldName(request.getFieldName());
 		productDatasetEntity.setDataType(request.getDataType());
-		//productDatasetEntity.setMandatory(request.getMandatory());
-		//productDatasetEntity.setAuthorised(request.getAuthorised());
-		productDatasetEntity.setUpdatedBy(request.getCreatedBy());
-		productDatasetEntity.setUpdatedAt(LocalDateTime.now());
+		productDatasetEntity.setMandatory(request.getCompulsory());
+		productDatasetEntity.setAuthorised(request.getAuthorised());
+		productDatasetEntity.setUpdatedBy(request.getUpdatedBy());
 
-		return productDatasetRepository.save(productDatasetEntity);
+		ProductDataSet savedProductDataset = productDataSetRepository.save(productDatasetEntity);
+		productDatasetRedisRepository.setHashOperations(fraudEngineRedisTemplate);
+		productDatasetRedisRepository.update(savedProductDataset);
+		return savedProductDataset;
 	}
 
 	public boolean deleteProductDataset(String productCode) {
-		//productDatasetRepository.deleteByProductCode(productCode);
+		ProductDataSet productDatasetEntity = productDataSetRepository.findByProductCode(productCode);
+		if (productDatasetEntity == null){
+			throw new ResourceNotFoundException("Product dataset details not found for this code " + productCode);
+		}
+		productDataSetRepository.deleteByProductCode(productCode);
+		productDatasetRedisRepository.setHashOperations(fraudEngineRedisTemplate);
+		productDatasetRedisRepository.delete(productDatasetEntity.getId());
 		return true;
 	}
 
