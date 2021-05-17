@@ -14,5 +14,6 @@ public class ExceptionResponse {
     private String errorMessage;
 
     @JsonProperty("errors")
+    @Builder.Default
     private Object errors = null;
 }

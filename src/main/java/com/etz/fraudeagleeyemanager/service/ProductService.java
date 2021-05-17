@@ -7,6 +7,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.etz.fraudeagleeyemanager.constant.Status;
 import com.etz.fraudeagleeyemanager.dto.request.CreateProductRequest;
 import com.etz.fraudeagleeyemanager.dto.request.DatasetProductRequest;
 import com.etz.fraudeagleeyemanager.dto.request.UpdateProductRequest;
@@ -27,11 +28,14 @@ public class ProductService {
 
 	public Product createProduct(CreateProductRequest request) {
 		Product productEntity = new Product();
-		productEntity.setCode(request.getProductCode());
+		//productEntity.setCode(request.getProductCode());
 		productEntity.setName(request.getProductName());
 		productEntity.setDescription(request.getProductDesc());
-	//	productEntity.setUseCard(request.getUseCard());
-	//	productEntity.setUseAccount(request.getUseAccount());
+		
+		productEntity.setUseCard(true);
+		productEntity.setUseAccount(false);
+		productEntity.setSupportHold(Status.ENABLED);
+		
 		productEntity.setCallbackURL(request.getCallback());
 		productEntity.setStatus(request.getStatus());
 		productEntity.setCreatedBy(request.getCreatedBy());

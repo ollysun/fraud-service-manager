@@ -4,6 +4,7 @@ import java.io.Serializable;
 
 import javax.persistence.MappedSuperclass;
 import javax.persistence.Transient;
+import javax.persistence.Version;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
@@ -51,8 +52,12 @@ public class BaseAuditEntity implements Serializable {
     @Transient
     private String eventType = ""; //Event activity type i.e INSERT, UPDATE etc
 
-//	@JsonIgnore
-//    @Version
-//    private Long version;
+	/*
+	 * This resolves JPA calling merge instead of persist on a new entity that manually sets
+	 * its primary key column.
+	 */
+	@JsonIgnore
+    @Version
+    private Long version;
 	
 }
