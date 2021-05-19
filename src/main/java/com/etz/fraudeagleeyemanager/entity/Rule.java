@@ -6,6 +6,9 @@ import com.etz.fraudeagleeyemanager.constant.Status;
 import com.etz.fraudeagleeyemanager.constant.SuspicionLevel;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import org.hibernate.annotations.ResultCheckStyle;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.Where;
 
 import javax.persistence.*;
 import java.io.Serializable;
@@ -14,6 +17,8 @@ import java.util.Set;
 @EqualsAndHashCode(callSuper = true)
 @Entity
 @Table(name = "rule")
+@SQLDelete(sql = "UPDATE rule SET deleted = true WHERE id = ?", check = ResultCheckStyle.COUNT)
+@Where(clause = "deleted = false")
 @Data
 public class Rule extends BaseEntity implements Serializable {
 
@@ -64,7 +69,8 @@ public class Rule extends BaseEntity implements Serializable {
 	@Column(name = "authorised")
 	private Boolean authorised;
 
-	@OneToMany(mappedBy = "rule", cascade = CascadeType.REMOVE)
+	@OneToMany(mappedBy = "rule",
+			cascade = CascadeType.ALL, orphanRemoval = true)
 	private Set<ProductRule> productRules;
 		
 }

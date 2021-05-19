@@ -108,8 +108,30 @@ public class RuleService {
 		ruleEntity.setUpdatedBy(request.getUpdatedBy());
 
 		Rule updatedEntity = ruleRepository.save(ruleEntity);
+
+		//update redis
+		Rule ruleRedis = ruleRedisRepository.findById(request.getRuleId());
+		ruleRedis.setSourceValueOne(request.getFirstSourceVal());
+		// check for the list of Operator
+		checkOperator(request.getFirstOperator());
+		ruleRedis.setOperatorOne(request.getFirstOperator());
+		ruleRedis.setCompareValueOne(request.getFirstCompareVal());
+		ruleRedis.setDataSourceOne(request.getFirstDataSource());
+		ruleRedis.setLogicOperator(request.getLogicOperator());
+		ruleRedis.setSourceValueTwo(request.getSecondSourceVal());
+		// check for the list of operator
+		checkOperator(request.getSecondOperator());
+		ruleRedis.setOperatorTwo(request.getSecondOperator());
+		ruleRedis.setCompareValueTwo(request.getSecondCompareVal());
+		ruleRedis.setDataSourceTwo(request.getSecondDataSource());
+		ruleRedis.setSuspicionLevel(request.getSuspicion());
+		ruleRedis.setAction(request.getAction());
+		ruleRedis.setAuthorised(request.getAuthorised());
+		ruleRedis.setStatus(request.getStatus());
+		ruleRedis.setUpdatedBy(request.getUpdatedBy());
+
 		ruleRedisRepository.setHashOperations(fraudEngineRedisTemplate);
-		ruleRedisRepository.update(updatedEntity);
+		ruleRedisRepository.update(ruleRedis);
 		
 		return updatedEntity;
 	}
@@ -146,8 +168,9 @@ public class RuleService {
 		prodRuleEntity.setStatus(Boolean.TRUE);
 		prodRuleEntity.setAuthorised(request.getAuthorised());
 		prodRuleEntity.setCreatedBy(request.getCreatedBy());
-
 		ProductRule createdEntity = productRuleRepository.save(prodRuleEntity);
+
+
 		productRuleRedisRepository.setHashOperations(fraudEngineRedisTemplate);
 		productRuleRedisRepository.create(createdEntity);
 		
@@ -155,7 +178,7 @@ public class RuleService {
 	}
 
 	public ProductRule updateProductRule(UpdateMapRuleToProductRequest request) {
-		ProductRule prodRuleEntity = productRuleRepository.findById(request.getProductRuleId().longValue())
+		ProductRule prodRuleEntity = productRuleRepository.findById(request.getProductRuleId())
 				.orElseThrow(() -> new ResourceNotFoundException("ProductRule Not found for Id " + request.getProductRuleId() ));
 		prodRuleEntity.setNotifyAdmin(request.getNotifyAdmin());
 		prodRuleEntity.setEmailGroupId(request.getEmailGroupId().longValue());
@@ -163,19 +186,18 @@ public class RuleService {
 		prodRuleEntity.setStatus(request.getStatus());
 		prodRuleEntity.setAuthorised(request.getAuthorised());
 		prodRuleEntity.setUpdatedBy(request.getUpdatedBy());
-
 		ProductRule updatedEntity = productRuleRepository.save(prodRuleEntity);
+
+		//update Redis
 		productRuleRedisRepository.setHashOperations(fraudEngineRedisTemplate);
-		productRuleRedisRepository.update(updatedEntity);
+		productRuleRedisRepository.update(prodRuleEntity);
 		return updatedEntity;
 	}
 
 	public boolean deleteProductRule(Long productRuleId) {
 		ProductRule prodRuleEntity = productRuleRepository.findById(productRuleId)
 				.orElseThrow(() -> new ResourceNotFoundException("ProductRule Not found for Id " + productRuleId ));
-
 		String redisId = prodRuleEntity.getProductCode()+ ":"+prodRuleEntity.getRuleId();
-		
 		productRuleRepository.deleteById(productRuleId);
 		productRuleRedisRepository.setHashOperations(fraudEngineRedisTemplate);
 		productRuleRedisRepository.delete(redisId);

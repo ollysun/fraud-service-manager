@@ -4,6 +4,7 @@ package com.etz.fraudeagleeyemanager.service;
 import com.etz.fraudeagleeyemanager.dto.request.CardRequest;
 import com.etz.fraudeagleeyemanager.dto.request.CardToProductRequest;
 import com.etz.fraudeagleeyemanager.dto.request.UpdateCardProductRequest;
+import com.etz.fraudeagleeyemanager.entity.AccountProduct;
 import com.etz.fraudeagleeyemanager.entity.Card;
 import com.etz.fraudeagleeyemanager.entity.CardProduct;
 import com.etz.fraudeagleeyemanager.exception.ResourceNotFoundException;
@@ -103,10 +104,14 @@ public class CardService {
 		cardToProdEntity.setStatus(request.getStatus());
 		cardToProdEntity.setUpdatedBy(request.getUpdatedBy());
 		cardToProdEntity.setProductCode(request.getProductCode());
-// todo fetch and update on redis as well
 		CardProduct cardProduct = cardProductRepository.save(cardToProdEntity);
+
+		CardProduct cardProductRedis = cardProductRedisRepository.findById(request.getCardId().longValue());
+		cardProductRedis.setStatus(request.getStatus());
+		cardProductRedis.setUpdatedBy(request.getUpdatedBy());
+		cardProductRedis.setProductCode(request.getProductCode());
 		cardProductRedisRepository.setHashOperations(fraudEngineRedisTemplate);
-		cardProductRedisRepository.update(cardProduct);
+		cardProductRedisRepository.update(cardProductRedis);
 		return cardProduct;
 	}
 

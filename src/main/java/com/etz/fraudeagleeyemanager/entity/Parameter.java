@@ -3,6 +3,9 @@ package com.etz.fraudeagleeyemanager.entity;
 import com.etz.fraudeagleeyemanager.constant.Status;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import org.hibernate.annotations.ResultCheckStyle;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.Where;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
@@ -12,6 +15,8 @@ import javax.validation.constraints.NotBlank;
 @Table(name = "parameter", 
 uniqueConstraints = @UniqueConstraint(
 		columnNames = {"name", "operator"}, name = "UC_Parameter"))
+@SQLDelete(sql = "UPDATE parameter SET deleted = true WHERE id = ?", check = ResultCheckStyle.COUNT)
+@Where(clause = "deleted = false")
 @Data
 public class Parameter extends BaseEntity {
 		

@@ -1,8 +1,10 @@
 package com.etz.fraudeagleeyemanager.entity;
 
-import com.etz.fraudeagleeyemanager.constant.BooleanStatus;
 import com.etz.fraudeagleeyemanager.constant.Status;
 import lombok.*;
+import org.hibernate.annotations.ResultCheckStyle;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.Where;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
@@ -11,6 +13,8 @@ import java.io.Serializable;
 
 @Entity
 @Table(name = "internal_watchlist")
+@SQLDelete(sql = "UPDATE internal_watchlist SET deleted = true WHERE id = ?", check = ResultCheckStyle.COUNT)
+@Where(clause = "deleted = false")
 @Getter
 @Setter
 @ToString

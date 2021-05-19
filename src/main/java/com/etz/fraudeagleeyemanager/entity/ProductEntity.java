@@ -2,6 +2,9 @@ package com.etz.fraudeagleeyemanager.entity;
 
 import com.etz.fraudeagleeyemanager.constant.Status;
 import lombok.*;
+import org.hibernate.annotations.ResultCheckStyle;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.Where;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
@@ -12,6 +15,8 @@ import java.util.Set;
 
 @Entity
 @Table(name = "product")
+@SQLDelete(sql = "UPDATE product SET deleted = true WHERE code = ?", check = ResultCheckStyle.COUNT)
+@Where(clause = "deleted = false")
 @EqualsAndHashCode(callSuper = true)
 @Data
 public class ProductEntity extends BaseEntity implements Serializable {
@@ -50,13 +55,15 @@ public class ProductEntity extends BaseEntity implements Serializable {
 
     @ToString.Exclude
     @OneToMany(mappedBy = "productEntity", fetch = FetchType.LAZY,
-            cascade = CascadeType.REMOVE)
+            cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<ProductRule> productRules;
 
 
-    @OneToMany(mappedBy = "productEntity", cascade = CascadeType.REMOVE)
+    @OneToMany(mappedBy = "productEntity",
+            cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<CardProduct> products;
 
-    @OneToMany(mappedBy = "productEntity", cascade = CascadeType.REMOVE)
+    @OneToMany(mappedBy = "productEntity",
+            cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<AccountProduct> productLists;
 }

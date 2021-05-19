@@ -1,6 +1,9 @@
 package com.etz.fraudeagleeyemanager.entity;
 
 import lombok.*;
+import org.hibernate.annotations.ResultCheckStyle;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.Where;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
@@ -11,6 +14,8 @@ import java.io.Serializable;
 @Data
 @Entity
 @Table(name = "product_dataset")
+@SQLDelete(sql = "UPDATE product_dataset SET deleted = true WHERE id = ?", check = ResultCheckStyle.COUNT)
+@Where(clause = "deleted = false")
 @IdClass(ProductDatasetId.class)
 public class ProductDataSet extends BaseEntity implements Serializable {
 	@Id
