@@ -26,14 +26,12 @@ public class ProductRule extends BaseEntity implements Serializable {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
-	@NotBlank(message = "Rule Id cannot be empty")
 	@Column(name = "rule_id")
 	private Long ruleId;
 
 	@Column(name = "product_code",  columnDefinition="VARCHAR(100)")
 	private String productCode;
 
-	@NotBlank(message = "email_group_id cannot be empty")
 	@Column(name = "email_group_id")
 	private Long emailGroupId;
 	

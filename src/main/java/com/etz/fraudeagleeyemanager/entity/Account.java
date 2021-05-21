@@ -51,6 +51,7 @@ public class Account extends BaseEntity implements Serializable {
 	@Column(name = "block_reason")
 	private String blockReason;
 
+	@ToString.Exclude
 	@OneToMany(mappedBy = "account",
 			cascade = CascadeType.ALL,
 			orphanRemoval = true,

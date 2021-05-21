@@ -48,14 +48,16 @@ public class RuleController {
 	}
 	
 	@GetMapping
-	public PageResponse<Rule> queryRule(@RequestParam(name = "ruleId", required = false) String ruleId){
-		return new PageResponse<>(ruleService.getRule(Long.parseLong(ruleId.trim())));
+	public PageResponse<Rule> queryRule(@RequestParam(name = "ruleId", required = false) Long ruleId){
+		return new PageResponse<>(ruleService.getRule(ruleId));
 	}
 		
 	
 	@PostMapping(path = "/product")
-	public ResponseEntity<ProductRule> mapRuleToProduct(@RequestBody @Valid MapRuleToProductRequest request){
-		return new ResponseEntity<>(ruleService.mapRuleToProduct(request), HttpStatus.CREATED);
+	public ResponseEntity<ModelResponse<ProductRule>> mapRuleToProduct(@RequestBody @Valid MapRuleToProductRequest request){
+		ModelResponse<ProductRule> response = new ModelResponse<>(ruleService.mapRuleToProduct(request));
+		response.setStatus(HttpStatus.CREATED.value());
+		return new ResponseEntity<>(response, HttpStatus.CREATED);
 	}
 	
 	@PutMapping(path = "/product")
@@ -63,7 +65,7 @@ public class RuleController {
 		return new ModelResponse<>(ruleService.updateProductRule(request));
 	}
 	
-	@DeleteMapping(path = "/product/{productRuleID}")
+	@DeleteMapping(path = "/product/{productRuleId}")
 	public BooleanResponse deleteProductRule(@PathVariable(name = "productRuleId") Long productRuleId){
 		return new BooleanResponse(ruleService.deleteProductRule(productRuleId));
 	}
