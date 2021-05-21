@@ -12,6 +12,7 @@ import com.etz.fraudeagleeyemanager.entity.Account;
 import com.etz.fraudeagleeyemanager.entity.ProductRule;
 import com.etz.fraudeagleeyemanager.entity.Rule;
 import com.etz.fraudeagleeyemanager.service.RuleService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,17 +21,18 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 
+@Slf4j
 @Validated
 @RestController
 @RequestMapping("/rule")
 public class RuleController {
 
 	@Autowired
-	RuleService ruleService;
+	private RuleService ruleService;
 	
 	@PostMapping
 	public ResponseEntity<ModelResponse<Rule>> createRule(@RequestBody @Valid CreateRuleRequest request){
-		ModelResponse<Rule> response = new ModelResponse<Rule>(ruleService.createRule(request));
+		ModelResponse<Rule> response = new ModelResponse<>(ruleService.createRule(request));
 		response.setStatus(HttpStatus.CREATED.value());
 		return new ResponseEntity<>(response, HttpStatus.CREATED);
 	}

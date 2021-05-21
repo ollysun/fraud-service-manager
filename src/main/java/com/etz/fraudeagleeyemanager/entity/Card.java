@@ -20,7 +20,7 @@ import java.util.Set;
 @Where(clause = "deleted = false")
 @Getter
 @Setter
-@ToString
+@ToString(exclude = { "cards" })
 @RequiredArgsConstructor
 public class Card extends BaseEntity implements Serializable {
 

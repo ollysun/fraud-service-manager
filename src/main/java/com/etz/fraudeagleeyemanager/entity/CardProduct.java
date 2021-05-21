@@ -30,6 +30,7 @@ public class CardProduct extends BaseEntity implements Serializable {
     @Column(name = "card_id", nullable = false,  columnDefinition = "bigint")
     private Long cardId;
 
+    @ToString.Exclude
     @ManyToOne
     @MapsId("productCode")
     @JoinColumn(foreignKey = @ForeignKey(name = "FK_CARD_PRODUCT_CODE"),
@@ -37,6 +38,7 @@ public class CardProduct extends BaseEntity implements Serializable {
             referencedColumnName="code")
     private ProductEntity productEntity;
 
+    @ToString.Exclude
     @ManyToOne
     @MapsId("cardId")
     @JoinColumn(foreignKey = @ForeignKey(name = "FK_CARD_PRODUCT_ID"),

@@ -20,6 +20,9 @@ import org.springframework.data.domain.Example;
 import org.springframework.data.domain.Page;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
+
+import java.util.Arrays;
+import java.util.List;
 import java.util.Set;
 
 @Service
@@ -44,20 +47,22 @@ public class RuleService {
 	public Rule createRule(CreateRuleRequest request) {
 		Rule ruleEntity = new Rule();
 		ruleEntity.setSourceValueOne(request.getFirstSourceVal());
-		checkOperator(request.getFirstOperator());
-		ruleEntity.setOperatorOne(request.getFirstOperator());
+		// check the operator
+		ruleEntity.setOperatorOne(checkOperator(request.getFirstOperator().toLowerCase()));
 		ruleEntity.setCompareValueOne(request.getFirstCompareVal());
-		ruleEntity.setDataSourceOne(request.getFirstDataSource());
-		ruleEntity.setLogicOperator(request.getLogicOperator());
+		ruleEntity.setDataSourceValOne(checkDataSource(request.getFirstDataSourceVal()));
+		// check logical operator
+		ruleEntity.setLogicOperator(checkLogicOperator(request.getLogicOperator()));
 		ruleEntity.setSourceValueTwo(request.getSecondSourceVal());
-		checkOperator(request.getSecondOperator());
-		ruleEntity.setOperatorTwo(request.getSecondOperator());
+		// check operator
+		ruleEntity.setOperatorTwo(checkOperator(request.getSecondOperator().toLowerCase()));
 		ruleEntity.setCompareValueTwo(request.getSecondCompareVal());
-		ruleEntity.setDataSourceTwo(request.getSecondDataSource());
+		ruleEntity.setDataSourceValTwo(request.getSecondDataSourceVal());
 		ruleEntity.setSuspicionLevel(request.getSuspicion());
 		ruleEntity.setAction(request.getAction());
 		ruleEntity.setAuthorised(request.getAuthorised());
 		ruleEntity.setStatus(Boolean.TRUE);
+		ruleEntity.setCreatedBy(request.getCreatedBy());
 		Rule createdEntity = ruleRepository.save(ruleEntity);
 		
 		ruleRedisRepository.setHashOperations(fraudEngineRedisTemplate);
@@ -73,15 +78,44 @@ public class RuleService {
 		return createdEntity;
 	}
 
-	private void checkOperator(String operatorRequest){
-		String[] operators = new String[] { "<", ">","==", "<=", ">=" };
-		if (operatorRequest != null) {
-			for (String operator : operators) {
-				if (!operator.equalsIgnoreCase(operatorRequest)) {
-					throw new FraudEngineException("Please check the Operator");
-				}
-			}
+	private String checkLogicOperator(String text){
+		List<String> dataSourceVal = Arrays.asList("AND", "OR", "NOT");
+		String output = "";
+		if(!(text.isEmpty())){
+			output = dataSourceVal.stream()
+					.filter(bl -> bl.toUpperCase().equalsIgnoreCase(text))
+					.findFirst()
+					.orElseThrow(() ->
+							new FraudEngineException("cannot found this logic operator " + text + " can be any of " + dataSourceVal.toString()));
 		}
+		return output;
+	}
+
+	private String checkDataSource(String text) {
+		List<String> dataSourceVal = Arrays.asList("FRAUD ENGINE", "STATISTICS");
+		String output = "";
+		if(!(text.isEmpty())){
+			output = dataSourceVal.stream()
+					.filter(bl -> bl.toUpperCase().equalsIgnoreCase(text))
+					.findFirst()
+					.orElseThrow(() ->
+							new FraudEngineException("cannot found this data source " + text + " can be any " + dataSourceVal.toString()));
+		}
+		return output;
+	}
+
+	private String checkOperator(String operatorRequest){
+		List<String> operators = Arrays.asList("<", ">","==", "<=", "!=", ">=", "change");
+		String output = "";
+		if (operatorRequest != null) {
+			output = operators.stream()
+					.filter(bl -> bl.toUpperCase().equalsIgnoreCase(operatorRequest))
+					.findFirst()
+					.orElseThrow(() ->
+							new FraudEngineException("Not found this Operator " + operatorRequest +
+									"can be any of " + operators.toString()));
+		}
+		return output;
 	}
 
 
@@ -93,14 +127,14 @@ public class RuleService {
 		checkOperator(request.getFirstOperator());
 		ruleEntity.setOperatorOne(request.getFirstOperator());
 		ruleEntity.setCompareValueOne(request.getFirstCompareVal());
-		ruleEntity.setDataSourceOne(request.getFirstDataSource());
+		ruleEntity.setDataSourceValOne(request.getFirstDataSourceVal());
 		ruleEntity.setLogicOperator(request.getLogicOperator());
 		ruleEntity.setSourceValueTwo(request.getSecondSourceVal());
 		// check for the list of operator
 		checkOperator(request.getSecondOperator());
 		ruleEntity.setOperatorTwo(request.getSecondOperator());
 		ruleEntity.setCompareValueTwo(request.getSecondCompareVal());
-		ruleEntity.setDataSourceTwo(request.getSecondDataSource());
+		ruleEntity.setDataSourceValTwo(request.getSecondDataSourceVal());
 		ruleEntity.setSuspicionLevel(request.getSuspicion());
 		ruleEntity.setAction(request.getAction());
 		ruleEntity.setAuthorised(request.getAuthorised());
@@ -116,14 +150,14 @@ public class RuleService {
 		checkOperator(request.getFirstOperator());
 		ruleRedis.setOperatorOne(request.getFirstOperator());
 		ruleRedis.setCompareValueOne(request.getFirstCompareVal());
-		ruleRedis.setDataSourceOne(request.getFirstDataSource());
+		ruleRedis.setDataSourceValOne(request.getFirstDataSourceVal());
 		ruleRedis.setLogicOperator(request.getLogicOperator());
 		ruleRedis.setSourceValueTwo(request.getSecondSourceVal());
 		// check for the list of operator
 		checkOperator(request.getSecondOperator());
 		ruleRedis.setOperatorTwo(request.getSecondOperator());
 		ruleRedis.setCompareValueTwo(request.getSecondCompareVal());
-		ruleRedis.setDataSourceTwo(request.getSecondDataSource());
+		ruleRedis.setDataSourceValTwo(request.getSecondDataSourceVal());
 		ruleRedis.setSuspicionLevel(request.getSuspicion());
 		ruleRedis.setAction(request.getAction());
 		ruleRedis.setAuthorised(request.getAuthorised());

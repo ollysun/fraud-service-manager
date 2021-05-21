@@ -1,10 +1,9 @@
 package com.etz.fraudeagleeyemanager.dto.request;
 
-import com.etz.fraudeagleeyemanager.constant.DataSource;
-import com.etz.fraudeagleeyemanager.constant.LogicOperator;
 import com.etz.fraudeagleeyemanager.constant.SuspicionLevel;
 import lombok.Data;
 
+import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
 @Data
@@ -17,13 +16,13 @@ public class UpdateRuleRequest{
     private String firstOperator;
     @NotNull(message="firstCompareVal cannot be empty")
     private Integer firstCompareVal;
-    @NotNull(message="firstDataSource cannot be empty")
-    private DataSource firstDataSource;
-    private LogicOperator logicOperator;
+    @NotBlank(message="firstDataSourceVal cannot be empty")
+    private String firstDataSourceVal;
+    private String logicOperator;
     private String secondSourceVal;
     private String secondOperator;
     private Integer secondCompareVal;
-    private DataSource secondDataSource;
+    private String secondDataSourceVal;
     @NotNull(message="suspicion cannot be empty")
     private SuspicionLevel suspicion;
     @NotNull(message="action cannot be empty")
