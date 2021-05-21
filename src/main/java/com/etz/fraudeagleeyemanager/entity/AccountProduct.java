@@ -19,15 +19,14 @@ import java.io.Serializable;
 public class AccountProduct extends BaseEntity implements Serializable {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
     @Column(name = "product_code", nullable = false, columnDefinition="VARCHAR(100)")
     private String productCode;
 
+    @Id
     @Column(name = "account_id", nullable = false, columnDefinition = "bigint")
     private Long accountId;
 
+    @ToString.Exclude
     @ManyToOne
     @MapsId("productCode")
     @JoinColumn(foreignKey = @ForeignKey(name = "FK_ACCOUNT_PRODUCT_PRODUCT_CODE"),
@@ -35,6 +34,7 @@ public class AccountProduct extends BaseEntity implements Serializable {
             referencedColumnName="code")
     private ProductEntity productEntity;
 
+    @ToString.Exclude
     @ManyToOne
     @MapsId("accountId")
     @JoinColumn(foreignKey = @ForeignKey(name = "FK_ACCOUNT_PRODUCT_CARD_ID"),

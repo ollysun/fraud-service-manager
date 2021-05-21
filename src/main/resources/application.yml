@@ -21,25 +21,11 @@ spring:
     name: fraud-eagle-eye-manager-service
 
   redis:
-    pocketmoni:
-      host: 127.0.0.1
+    eagle-eye-manager:
+      host: 172.17.10.16
       port: 6379
       database: 0
-
-    mobilegate:
-      host: 127.0.0.1
-      port: 6379
-      database: 0
-
-    corporatepay:
-      host: 127.0.0.1
-      port: 6379
-      database: 0
-
-    switchit:
-      host: 127.0.0.1
-      port: 6379
-      database: 0
+      password: visionsvisions
 
   cloud:
     consul:

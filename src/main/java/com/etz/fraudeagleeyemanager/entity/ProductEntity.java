@@ -1,6 +1,5 @@
 package com.etz.fraudeagleeyemanager.entity;
 
-import com.etz.fraudeagleeyemanager.constant.Status;
 import lombok.*;
 import org.hibernate.annotations.ResultCheckStyle;
 import org.hibernate.annotations.SQLDelete;
@@ -13,11 +12,11 @@ import java.util.List;
 import java.util.Set;
 
 
+@EqualsAndHashCode(callSuper = true)
 @Entity
 @Table(name = "product")
 @SQLDelete(sql = "UPDATE product SET deleted = true WHERE code = ?", check = ResultCheckStyle.COUNT)
 @Where(clause = "deleted = false")
-@EqualsAndHashCode(callSuper = true)
 @Data
 public class ProductEntity extends BaseEntity implements Serializable {
 
@@ -42,13 +41,13 @@ public class ProductEntity extends BaseEntity implements Serializable {
     @Column(name = "callback_url")
     private String callbackURL;
 
-    @Column(nullable = false, name = "support_hold", columnDefinition = "TINYINT default false", length = 1)
-    private Status supportHold;
+    @Column( name = "support_hold", columnDefinition = "TINYINT default 0", length = 1)
+    private Boolean supportHold;
 
     @Column(nullable = false, name = "status", columnDefinition = "TINYINT", length = 1)
-    private Status status;
+    private Boolean status;
 
-
+    @ToString.Exclude
     @OneToMany(mappedBy = "productEntity",
             cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ProductDataSet> productDataset;
@@ -58,11 +57,12 @@ public class ProductEntity extends BaseEntity implements Serializable {
             cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<ProductRule> productRules;
 
-
+    @ToString.Exclude
     @OneToMany(mappedBy = "productEntity",
             cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<CardProduct> products;
 
+    @ToString.Exclude
     @OneToMany(mappedBy = "productEntity",
             cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<AccountProduct> productLists;

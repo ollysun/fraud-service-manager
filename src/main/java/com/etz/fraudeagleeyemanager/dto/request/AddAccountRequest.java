@@ -12,7 +12,7 @@ public class AddAccountRequest {
 
 	@NotBlank(message = "Please enter the account number")
 	@PositiveOrZero(message = "Please enter the number")
-	@Size(max = 10, min = 10, message="Please enter ")
+	@Size(max = 10, min = 10, message="Please enter correct Nuban Number")
 	private String accountNo;
 	
 	@NotBlank(message = "Please enter the account name")

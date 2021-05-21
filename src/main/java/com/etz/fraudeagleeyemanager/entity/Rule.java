@@ -2,7 +2,6 @@ package com.etz.fraudeagleeyemanager.entity;
 
 import com.etz.fraudeagleeyemanager.constant.DataSource;
 import com.etz.fraudeagleeyemanager.constant.LogicOperator;
-import com.etz.fraudeagleeyemanager.constant.Status;
 import com.etz.fraudeagleeyemanager.constant.SuspicionLevel;
 import lombok.Data;
 import lombok.EqualsAndHashCode;

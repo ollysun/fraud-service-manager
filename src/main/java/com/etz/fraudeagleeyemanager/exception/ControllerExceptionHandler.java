@@ -57,6 +57,16 @@ public class ControllerExceptionHandler extends ResponseEntityExceptionHandler {
         return new ResponseEntity<>(exceptionResponse, HttpStatus.CONFLICT);
     }
 
+    @ExceptionHandler(SqlExceptionError.class)
+    public ResponseEntity<Object> handleException(SqlExceptionError ex){
+        List<String> details = new ArrayList<>();
+        details.add(ex.getMessage());
+        final ExceptionResponse exceptionResponse = new ExceptionResponse(
+                new Date(),
+                "Similar record already exist",HttpStatus.CONFLICT,details);
+        return new ResponseEntity<>(exceptionResponse, HttpStatus.CONFLICT);
+    }
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Object> handleAllException(Exception ex, WebRequest request) {
         List<String> details = new ArrayList<>();

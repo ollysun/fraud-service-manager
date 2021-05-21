@@ -1,12 +1,9 @@
 package com.etz.fraudeagleeyemanager.entity;
 
 import com.etz.fraudeagleeyemanager.constant.IntervalType;
-import com.etz.fraudeagleeyemanager.constant.Status;
 import lombok.*;
-
 import javax.persistence.*;
 import java.io.Serializable;
-import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "report_scheduler",
@@ -29,12 +26,11 @@ public class ReportScheduler extends BaseEntity implements Serializable {
 	@Enumerated(EnumType.STRING)
 	private IntervalType intervalType;
 	
-	@Column(nullable = false, name = "loop", columnDefinition = "TINYINT", length = 1)
+	@Column(nullable = false, name = "\"loop\"", columnDefinition = "TINYINT", length = 1)
 	private Boolean loop;
 
 	@Column(nullable = false, name = "status", columnDefinition = "TINYINT", length = 1)
-	@Enumerated(EnumType.ORDINAL)
-	private Status status;
+	private Boolean status;
 
 	@ToString.Exclude
 	@ManyToOne(fetch = FetchType.LAZY, optional = false)

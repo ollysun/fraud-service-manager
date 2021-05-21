@@ -50,7 +50,7 @@ public class AccountController {
 	}
 
 	@PutMapping(path = "/product")
-	public ModelResponse<AccountProduct> updateAccount(@RequestBody UpdateAccountProductRequest request) {
+	public ModelResponse<AccountProduct> updateAccount(@RequestBody @Valid UpdateAccountProductRequest request) {
 		return new ModelResponse<>(accountService.updateAccountProduct(request));
 	}
 

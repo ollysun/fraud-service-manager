@@ -8,13 +8,14 @@ import com.etz.fraudeagleeyemanager.entity.Account;
 import com.etz.fraudeagleeyemanager.entity.AccountProduct;
 import com.etz.fraudeagleeyemanager.exception.FraudEngineException;
 import com.etz.fraudeagleeyemanager.exception.ResourceNotFoundException;
+import com.etz.fraudeagleeyemanager.exception.SqlExceptionError;
 import com.etz.fraudeagleeyemanager.redisrepository.AccountProductRedisRepository;
 import com.etz.fraudeagleeyemanager.redisrepository.AccountRedisRepository;
 import com.etz.fraudeagleeyemanager.repository.AccountProductRepository;
 import com.etz.fraudeagleeyemanager.repository.AccountRepository;
 import com.etz.fraudeagleeyemanager.util.PageRequestUtil;
+import org.hibernate.engine.jdbc.spi.SqlExceptionHelper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.Page;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -43,23 +44,43 @@ public class AccountService {
 
 	
 		
-	public Account createAccount(AddAccountRequest request) {
+	public Account createAccount(AddAccountRequest request){
 		Account accountEntity = new Account();
 
-		// check for account number digits
-		accountEntity.setAccountName(request.getAccountName());
-		accountEntity.setBankCode(request.getBankCode());
-		accountEntity.setBankName(request.getBankName());
-		accountEntity.setStatus(Boolean.TRUE);
-		accountEntity.setCreatedBy(request.getCreatedBy());
-		accountEntity.setSuspicionCount(request.getSuspicion());
-		accountEntity.setBlockReason(request.getBlockReason());
+		if (!isNumeric(request.getAccountNo())){
+			throw new FraudEngineException("Incorrect Account Number");
+		}
+		try {
+			// check for account number digits
+			accountEntity.setAccountName(request.getAccountName());
+			accountEntity.setBankCode(request.getBankCode());
+			accountEntity.setBankName(request.getBankName());
+			accountEntity.setStatus(Boolean.TRUE);
+			accountEntity.setCreatedBy(request.getCreatedBy());
+			accountEntity.setSuspicionCount(request.getSuspicion());
+			accountEntity.setAccountNo(request.getAccountNo());
+			accountEntity.setBlockReason(request.getBlockReason());
 // saving to database
-		Account account = accountRepository.save(accountEntity);
- // redis saving
-		accountRedisRepository.setHashOperations(redisTemplate);
-		accountRedisRepository.create(account);
-		return account;
+			Account account = accountRepository.save(accountEntity);
+			// redis saving
+			accountRedisRepository.setHashOperations(redisTemplate);
+			accountRedisRepository.create(account);
+			return account;
+		} catch(Exception ex){
+			throw new FraudEngineException(ex.getLocalizedMessage());
+		}
+	}
+
+	public static boolean isNumeric(String strNum) {
+		if (strNum == null) {
+			return false;
+		}
+		try {
+			Long d = Long.parseLong(strNum);
+		} catch (NumberFormatException nfe) {
+			return false;
+		}
+		return true;
 	}
 
 	// update account to increment suspicious count
@@ -84,20 +105,28 @@ public class AccountService {
 	
 	public AccountProduct mapAccountProduct(AccountToProductRequest request) {
 		AccountProduct accountProductEntity = new AccountProduct();
-		accountProductEntity.setProductCode(request.getProductCode());
-		accountProductEntity.setAccountId(request.getAccountId());
-		accountProductEntity.setStatus(Boolean.TRUE);
-		accountProductEntity.setCreatedBy(request.getCreatedBy());
 
-		AccountProduct accountProduct = accountProductRepository.save(accountProductEntity);
+		try {
+			accountProductEntity.setProductCode(request.getProductCode());
+			accountProductEntity.setAccountId(request.getAccountId());
+			accountProductEntity.setStatus(Boolean.TRUE);
+			accountProductEntity.setCreatedBy(request.getCreatedBy());
 
-		accountProductRedisRepository.setHashOperations(redisTemplate);
-		accountProductRedisRepository.update(accountProduct);
-		return accountProduct;
+			AccountProduct accountProduct = accountProductRepository.save(accountProductEntity);
+
+			accountProductRedisRepository.setHashOperations(redisTemplate);
+			accountProductRedisRepository.create(accountProduct);
+			return accountProduct;
+		}catch(Exception ex){
+			throw new FraudEngineException(ex.getLocalizedMessage());
+		}
 	}
 	
 	public AccountProduct updateAccountProduct(UpdateAccountProductRequest request) {
 		AccountProduct accountEntity = accountProductRepository.findByAccountId(request.getAccountId());
+		if (accountEntity == null){
+			throw new ResourceNotFoundException("Account Product not found for this ID " +  request.getAccountId());
+		}
 		accountEntity.setStatus(request.getStatus());
 		accountEntity.setUpdatedBy(request.getUpdatedBy());
 		accountEntity.setProductCode(request.getProductCode());

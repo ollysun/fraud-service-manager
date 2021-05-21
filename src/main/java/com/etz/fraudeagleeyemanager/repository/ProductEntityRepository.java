@@ -9,5 +9,4 @@ public interface ProductEntityRepository extends JpaRepository<ProductEntity, St
 
     ProductEntity findByCode(String code);
 
-    Boolean deleteByCode(String code);
 }

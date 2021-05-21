@@ -14,7 +14,8 @@ public class RedisConfig {
     @Bean(name = "fraudEngineConnectionFactory")
     JedisConnectionFactory fraudEngineJedisConnectionFactory() {
         RedisStandaloneConfiguration redisStandaloneConfiguration =
-                new RedisStandaloneConfiguration("127.0.0.1", 6379);
+                new RedisStandaloneConfiguration("172.17.10.16", 6379);
+        redisStandaloneConfiguration.setPassword("visionsvisions");
         redisStandaloneConfiguration.setDatabase(0);
         return new JedisConnectionFactory(redisStandaloneConfiguration);
     }
