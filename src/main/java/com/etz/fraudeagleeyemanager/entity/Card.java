@@ -78,7 +78,7 @@ public class Card extends BaseEntity implements Serializable {
 	@Column(nullable = false, name = "status", columnDefinition = "TINYINT", length = 1)
 	private Boolean status;
 
-	@OneToMany(mappedBy = "card", orphanRemoval = true, cascade = CascadeType.ALL)
+	@OneToMany(mappedBy = "card",fetch = FetchType.EAGER, orphanRemoval = true, cascade = CascadeType.ALL)
 	private Set<CardProduct> cards;
 
 }

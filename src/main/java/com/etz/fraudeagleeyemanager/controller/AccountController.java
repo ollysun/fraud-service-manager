@@ -19,7 +19,7 @@ import javax.validation.Valid;
 
 @Validated
 @RestController
-@RequestMapping("/account")
+@RequestMapping("/v1/account")
 public class AccountController {
 
 	@Autowired

@@ -1,6 +1,8 @@
 
 server:
   port: 9190
+  servlet:
+    context-path: /api
 
 kafka:
   pocketmoni:

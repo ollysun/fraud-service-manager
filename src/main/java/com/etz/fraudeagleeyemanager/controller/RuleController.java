@@ -24,7 +24,7 @@ import javax.validation.Valid;
 @Slf4j
 @Validated
 @RestController
-@RequestMapping("/rule")
+@RequestMapping("/v1/rule")
 public class RuleController {
 
 	@Autowired

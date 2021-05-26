@@ -42,12 +42,12 @@ public class EmailGroup extends BaseEntity implements Serializable {
 	private Status status;
 
 	@ToString.Exclude
-	@OneToMany(mappedBy = "emailGroup", fetch = FetchType.LAZY,
+	@OneToMany(mappedBy = "emailGroup", fetch = FetchType.EAGER,
 			cascade = CascadeType.ALL, orphanRemoval = true)
 	private Set<ProductRule> productRules = new HashSet<>();
 
 	@ToString.Exclude
-	@OneToMany(mappedBy = "emailGroup", fetch = FetchType.LAZY,
+	@OneToMany(mappedBy = "emailGroup", fetch = FetchType.EAGER,
 			cascade = CascadeType.ALL, orphanRemoval = true)
 	private Set<ReportScheduler> reportSchedulers = new HashSet<>();
 

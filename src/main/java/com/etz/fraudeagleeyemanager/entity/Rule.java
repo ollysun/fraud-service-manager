@@ -65,9 +65,8 @@ public class Rule extends BaseEntity implements Serializable {
 	@Column(name = "authorised")
 	private Boolean authorised;
 
-	@OneToMany(mappedBy = "rule",
+	@OneToMany(mappedBy = "rule",fetch = FetchType.EAGER,
 			cascade = CascadeType.ALL, orphanRemoval = true)
-	@EqualsAndHashCode.Exclude
 	private Set<ProductRule> productRule;
 		
 }

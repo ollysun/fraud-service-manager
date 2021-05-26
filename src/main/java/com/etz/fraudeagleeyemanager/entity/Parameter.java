@@ -1,6 +1,6 @@
 package com.etz.fraudeagleeyemanager.entity;
 
-import com.etz.fraudeagleeyemanager.constant.Status;
+import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.hibernate.annotations.ResultCheckStyle;
@@ -8,7 +8,7 @@ import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.Where;
 
 import javax.persistence.*;
-import javax.validation.constraints.NotBlank;
+import java.io.Serializable;
 
 @EqualsAndHashCode(callSuper = true)
 @Entity
@@ -18,7 +18,7 @@ uniqueConstraints = @UniqueConstraint(
 @SQLDelete(sql = "UPDATE parameter SET deleted = true WHERE id = ?", check = ResultCheckStyle.COUNT)
 @Where(clause = "deleted = false")
 @Data
-public class Parameter extends BaseEntity {
+public class Parameter extends BaseEntity implements Serializable {
 		
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
