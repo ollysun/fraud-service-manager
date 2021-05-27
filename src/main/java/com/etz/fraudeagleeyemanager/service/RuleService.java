@@ -1,28 +1,40 @@
 package com.etz.fraudeagleeyemanager.service;
 
 
-import com.etz.fraudeagleeyemanager.dto.request.CreateRuleRequest;
-import com.etz.fraudeagleeyemanager.dto.request.MapRuleToProductRequest;
-import com.etz.fraudeagleeyemanager.dto.request.UpdateMapRuleToProductRequest;
-import com.etz.fraudeagleeyemanager.dto.request.UpdateRuleRequest;
-import com.etz.fraudeagleeyemanager.entity.ProductRule;
-import com.etz.fraudeagleeyemanager.entity.Rule;
-import com.etz.fraudeagleeyemanager.exception.FraudEngineException;
-import com.etz.fraudeagleeyemanager.exception.ResourceNotFoundException;
-import com.etz.fraudeagleeyemanager.redisrepository.ProductRuleRedisRepository;
-import com.etz.fraudeagleeyemanager.redisrepository.RuleRedisRepository;
-import com.etz.fraudeagleeyemanager.repository.ProductRuleRepository;
-import com.etz.fraudeagleeyemanager.repository.RuleRepository;
-import com.etz.fraudeagleeyemanager.util.JsonConverter;
-import com.etz.fraudeagleeyemanager.util.PageRequestUtil;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.Page;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
-import java.util.Set;
 
+import com.etz.fraudeagleeyemanager.dto.request.CreateRuleRequest;
+import com.etz.fraudeagleeyemanager.dto.request.MapRuleToProductRequest;
+import com.etz.fraudeagleeyemanager.dto.request.UpdateMapRuleToProductRequest;
+import com.etz.fraudeagleeyemanager.dto.request.UpdateRuleRequest;
+import com.etz.fraudeagleeyemanager.dto.response.RuleResponse;
+import com.etz.fraudeagleeyemanager.entity.ProductEntity;
+import com.etz.fraudeagleeyemanager.entity.ProductRule;
+import com.etz.fraudeagleeyemanager.entity.Rule;
+import com.etz.fraudeagleeyemanager.exception.ResourceNotFoundException;
+import com.etz.fraudeagleeyemanager.redisrepository.ProductRuleRedisRepository;
+import com.etz.fraudeagleeyemanager.redisrepository.RuleRedisRepository;
+import com.etz.fraudeagleeyemanager.repository.EmailGroupRepository;
+import com.etz.fraudeagleeyemanager.repository.ProductEntityRepository;
+import com.etz.fraudeagleeyemanager.repository.ProductRuleRepository;
+import com.etz.fraudeagleeyemanager.repository.RuleRepository;
+import com.etz.fraudeagleeyemanager.util.AppUtil;
+import com.etz.fraudeagleeyemanager.util.JsonConverter;
+import com.etz.fraudeagleeyemanager.util.PageRequestUtil;
+
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 @Service
 public class RuleService {
 
@@ -41,24 +53,32 @@ public class RuleService {
 	@Autowired
 	ProductRuleRepository productRuleRepository;
 
+	@Autowired
+	private ProductEntityRepository productEntityRepository;
+
+	@Autowired
+	EmailGroupRepository emailGroupRepository;
+
 	
 	public Rule createRule(CreateRuleRequest request) {
 		Rule ruleEntity = new Rule();
 		ruleEntity.setSourceValueOne(request.getFirstSourceVal());
-		checkOperator(request.getFirstOperator());
-		ruleEntity.setOperatorOne(request.getFirstOperator());
-		ruleEntity.setCompareValueOne(request.getFirstCompareVal());
-		ruleEntity.setDataSourceOne(request.getFirstDataSource());
-		ruleEntity.setLogicOperator(request.getLogicOperator());
+		// check the operator
+		ruleEntity.setOperatorOne(AppUtil.checkOperator(request.getFirstOperator().toLowerCase()));
+		ruleEntity.setCompareValueOne(String.valueOf(request.getFirstCompareVal()));
+		ruleEntity.setDataSourceValOne(AppUtil.checkDataSource(request.getFirstDataSourceVal()));
+		// check logical operator
+		ruleEntity.setLogicOperator(AppUtil.checkLogicOperator(request.getLogicOperator()));
 		ruleEntity.setSourceValueTwo(request.getSecondSourceVal());
-		checkOperator(request.getSecondOperator());
-		ruleEntity.setOperatorTwo(request.getSecondOperator());
+		// check operator
+		ruleEntity.setOperatorTwo(AppUtil.checkOperator(request.getSecondOperator().toLowerCase()));
 		ruleEntity.setCompareValueTwo(request.getSecondCompareVal());
-		ruleEntity.setDataSourceTwo(request.getSecondDataSource());
+		ruleEntity.setDataSourceValTwo(request.getSecondDataSourceVal());
 		ruleEntity.setSuspicionLevel(request.getSuspicion());
 		ruleEntity.setAction(request.getAction());
 		ruleEntity.setAuthorised(request.getAuthorised());
 		ruleEntity.setStatus(Boolean.TRUE);
+		ruleEntity.setCreatedBy(request.getCreatedBy());
 		
 		// for auditing purpose for CREATE
 		ruleEntity.setEntityId(null);
@@ -79,16 +99,7 @@ public class RuleService {
 		return createdEntity;
 	}
 
-	private void checkOperator(String operatorRequest){
-		String[] operators = new String[] { "<", ">","==", "<=", ">=" };
-		if (operatorRequest != null) {
-			for (String operator : operators) {
-				if (!operator.equalsIgnoreCase(operatorRequest)) {
-					throw new FraudEngineException("Please check the Operator");
-				}
-			}
-		}
-	}
+
 
 
 	public Rule updateRule(UpdateRuleRequest request) {
@@ -96,17 +107,15 @@ public class RuleService {
 									.orElseThrow(() -> new ResourceNotFoundException("Rule Not found for Id " + request.getRuleId() ));
 		ruleEntity.setSourceValueOne(request.getFirstSourceVal());
 		// check for the list of Operator
-		checkOperator(request.getFirstOperator());
-		ruleEntity.setOperatorOne(request.getFirstOperator());
+		ruleEntity.setOperatorOne(AppUtil.checkOperator(request.getFirstOperator()));
 		ruleEntity.setCompareValueOne(request.getFirstCompareVal());
-		ruleEntity.setDataSourceOne(request.getFirstDataSource());
-		ruleEntity.setLogicOperator(request.getLogicOperator());
+		ruleEntity.setDataSourceValOne(AppUtil.checkDataSource(request.getFirstDataSource()));
+		ruleEntity.setLogicOperator(AppUtil.checkLogicOperator(request.getLogicOperator()));
 		ruleEntity.setSourceValueTwo(request.getSecondSourceVal());
 		// check for the list of operator
-		checkOperator(request.getSecondOperator());
-		ruleEntity.setOperatorTwo(request.getSecondOperator());
+		ruleEntity.setOperatorTwo(AppUtil.checkOperator(request.getSecondOperator()));
 		ruleEntity.setCompareValueTwo(request.getSecondCompareVal());
-		ruleEntity.setDataSourceTwo(request.getSecondDataSource());
+		ruleEntity.setDataSourceValTwo(AppUtil.checkDataSource(request.getSecondDataSource()));
 		ruleEntity.setSuspicionLevel(request.getSuspicion());
 		ruleEntity.setAction(request.getAction());
 		ruleEntity.setAuthorised(request.getAuthorised());
@@ -119,6 +128,8 @@ public class RuleService {
 		ruleEntity.setRequestDump(request);
 
 		Rule updatedEntity = ruleRepository.save(ruleEntity);
+
+		//update redis
 		ruleRedisRepository.setHashOperations(fraudEngineRedisTemplate);
 		ruleRedisRepository.update(updatedEntity);
 		
@@ -154,15 +165,28 @@ public class RuleService {
 		}
 		Rule ruleEntity = ruleRepository.findById(ruleId).orElseThrow(() -> new ResourceNotFoundException("Rule Not found " + ruleId));
 		ruleEntity.setId(ruleId);
+
 		return ruleRepository.findAll(Example.of(ruleEntity), PageRequestUtil.getPageRequest());
 	}
 
 	public ProductRule mapRuleToProduct(MapRuleToProductRequest request) {
 		ProductRule prodRuleEntity = new ProductRule();
+
+		ProductEntity productEntity = productEntityRepository.findByCode(request.getProductCode());
+		if (productEntity == null){
+			throw new ResourceNotFoundException("Product Entity not found for productCode " + request.getProductCode());
+		}
+		ruleRepository.findById(request.getRuleId()).orElseThrow(() ->
+				new ResourceNotFoundException("Rule Not found for Id " + request.getRuleId() ));
+
+		if (request.getEmailGroupId() != null){
+			emailGroupRepository.findById(request.getEmailGroupId()).orElseThrow(() ->
+					new ResourceNotFoundException("Email Group Id Not found for  Id " + request.getEmailGroupId() ));
+		}
 		prodRuleEntity.setProductCode(request.getProductCode());
-		prodRuleEntity.setRuleId(request.getRuleId().longValue());
+		prodRuleEntity.setRuleId(request.getRuleId());
 		prodRuleEntity.setNotifyAdmin(request.getNotifyAdmin());
-		prodRuleEntity.setEmailGroupId(request.getEmailGroupId().longValue());
+		prodRuleEntity.setEmailGroupId(request.getEmailGroupId());
 		prodRuleEntity.setNotifyCustomer(request.getNotifyCustomer());
 		prodRuleEntity.setStatus(Boolean.TRUE);
 		prodRuleEntity.setAuthorised(request.getAuthorised());
@@ -172,19 +196,24 @@ public class RuleService {
 		prodRuleEntity.setEntityId(null);
 		prodRuleEntity.setRecordBefore(null);
 		prodRuleEntity.setRequestDump(request);
+		ProductRule createdProductRuleEntity = productRuleRepository.save(prodRuleEntity);
 
-		ProductRule createdEntity = productRuleRepository.save(prodRuleEntity);
 		productRuleRedisRepository.setHashOperations(fraudEngineRedisTemplate);
-		productRuleRedisRepository.create(createdEntity);
+		productRuleRedisRepository.create(createdProductRuleEntity);
 		
-		return createdEntity;
+		return createdProductRuleEntity;
 	}
 
 	public ProductRule updateProductRule(UpdateMapRuleToProductRequest request) {
-		ProductRule prodRuleEntity = productRuleRepository.findById(request.getProductRuleId().longValue())
+		ProductRule prodRuleEntity = productRuleRepository.findById(request.getProductRuleId())
 				.orElseThrow(() -> new ResourceNotFoundException("ProductRule Not found for Id " + request.getProductRuleId() ));
+
+		if (request.getEmailGroupId() != null){
+			emailGroupRepository.findById(request.getEmailGroupId()).orElseThrow(() ->
+					new ResourceNotFoundException("Email Group Id Not found for  Id " + request.getEmailGroupId() ));
+		}
 		prodRuleEntity.setNotifyAdmin(request.getNotifyAdmin());
-		prodRuleEntity.setEmailGroupId(request.getEmailGroupId().longValue());
+		prodRuleEntity.setEmailGroupId(request.getEmailGroupId());
 		prodRuleEntity.setNotifyCustomer(request.getNotifyCustomer());
 		prodRuleEntity.setStatus(request.getStatus());
 		prodRuleEntity.setAuthorised(request.getAuthorised());
@@ -196,8 +225,10 @@ public class RuleService {
 		prodRuleEntity.setRequestDump(request);
 
 		ProductRule updatedEntity = productRuleRepository.save(prodRuleEntity);
+
+		//update Redis
 		productRuleRedisRepository.setHashOperations(fraudEngineRedisTemplate);
-		productRuleRedisRepository.update(updatedEntity);
+		productRuleRedisRepository.update(prodRuleEntity);
 		return updatedEntity;
 	}
 
@@ -219,4 +250,24 @@ public class RuleService {
 		productRuleRedisRepository.delete(redisId);
 		return true;
 	}
+
+	public List<RuleResponse> getRuleProduct(String code) {
+		List<Rule> ruleList = new ArrayList<>();
+		if (code != null) {
+			ruleList =  ruleRepository.getRuleWithCode(code);
+		}
+		return outputRuleResponse(ruleList);
+	}
+
+	private List<RuleResponse> outputRuleResponse(List<Rule> ruleList){
+		List<RuleResponse> ruleResponseList = new ArrayList<>();
+		ruleList.forEach(ruleVal -> {
+			RuleResponse ruleResponse = new RuleResponse();
+			BeanUtils.copyProperties(ruleVal,ruleResponse,"productRule");
+			ruleResponseList.add(ruleResponse);
+		});
+		return ruleResponseList;
+	}
+
+
 }

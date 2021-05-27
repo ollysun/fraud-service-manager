@@ -25,9 +25,6 @@ public class CreateProductRequest implements Serializable {
 
 	private String callback;
 
-	@NotNull(message = "Please let know the status ")
-	private Status status;
-
 	@NotNull(message = "CreatedBy cannot be empty")
 	private String createdBy;
 }

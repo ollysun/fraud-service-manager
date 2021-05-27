@@ -1,24 +1,29 @@
 package com.etz.fraudeagleeyemanager.entity;
 
 import lombok.*;
+import org.hibernate.annotations.ResultCheckStyle;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.Where;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.Size;
 import java.io.Serializable;
 import java.util.Set;
 
 
 @EqualsAndHashCode(callSuper = true)
 @Entity
-@Table(name = "account", 
+@Table(name = "account",
 		uniqueConstraints = @UniqueConstraint(name="UC_ACCOUNT",
-				columnNames = {"account_no", "bank_code"}))
+				columnNames = {"account_no"}))
+@SQLDelete(sql = "UPDATE account SET deleted = true WHERE id = ?", check = ResultCheckStyle.COUNT)
+@Where(clause = "deleted = false")
 @Data
 public class Account extends BaseAuditEntity implements Serializable {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@Column(name = "id", updatable = false, nullable = false)
 	private Long id;
 
 	@Column(name = "account_no", unique = true)
@@ -35,7 +40,8 @@ public class Account extends BaseAuditEntity implements Serializable {
 	@NotBlank(message = "Bank name cannot be empty")
 	@Column(name = "bank_name")
 	private String bankName;
-	
+
+
 	@Column(nullable = false, name = "status", columnDefinition = "TINYINT", length = 1)
 	private Boolean status;
 
@@ -45,7 +51,12 @@ public class Account extends BaseAuditEntity implements Serializable {
 	@Column(name = "block_reason")
 	private String blockReason;
 
-	@OneToMany(mappedBy = "account")
-	private Set<AccountProduct> accounts;
+//	@OneToMany(mappedBy = "account",
+//			cascade = CascadeType.ALL,
+//			orphanRemoval = true,
+//			fetch = FetchType.LAZY)
+//	private Set<AccountProduct> accounts;
+
+
 
 }

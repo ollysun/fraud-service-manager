@@ -1,7 +1,9 @@
 package com.etz.fraudeagleeyemanager.entity;
 
-import com.etz.fraudeagleeyemanager.constant.Status;
 import lombok.*;
+import org.hibernate.annotations.ResultCheckStyle;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.Where;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
@@ -10,9 +12,11 @@ import java.util.List;
 import java.util.Set;
 
 
+@EqualsAndHashCode(callSuper = true)
 @Entity
 @Table(name = "product")
-@EqualsAndHashCode(callSuper = true)
+@SQLDelete(sql = "UPDATE product SET deleted = true WHERE code = ?", check = ResultCheckStyle.COUNT)
+@Where(clause = "deleted = false")
 @Data
 public class ProductEntity extends BaseAuditVersionEntity implements Serializable {
 
@@ -37,26 +41,29 @@ public class ProductEntity extends BaseAuditVersionEntity implements Serializabl
     @Column(name = "callback_url")
     private String callbackURL;
 
-    @Column(nullable = false, name = "support_hold", columnDefinition = "TINYINT default false", length = 1)
-    private Status supportHold;
+    @Column( name = "support_hold", columnDefinition = "TINYINT default 0", length = 1)
+    private Boolean supportHold;
 
     @Column(nullable = false, name = "status", columnDefinition = "TINYINT", length = 1)
-    private Status status;
+    private Boolean status;
 
-
-    @OneToMany(mappedBy = "productEntity",
+    @ToString.Exclude
+    @OneToMany(mappedBy = "productEntity", fetch = FetchType.EAGER,
             cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ProductDataSet> productDataset;
 
     @ToString.Exclude
-    @OneToMany(mappedBy = "productEntity", fetch = FetchType.LAZY,
-            cascade = CascadeType.REMOVE)
+    @OneToMany(mappedBy = "productEntity", fetch = FetchType.EAGER,
+            cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<ProductRule> productRules;
 
-
-    @OneToMany(mappedBy = "productEntity", cascade = CascadeType.REMOVE)
+    @ToString.Exclude
+    @OneToMany(mappedBy = "productEntity",fetch = FetchType.EAGER,
+            cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<CardProduct> products;
 
-    @OneToMany(mappedBy = "productEntity", cascade = CascadeType.REMOVE)
-    private Set<AccountProduct> productLists;
+//    @ToString.Exclude
+//    @OneToMany(mappedBy = "productEntity", fetch = FetchType.LAZY,
+//            cascade = CascadeType.ALL, orphanRemoval = true)
+//    private Set<AccountProduct> productLists;
 }

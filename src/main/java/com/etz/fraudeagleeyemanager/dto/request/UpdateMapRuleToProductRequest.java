@@ -12,7 +12,7 @@ public class UpdateMapRuleToProductRequest implements Serializable {
 	@NotNull(message="productRuleId cannot be empty")
 	private Long productRuleId;
 	private Boolean notifyAdmin;
-	private Integer emailGroupId;
+	private Long emailGroupId;
 	private Boolean notifyCustomer;
 	@NotNull(message="authorised cannot be empty")
 	private Boolean authorised;

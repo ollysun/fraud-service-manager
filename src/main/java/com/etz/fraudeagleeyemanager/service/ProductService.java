@@ -4,18 +4,21 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
-import com.etz.fraudeagleeyemanager.constant.Status;
 import com.etz.fraudeagleeyemanager.dto.request.CreateProductRequest;
 import com.etz.fraudeagleeyemanager.dto.request.DatasetProductRequest;
 import com.etz.fraudeagleeyemanager.dto.request.UpdateDataSetRequest;
 import com.etz.fraudeagleeyemanager.dto.request.UpdateProductRequest;
+import com.etz.fraudeagleeyemanager.dto.response.ProductDataSetResponse;
+import com.etz.fraudeagleeyemanager.dto.response.ProductResponse;
 import com.etz.fraudeagleeyemanager.entity.ProductDataSet;
 import com.etz.fraudeagleeyemanager.entity.ProductEntity;
+import com.etz.fraudeagleeyemanager.exception.FraudEngineException;
 import com.etz.fraudeagleeyemanager.exception.ResourceNotFoundException;
 import com.etz.fraudeagleeyemanager.redisrepository.ProductDatasetRedisRepository;
 import com.etz.fraudeagleeyemanager.redisrepository.ProductRedisRepository;
@@ -23,61 +26,95 @@ import com.etz.fraudeagleeyemanager.repository.ProductDataSetRepository;
 import com.etz.fraudeagleeyemanager.repository.ProductEntityRepository;
 import com.etz.fraudeagleeyemanager.util.JsonConverter;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 @Service
 public class ProductService {
 
 	@Autowired
-	private ProductEntityRepository productEntityRepository;
+	private final ProductEntityRepository productEntityRepository;
 
 	@Autowired
-	private ProductDataSetRepository productDataSetRepository;
+	private final ProductDataSetRepository productDataSetRepository;
 
 	@Autowired
-	private ProductRedisRepository productRedisRepository;
+	private final ProductRedisRepository productRedisRepository;
 
 	@Autowired
-	private ProductDatasetRedisRepository productDatasetRedisRepository;
+	private final ProductDatasetRedisRepository productDatasetRedisRepository;
 
 	@Autowired @Qualifier("redisTemplate")
-	private RedisTemplate<String, Object> fraudEngineRedisTemplate;
+	private final RedisTemplate<String, Object> fraudEngineRedisTemplate;
 
-	public ProductEntity createProduct(CreateProductRequest request) {
-		ProductEntity productEntity = new ProductEntity();
-		productEntity.setCode(request.getProductCode());
-		productEntity.setName(request.getProductName());
-		productEntity.setDescription(request.getProductDesc());
-		productEntity.setUseCard(request.getUseCard());
-		productEntity.setUseAccount(request.getUseAccount());
-		productEntity.setSupportHold(Status.ENABLED);
-		productEntity.setCallbackURL(request.getCallback());
-		productEntity.setStatus(request.getStatus());
-		productEntity.setCreatedBy(request.getCreatedBy());
-		
-		// for auditing purpose for CREATE
-		productEntity.setEntityId(null);
-		productEntity.setRecordBefore(null);
-		productEntity.setRequestDump(request);
-		
-		ProductEntity savedProduct = productEntityRepository.save(productEntity);
-		productRedisRepository.setHashOperations(fraudEngineRedisTemplate);
-		productRedisRepository.create(savedProduct);
-		return savedProduct;
+	public ProductService(ProductEntityRepository productEntityRepository, ProductDataSetRepository productDataSetRepository, ProductRedisRepository productRedisRepository, ProductDatasetRedisRepository productDatasetRedisRepository, RedisTemplate<String, Object> fraudEngineRedisTemplate) {
+		this.productEntityRepository = productEntityRepository;
+		this.productDataSetRepository = productDataSetRepository;
+		this.productRedisRepository = productRedisRepository;
+		this.productDatasetRedisRepository = productDatasetRedisRepository;
+		this.fraudEngineRedisTemplate = fraudEngineRedisTemplate;
 	}
 
-	public List<ProductEntity> getProduct(String productCode) {
-		if (productCode.isEmpty()) {
-			return productEntityRepository.findAll();
+	public ProductResponse createProduct(CreateProductRequest request) {
+		ProductEntity productEntity = new ProductEntity();
+		try {
+			productEntity.setCode(request.getProductCode());
+			productEntity.setName(request.getProductName());
+			productEntity.setDescription(request.getProductDesc());
+			productEntity.setUseCard(request.getUseCard());
+			productEntity.setUseAccount(request.getUseAccount());
+			productEntity.setCallbackURL(request.getCallback());
+			productEntity.setSupportHold(Boolean.FALSE);
+			productEntity.setStatus(Boolean.TRUE);
+			productEntity.setCreatedBy(request.getCreatedBy());
+
+			// for auditing purpose for CREATE
+			productEntity.setEntityId(null);
+			productEntity.setRecordBefore(null);
+			productEntity.setRequestDump(request);
+			
+			ProductEntity savedProduct = productEntityRepository.save(productEntity);
+			productRedisRepository.setHashOperations(fraudEngineRedisTemplate);
+			productRedisRepository.create(savedProduct);
+
+			return outputProductResponse(savedProduct);
+		}catch (Exception ex){
+			throw new FraudEngineException(ex.getMessage());
+		}
+	}
+
+	private ProductResponse outputProductResponse(ProductEntity productEntity){
+		ProductResponse productResponse = new ProductResponse();
+		BeanUtils.copyProperties(productEntity,productResponse,"productDataset, productRules, products, productLists");
+		return productResponse;
+	}
+
+	public List<ProductResponse>  getProduct(String productCode) {
+		List<ProductResponse> productResponseList;
+		if (productCode == null) {
+			return outputCreateProduct(productEntityRepository.findAll());
 		}
 
 		List<ProductEntity> productList = new ArrayList<>();
 		productList.add(productEntityRepository.findByCode(productCode));
-		return productList;
+		productResponseList = outputCreateProduct(productList);
+		return productResponseList;
+	}
+
+	private List<ProductResponse> outputCreateProduct(List<ProductEntity> productEntityList){
+		List<ProductResponse> productResponseList = new ArrayList<>();
+		productEntityList.forEach(productVal -> {
+				ProductResponse productResponse = new ProductResponse();
+			    BeanUtils.copyProperties(productVal,productResponse,"productDataset, productRules, products, productLists");
+				productResponseList.add(productResponse);
+		});
+		return productResponseList;
 	}
 
 	public ProductEntity updateProduct(UpdateProductRequest request) {
 		ProductEntity productEntity = productEntityRepository.findByCode(request.getProductCode());
 		if (productEntity == null){
-			throw new ResourceNotFoundException("Product not found for Code" + request.getProductCode());
+			throw new ResourceNotFoundException("Product not found for Code " + request.getProductCode());
 		}
 		productEntity.setName(request.getProductName());
 		productEntity.setDescription(request.getProductDesc());
@@ -96,7 +133,13 @@ public class ProductService {
 		ProductEntity savedProduct = productEntityRepository.save(productEntity);
 		productRedisRepository.setHashOperations(fraudEngineRedisTemplate);
 		productRedisRepository.update(savedProduct);
-		return savedProduct;
+		return outputUpdatedProductResponse(savedProduct);
+	}
+
+	private ProductResponse outputUpdatedProductResponse(ProductEntity productEntity){
+		ProductResponse productResponse = new ProductResponse();
+		BeanUtils.copyProperties(productEntity,productResponse,"createdBy, createdAt,productDataset, productRules, products, productLists");
+		return productResponse;
 	}
 
 	public Boolean deleteProduct(String productCode) {
@@ -135,17 +178,20 @@ public class ProductService {
 		ProductDataSet savedProductDataset = productDataSetRepository.save(prodDatasetEntity);
 		productDatasetRedisRepository.setHashOperations(fraudEngineRedisTemplate);
 		productDatasetRedisRepository.create(savedProductDataset);
-		return savedProductDataset;
+		return outputCreatedProductDataset(savedProductDataset);
 	}
 
-	public List<ProductDataSet> getProductDataset(String productCode) {
-		if (productCode == null) {
-			return productDataSetRepository.findAll();
-		}
+	private ProductDataSetResponse outputCreatedProductDataset(ProductDataSet productEntity){
+		ProductDataSetResponse productResponse = new ProductDataSetResponse();
+		BeanUtils.copyProperties(productEntity,productResponse,"productEntity");
+		return productResponse;
+	}
 
+	public List<ProductDataSetResponse> getProductDataset(String productCode) {
 		List<ProductDataSet> productDatasetList = new ArrayList<>();
+		if (productCode == null) return outputProductDatasetEntity(productDataSetRepository.findAll());
 		productDatasetList.add(productDataSetRepository.findByProductCode(productCode));
-		return productDatasetList;
+		return outputProductDatasetEntity(productDatasetList);
 	}
 
 	public ProductDataSet updateProductDataset(UpdateDataSetRequest request) {
@@ -168,7 +214,13 @@ public class ProductService {
 		ProductDataSet savedProductDataset = productDataSetRepository.save(productDatasetEntity);
 		productDatasetRedisRepository.setHashOperations(fraudEngineRedisTemplate);
 		productDatasetRedisRepository.update(savedProductDataset);
-		return savedProductDataset;
+		return outputUpdatedProductDatasetResponse(savedProductDataset);
+	}
+
+	private ProductDataSetResponse outputUpdatedProductDatasetResponse(ProductDataSet productEntity){
+		ProductDataSetResponse productResponse = new ProductDataSetResponse();
+		BeanUtils.copyProperties(productEntity,productResponse,"createdBy, createdAt,productDataset, productRules, products, productLists");
+		return productResponse;
 	}
 
 	public boolean deleteProductDataset(String productCode) {
@@ -176,7 +228,6 @@ public class ProductService {
 		if (productDatasetEntity == null){
 			throw new ResourceNotFoundException("Product dataset details not found for this code " + productCode);
 		}
-		
 		// for auditing purpose for DELETE
 		productDatasetEntity.setEntityId(productCode);
 		productDatasetEntity.setRecordBefore(JsonConverter.objectToJson(productDatasetEntity));
@@ -188,6 +239,16 @@ public class ProductService {
 		productDatasetRedisRepository.setHashOperations(fraudEngineRedisTemplate);
 		productDatasetRedisRepository.delete(productDatasetEntity.getId());
 		return true;
+	}
+
+	private List<ProductDataSetResponse> outputProductDatasetEntity(List<ProductDataSet> productDatasetList){
+		List<ProductDataSetResponse> productResponseList = new ArrayList<>();
+		productDatasetList.forEach(productVal -> {
+			ProductDataSetResponse productResponse = new ProductDataSetResponse();
+			BeanUtils.copyProperties(productVal,productResponse,"productEntity");
+			productResponseList.add(productResponse);
+		});
+		return productResponseList;
 	}
 
 }

@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 
 @RestController
-@RequestMapping("/parameter")
+@RequestMapping("/v1/parameter")
 public class ParameterController {
 	
 	@Autowired
@@ -29,21 +29,20 @@ public class ParameterController {
 		return new ResponseEntity<>(response, HttpStatus.CREATED);
 	}
 	
-	@PutMapping(path = "/{paramId}")
-	public ModelResponse<Parameter> updateParameter(@PathVariable(name = "paramID") Integer parameterId,
-			@RequestBody UpdateParameterRequest request){
+	@PutMapping
+	public ModelResponse<Parameter> updateParameter(@RequestBody @Valid UpdateParameterRequest request){
 		return new ModelResponse<>(parameterService.updateParameter(request));
 	}
 	
-	@DeleteMapping(path = "/{paramID}")
-	public BooleanResponse deleteParameter(@PathVariable(name = "paramID") Long parameterId){
-		return new BooleanResponse(parameterService.deleteParameter(parameterId));
+	@DeleteMapping(path = "/{id}")
+	public BooleanResponse deleteParameter(@PathVariable(name = "id") Long id){
+		return new BooleanResponse(parameterService.deleteParameter(id));
 	}
 	
 	@GetMapping
 	public PageResponse<Parameter> queryParameter(
-			@RequestParam(name = "paramId", required = false) String paramId){
-		return new PageResponse<>(parameterService.getParameter(Long.parseLong(paramId.trim())));
+			@RequestParam(name = "paramId", required = false) Long paramId){
+		return new PageResponse<>(parameterService.getParameter(paramId));
 	}
 	
 }

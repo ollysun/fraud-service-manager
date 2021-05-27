@@ -10,6 +10,10 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
+import org.hibernate.annotations.ResultCheckStyle;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.Where;
+
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -18,6 +22,8 @@ import lombok.EqualsAndHashCode;
 @Table(name = "parameter", 
 uniqueConstraints = @UniqueConstraint(
 		columnNames = {"name", "operator"}, name = "UC_Parameter"))
+@SQLDelete(sql = "UPDATE parameter SET deleted = true WHERE id = ?", check = ResultCheckStyle.COUNT)
+@Where(clause = "deleted = false")
 @Data
 public class Parameter extends BaseAuditEntity implements Serializable {
 		

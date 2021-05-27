@@ -1,15 +1,20 @@
 package com.etz.fraudeagleeyemanager.entity;
 
 import lombok.*;
+import org.hibernate.annotations.ResultCheckStyle;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.Where;
 
 import javax.persistence.*;
 import java.io.Serializable;
 
 @EqualsAndHashCode(callSuper = true)
 @Data
+@Entity
 @Table(name = "card_product", uniqueConstraints = @UniqueConstraint(name="UC_CARD_PRODUCT",
         columnNames = {"card_id"}))
-@Entity
+@SQLDelete(sql = "UPDATE card_product SET deleted = true WHERE id = ?", check = ResultCheckStyle.COUNT)
+@Where(clause = "deleted = false")
 @IdClass(CardProductId.class)
 public class CardProduct extends BaseAuditEntity implements Serializable {
 

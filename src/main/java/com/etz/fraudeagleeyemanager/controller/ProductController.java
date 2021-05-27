@@ -2,6 +2,8 @@ package com.etz.fraudeagleeyemanager.controller;
 
 
 
+import java.util.List;
+
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,42 +27,48 @@ import com.etz.fraudeagleeyemanager.dto.request.UpdateProductRequest;
 import com.etz.fraudeagleeyemanager.dto.response.BooleanResponse;
 import com.etz.fraudeagleeyemanager.dto.response.CollectionResponse;
 import com.etz.fraudeagleeyemanager.dto.response.ModelResponse;
-import com.etz.fraudeagleeyemanager.entity.ProductEntity;
+import com.etz.fraudeagleeyemanager.dto.response.ProductDataSetResponse;
+import com.etz.fraudeagleeyemanager.dto.response.ProductResponse;
 import com.etz.fraudeagleeyemanager.entity.ProductDataSet;
+import com.etz.fraudeagleeyemanager.entity.ProductEntity;
 import com.etz.fraudeagleeyemanager.service.ProductService;
 
 @Validated
 @RestController
-@RequestMapping("/product")
+@RequestMapping("/v1/product")
 public class ProductController {
 
 	@Autowired
 	ProductService productService;
+
+	//private RestTemplateUtil restTemplateUtil;
 	
 	@PostMapping
 	public ResponseEntity<ModelResponse<ProductEntity>> createProduct(
 			@Valid @RequestBody  CreateProductRequest request){
-		ModelResponse<ProductEntity> response = new ModelResponse<ProductEntity>(productService.createProduct(request));
+		ModelResponse<ProductEntity> response = new ModelResponse<>(productService.createProduct(request));
 		response.setStatus(HttpStatus.CREATED.value());
 		return new ResponseEntity<>(response, HttpStatus.CREATED);
 	}
 		
-	@PutMapping(path = "/{product_code}")
-	public ModelResponse<ProductEntity> updateProduct(@PathVariable(name = "product_code") String productCode,
-			@RequestBody @Valid UpdateProductRequest request){
-		request.setProductCode(productCode);
+	@PutMapping
+	public ModelResponse<ProductEntity> updateProduct(@RequestBody @Valid UpdateProductRequest request){
 		return new ModelResponse<>(productService.updateProduct(request));
 	}
 	
-	@DeleteMapping(path = "/{product_code}")
-	public BooleanResponse deleteProduct(@PathVariable(name = "product_code") String productCode){
-		return new BooleanResponse(productService.deleteProduct(productCode));
+	@DeleteMapping(path = "/{code}")
+	public BooleanResponse deleteProduct(@PathVariable(name = "code") String code){
+		return new BooleanResponse(productService.deleteProduct(code));
 	}
 	
 	@GetMapping
-	public CollectionResponse<ProductEntity> queryProduct(@RequestParam(name = "productCode", defaultValue = "")
-																	  String productCode){
-		return new CollectionResponse<>(productService.getProduct(productCode.trim()));
+	public ResponseEntity<CollectionResponse<ProductResponse>> queryProduct(@RequestParam(name = "code", required = false)
+																	  String code){
+		//log.info(restTemplateUtil.getAllProducts();
+		List<ProductResponse> userResponseList = productService.getProduct(code);
+		CollectionResponse<ProductResponse> collectionResponse = new CollectionResponse<>(userResponseList);
+		collectionResponse.setMessage("All Product");
+		return new ResponseEntity<>(collectionResponse, HttpStatus.OK);
 	}
 	
 	@PostMapping(path = "/dataset")
@@ -71,21 +79,23 @@ public class ProductController {
 	}
 	
 	@GetMapping(path = "/dataset")
-	public CollectionResponse<ProductDataSet> queryProductDataset(
-			@RequestParam(name = "productCode", defaultValue = "") String productCode){
-		return new CollectionResponse<>(productService.getProductDataset(productCode.trim()));
+	public ResponseEntity<CollectionResponse<ProductDataSetResponse>> queryProductDataset(
+			@RequestParam(name = "code", required = false) String code){
+
+		List<ProductDataSetResponse> userResponseList = productService.getProductDataset(code);
+		CollectionResponse<ProductDataSetResponse> collectionResponse = new CollectionResponse<>(userResponseList);
+		collectionResponse.setMessage("All Dataset");
+		return new ResponseEntity<>(collectionResponse, HttpStatus.OK);
 	}
 	
-	@PutMapping(path = "/dataset/{product_code}")
-	public ModelResponse<ProductDataSet> updateProductDataset(@PathVariable(name = "product_code") String productCode,
-                                                              @RequestBody UpdateDataSetRequest request){
-		request.setProductCode(productCode);
+	@PutMapping(path = "/dataset")
+	public ModelResponse<ProductDataSet> updateProductDataset(@RequestBody UpdateDataSetRequest request){
 		return new ModelResponse<>(productService.updateProductDataset(request));
 	}
 	
-	@DeleteMapping(path = "/dataset/{product_code}")
-	public BooleanResponse deleteProductDataset(@PathVariable(name = "product_code") String productCode){
-		return new BooleanResponse(productService.deleteProductDataset(productCode));
+	@DeleteMapping(path = "/dataset/{code}")
+	public BooleanResponse deleteProductDataset(@PathVariable(name = "code") String code){
+		return new BooleanResponse(productService.deleteProductDataset(code));
 	}
 	
 }

@@ -18,6 +18,7 @@ import com.etz.fraudeagleeyemanager.exception.ResourceNotFoundException;
 import com.etz.fraudeagleeyemanager.redisrepository.ParameterRedisRepository;
 import com.etz.fraudeagleeyemanager.repository.ParameterRepository;
 import com.etz.fraudeagleeyemanager.util.JsonConverter;
+import com.etz.fraudeagleeyemanager.util.AppUtil;
 import com.etz.fraudeagleeyemanager.util.PageRequestUtil;
 
 import lombok.extern.slf4j.Slf4j;
@@ -39,11 +40,10 @@ public class ParameterService {
 	public Parameter createParameter(CreateParameterRequest request) {
 		Parameter parameterEntity = new Parameter();
 		parameterEntity.setName(request.getName());
-		parameterEntity.setOperator(request.getOperator());
-		parameterEntity.setRequireValue(request.getRequireValue());
+		parameterEntity.setOperator(AppUtil.checkOperator(request.getOperator()));
 		parameterEntity.setAuthorised(request.getAuthorised());
+		parameterEntity.setRequireValue(request.getRequireValue());
 		parameterEntity.setCreatedBy(request.getCreatedBy());
-		
 		// for auditing purpose for CREATE
 		parameterEntity.setEntityId(null);
 		parameterEntity.setRecordBefore(null);
@@ -61,7 +61,7 @@ public class ParameterService {
 		Parameter parameterEntity = parameterRepository.findById(request.getParamId())
 														     .orElseThrow(() -> new ResourceNotFoundException("Parameter details not found for the ID " + request.getParamId()));
 		parameterEntity.setName(request.getName());
-		parameterEntity.setOperator(request.getOperator());
+		parameterEntity.setOperator(AppUtil.checkOperator(request.getOperator()));
 		parameterEntity.setRequireValue(request.getRequireValue());
 		parameterEntity.setAuthorised(request.getAuthorised());
 		parameterEntity.setUpdatedBy(request.getUpdatedBy());

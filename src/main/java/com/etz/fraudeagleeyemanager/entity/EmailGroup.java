@@ -2,6 +2,9 @@ package com.etz.fraudeagleeyemanager.entity;
 
 import com.etz.fraudeagleeyemanager.constant.Status;
 import lombok.*;
+import org.hibernate.annotations.ResultCheckStyle;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.Where;
 
 import javax.persistence.*;
 import javax.validation.constraints.Email;
@@ -17,6 +20,8 @@ import java.util.Set;
 @RequiredArgsConstructor
 @Entity
 @Table(name="email_group")
+@SQLDelete(sql = "UPDATE email_group SET deleted = true WHERE id = ?", check = ResultCheckStyle.COUNT)
+@Where(clause = "deleted = false")
 public class EmailGroup extends BaseAuditEntity implements Serializable {
 
 	@Id
@@ -37,13 +42,13 @@ public class EmailGroup extends BaseAuditEntity implements Serializable {
 	private Status status;
 
 	@ToString.Exclude
-	@OneToMany(mappedBy = "emailGroup", fetch = FetchType.LAZY,
-			cascade = CascadeType.ALL)
+	@OneToMany(mappedBy = "emailGroup", fetch = FetchType.EAGER,
+			cascade = CascadeType.ALL, orphanRemoval = true)
 	private Set<ProductRule> productRules = new HashSet<>();
 
 	@ToString.Exclude
-	@OneToMany(mappedBy = "emailGroup", fetch = FetchType.LAZY,
-			cascade = CascadeType.ALL)
+	@OneToMany(mappedBy = "emailGroup", fetch = FetchType.EAGER,
+			cascade = CascadeType.ALL, orphanRemoval = true)
 	private Set<ReportScheduler> reportSchedulers = new HashSet<>();
 
 	@Override

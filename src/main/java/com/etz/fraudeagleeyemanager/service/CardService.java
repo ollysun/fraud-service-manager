@@ -119,10 +119,14 @@ public class CardService {
 		cardToProdEntity.setEntityId(request.getCardId().toString());
 		cardToProdEntity.setRecordBefore(JsonConverter.objectToJson(cardToProdEntity));
 		cardToProdEntity.setRequestDump(request);
-
 		CardProduct cardProduct = cardProductRepository.save(cardToProdEntity);
+
+		CardProduct cardProductRedis = cardProductRedisRepository.findById(request.getCardId().longValue());
+		cardProductRedis.setStatus(request.getStatus());
+		cardProductRedis.setUpdatedBy(request.getUpdatedBy());
+		cardProductRedis.setProductCode(request.getProductCode());
 		cardProductRedisRepository.setHashOperations(fraudEngineRedisTemplate);
-		cardProductRedisRepository.update(cardProduct);
+		cardProductRedisRepository.update(cardProductRedis);
 		return cardProduct;
 	}
 

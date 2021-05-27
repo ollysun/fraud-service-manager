@@ -3,6 +3,9 @@ package com.etz.fraudeagleeyemanager.entity;
 import com.etz.fraudeagleeyemanager.constant.CardBrand;
 import com.etz.fraudeagleeyemanager.constant.CardType;
 import lombok.*;
+import org.hibernate.annotations.ResultCheckStyle;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.Where;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
@@ -13,9 +16,11 @@ import java.util.Set;
 @Table(name = "card", 
 		uniqueConstraints = @UniqueConstraint(name="UC_CARD",
 				columnNames = {"card_bin", "iso_country_code"}))
+@SQLDelete(sql = "UPDATE card SET deleted = true WHERE id = ?", check = ResultCheckStyle.COUNT)
+@Where(clause = "deleted = false")
 @Getter
 @Setter
-@ToString
+@ToString(exclude = { "cards" })
 @RequiredArgsConstructor
 public class Card extends BaseAuditEntity implements Serializable {
 
@@ -73,9 +78,7 @@ public class Card extends BaseAuditEntity implements Serializable {
 	@Column(nullable = false, name = "status", columnDefinition = "TINYINT", length = 1)
 	private Boolean status;
 
-
-
-	@OneToMany(mappedBy = "card")
+	@OneToMany(mappedBy = "card",fetch = FetchType.EAGER, orphanRemoval = true, cascade = CascadeType.ALL)
 	private Set<CardProduct> cards;
 
 }

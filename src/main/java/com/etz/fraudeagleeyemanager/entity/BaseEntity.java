@@ -16,9 +16,9 @@ import java.time.LocalDateTime;
 @Setter
 @ToString
 @MappedSuperclass
-public class BaseEntity {
+public abstract class BaseEntity {
 
-    @Column(name = "created_at", nullable = false)
+    @Column(name = "created_at", updatable = false, nullable = false)
     @CreationTimestamp
     private LocalDateTime createdAt;
 
@@ -33,5 +33,8 @@ public class BaseEntity {
  
     @Column(name = "updated_by")
     private String updatedBy;
+
+    @Column(name = "deleted")
+    private boolean deleted;
  
 }

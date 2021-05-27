@@ -4,13 +4,20 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
+import org.hibernate.annotations.ResultCheckStyle;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.Where;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
 import java.io.Serializable;
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
 
 @Entity
 @Table(name = "product_rule")
+@SQLDelete(sql = "UPDATE product_rule SET deleted = true WHERE id = ?", check = ResultCheckStyle.COUNT)
+@Where(clause = "deleted = false")
 @Getter
 @Setter
 @RequiredArgsConstructor
@@ -21,14 +28,12 @@ public class ProductRule extends BaseAuditEntity implements Serializable {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
-	@NotBlank(message = "Rule Id cannot be empty")
 	@Column(name = "rule_id")
 	private Long ruleId;
 
 	@Column(name = "product_code",  columnDefinition="VARCHAR(100)")
 	private String productCode;
 
-	@NotBlank(message = "email_group_id cannot be empty")
 	@Column(name = "email_group_id")
 	private Long emailGroupId;
 	
@@ -45,21 +50,22 @@ public class ProductRule extends BaseAuditEntity implements Serializable {
 	private Boolean authorised;
 
 	@ToString.Exclude
-	@ManyToOne(fetch = FetchType.LAZY, optional = false)
+	@ManyToOne
 	@JoinColumn(name = "product_code", foreignKey = @ForeignKey(name = "FK_PRODUCT_RULE_CODE"),
 			referencedColumnName="code", insertable = false, updatable = false)
 	private ProductEntity productEntity;
 
 	@ToString.Exclude
-	@ManyToOne(fetch = FetchType.LAZY, optional = false)
+	@ManyToOne
 	@JoinColumn(name = "email_group_id", foreignKey = @ForeignKey(name = "FK_PRODUCT_RULE_EMAIL_GROUP_ID"),
 			referencedColumnName="id", insertable = false, updatable = false)
 	private EmailGroup emailGroup;
 
 	@ToString.Exclude
-	@ManyToOne(fetch = FetchType.LAZY, optional = false)
+	@ManyToOne
 	@JoinColumn(name = "rule_id", foreignKey = @ForeignKey(name = "FK_PRODUCT_RULE_RULE_ID"),
 			referencedColumnName="id", insertable = false, updatable = false)
+	@Fetch(FetchMode.JOIN)
 	private Rule rule;
 
 

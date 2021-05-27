@@ -12,6 +12,10 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.validation.constraints.NotBlank;
 
+import org.hibernate.annotations.ResultCheckStyle;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.Where;
+
 import com.etz.fraudeagleeyemanager.constant.Status;
 import com.etz.fraudeagleeyemanager.constant.UserCategory;
 
@@ -23,6 +27,8 @@ import lombok.ToString;
 
 @Entity
 @Table(name = "ofac_watchlist")
+@SQLDelete(sql = "UPDATE ofac_watchlist SET deleted = true WHERE id = ?", check = ResultCheckStyle.COUNT)
+@Where(clause = "deleted = false")
 @Getter
 @Setter
 @ToString

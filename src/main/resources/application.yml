@@ -1,6 +1,8 @@
 
 server:
   port: 9190
+  servlet:
+    context-path: /api
 
 kafka:
   pocketmoni:
@@ -27,25 +29,11 @@ spring:
     name: fraud-eagle-eye-manager-service
 
   redis:
-    pocketmoni:
-      host: 127.0.0.1
+    eagle-eye-manager:
+      host: 172.17.10.16
       port: 6379
       database: 0
-
-    mobilegate:
-      host: 127.0.0.1
-      port: 6379
-      database: 0
-
-    corporatepay:
-      host: 127.0.0.1
-      port: 6379
-      database: 0
-
-    switchit:
-      host: 127.0.0.1
-      port: 6379
-      database: 0
+      password: visionsvisions
 
   cloud:
     consul:
@@ -64,6 +52,9 @@ spring:
     password: root
     url: jdbc:mysql://localhost:3306/eagle_eye?useLegacyDatetimeCode=false&serverTimezone=Africa/Lagos&createDatabaseIfNotExist=true
     driverClassName: com.mysql.cj.jdbc.Driver
+    initialization-mode: always
+    data: classpath:data.sql
+
   jackson:
     default-property-inclusion: NON_NULL
     mapper:
@@ -81,7 +72,7 @@ spring:
       ddl-auto: create
     properties:
       hibernate:
-        dialect: org.hibernate.dialect.MySQL5Dialect
+        dialect: org.hibernate.dialect.MySQL55Dialect
     show-sql: true
 
   kafka:

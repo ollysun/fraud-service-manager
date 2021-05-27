@@ -29,7 +29,7 @@ public class Report extends BaseAuditEntity implements Serializable {
 	private String description;
 
 	@ToString.Exclude
-	@OneToMany(mappedBy = "report", fetch = FetchType.LAZY,
+	@OneToMany(mappedBy = "report", fetch = FetchType.EAGER,
 			cascade = CascadeType.ALL)
 	private Set<ReportScheduler> reportSchedulers = new HashSet<>();
 

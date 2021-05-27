@@ -1,42 +1,53 @@
 package com.etz.fraudeagleeyemanager.entity;
 
-import com.etz.fraudeagleeyemanager.constant.DataSource;
-import com.etz.fraudeagleeyemanager.constant.LogicOperator;
-import com.etz.fraudeagleeyemanager.constant.Status;
-import com.etz.fraudeagleeyemanager.constant.SuspicionLevel;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-
-import javax.persistence.*;
 import java.io.Serializable;
 import java.util.Set;
+
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.OneToMany;
+import javax.persistence.Table;
+
+import org.hibernate.annotations.ResultCheckStyle;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.Where;
+
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
 
 @EqualsAndHashCode(callSuper = true)
 @Entity
 @Table(name = "rule")
+@SQLDelete(sql = "UPDATE rule SET deleted = true WHERE id = ?", check = ResultCheckStyle.COUNT)
+@Where(clause = "deleted = false")
 @Data
+@ToString(exclude = {"productRule"})
 public class Rule extends BaseAuditEntity implements Serializable {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 	
-	@Column(name = "source_value_1")
+	@Column(name = "source_value_1", nullable=false)
 	private String sourceValueOne;
 
-	@Column(name = "operator_1")
+	@Column(name = "operator_1", nullable=false)
 	private String operatorOne;
 
 	@Column(name = "compare_value_1")
-	private Integer compareValueOne;
+	private String compareValueOne;
 
-	@Column(name = "data_source_1")
-	@Enumerated(EnumType.STRING)
-	private DataSource dataSourceOne;
+	@Column(name = "data_source_1", nullable=false)
+	private String dataSourceValOne;
 
 	@Column(name = "logic_operator")
-	@Enumerated(EnumType.STRING)
-	private LogicOperator logicOperator;
+	private String logicOperator;
 
 	@Column(name = "source_value_2")
 	private String sourceValueTwo;
@@ -45,15 +56,13 @@ public class Rule extends BaseAuditEntity implements Serializable {
 	private String operatorTwo;
 
 	@Column(name = "compare_value_2")
-	private Integer compareValueTwo;
+	private String compareValueTwo;
 
 	@Column(name = "data_source_2")
-	@Enumerated(EnumType.STRING)
-	private DataSource dataSourceTwo;
+	private String dataSourceValTwo;
 
-	@Column(name = "suspicion_level", columnDefinition = "INT", length = 10)
-	@Enumerated(EnumType.ORDINAL)
-	private SuspicionLevel suspicionLevel;
+
+	private Integer suspicionLevel;
 
 	@Column(name = "action")
 	private String action;
@@ -64,7 +73,8 @@ public class Rule extends BaseAuditEntity implements Serializable {
 	@Column(name = "authorised")
 	private Boolean authorised;
 
-	@OneToMany(mappedBy = "rule", cascade = CascadeType.REMOVE)
-	private Set<ProductRule> productRules;
+	@OneToMany(mappedBy = "rule",fetch = FetchType.LAZY,
+			cascade = CascadeType.ALL, orphanRemoval = true)
+	private Set<ProductRule> productRule;
 		
 }

@@ -26,7 +26,7 @@ public class UpdateProductRequest implements Serializable {
 	private String callback;
 
 	@NotNull(message = "Please let know the status ")
-	private Status status;
+	private Boolean status;
 
 	@NotNull(message = "UpdatedBy cannot be empty")
 	private String updatedBy;
