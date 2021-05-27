@@ -12,17 +12,17 @@ public class CreateRuleRequest {
 	private String firstSourceVal;
 	@NotNull(message="firstOperator cannot be empty")
 	private String firstOperator;
-	@NotNull(message="firstCompareVal cannot be empty")
-	private Integer firstCompareVal;
+	@NotBlank(message="firstCompareVal cannot be empty")
+	private String firstCompareVal;
 	@NotBlank(message="firstDataSourceVal cannot be empty")
 	private String firstDataSourceVal;
 	private String logicOperator;
 	private String secondSourceVal;
 	private String secondOperator;
-	private Integer secondCompareVal;
+	private String secondCompareVal;
 	private String secondDataSourceVal;
 	@NotNull(message="suspicion level cannot be empty")
-	private SuspicionLevel suspicion;
+	private Integer suspicion;
 	@NotBlank(message="action cannot be empty")
 	private String action;
 	@NotBlank(message="createdBy cannot be empty")

@@ -15,32 +15,29 @@ import java.io.Serializable;
         columnNames = {"account_id"}))
 @SQLDelete(sql = "UPDATE account_product SET deleted = true WHERE id = ?", check = ResultCheckStyle.COUNT)
 @Where(clause = "deleted = false")
-@IdClass(AccountProductId.class)
+//@IdClass(AccountProductId.class)
 public class AccountProduct extends BaseEntity implements Serializable {
 
-    @Id
-    @Column(name = "product_code", nullable = false, columnDefinition="VARCHAR(100)")
-    private String productCode;
+//    @Id
+//    @Column(name = "product_code", nullable = false, columnDefinition="VARCHAR(100)")
+//    private String productCode;
+//
+//    @Id
+//    @Column(name = "account_id", nullable = false, columnDefinition = "bigint")
+//    private Long accountId;
 
-    @Id
-    @Column(name = "account_id", nullable = false, columnDefinition = "bigint")
-    private Long accountId;
+    @EmbeddedId
+    private AccountProductId accountProductId;
 
-    @ToString.Exclude
-    @ManyToOne
-    @MapsId("productCode")
-    @JoinColumn(foreignKey = @ForeignKey(name = "FK_ACCOUNT_PRODUCT_PRODUCT_CODE"),
-            name = "product_code",
-            referencedColumnName="code")
-    private ProductEntity productEntity;
-
-    @ToString.Exclude
-    @ManyToOne
-    @MapsId("accountId")
-    @JoinColumn(foreignKey = @ForeignKey(name = "FK_ACCOUNT_PRODUCT_CARD_ID"),
-            name = "account_id",
-            referencedColumnName="id")
-    private Account account;
+//    @ManyToOne
+//    @MapsId("productCode")
+//    @JoinColumn(name = "product_code")
+//    private ProductEntity productEntity;
+//
+//    @ManyToOne
+//    @MapsId("accountId")
+//    @JoinColumn(name = "account_id")
+//    private Account account;
 
     @Column(nullable = false, name = "status", columnDefinition = "TINYINT", length = 1)
     private Boolean status;

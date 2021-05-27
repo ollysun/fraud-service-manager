@@ -6,12 +6,11 @@ import com.etz.fraudeagleeyemanager.dto.request.CreateProductRequest;
 import com.etz.fraudeagleeyemanager.dto.request.DatasetProductRequest;
 import com.etz.fraudeagleeyemanager.dto.request.UpdateDataSetRequest;
 import com.etz.fraudeagleeyemanager.dto.request.UpdateProductRequest;
-import com.etz.fraudeagleeyemanager.dto.response.BooleanResponse;
-import com.etz.fraudeagleeyemanager.dto.response.CollectionResponse;
-import com.etz.fraudeagleeyemanager.dto.response.ModelResponse;
+import com.etz.fraudeagleeyemanager.dto.response.*;
 import com.etz.fraudeagleeyemanager.entity.ProductEntity;
 import com.etz.fraudeagleeyemanager.entity.ProductDataSet;
 import com.etz.fraudeagleeyemanager.service.ProductService;
+import com.etz.fraudeagleeyemanager.util.RestTemplateUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -23,11 +22,13 @@ import java.util.List;
 
 @Validated
 @RestController
-@RequestMapping("/product")
+@RequestMapping("/v1/product")
 public class ProductController {
 
 	@Autowired
 	ProductService productService;
+
+	private RestTemplateUtil restTemplateUtil;
 	
 	@PostMapping
 	public ResponseEntity<ModelResponse<ProductEntity>> createProduct(
@@ -48,9 +49,13 @@ public class ProductController {
 	}
 	
 	@GetMapping
-	public CollectionResponse<ProductEntity> queryProduct(@RequestParam(name = "code", required = false)
+	public ResponseEntity<CollectionResponse<ProductResponse>> queryProduct(@RequestParam(name = "code", required = false)
 																	  String code){
-		return new CollectionResponse<>(productService.getProduct(code));
+		//log.info(restTemplateUtil.getAllProducts();
+		List<ProductResponse> userResponseList = productService.getProduct(code);
+		CollectionResponse<ProductResponse> collectionResponse = new CollectionResponse<>(userResponseList);
+		collectionResponse.setMessage("All Product");
+		return new ResponseEntity<>(collectionResponse, HttpStatus.OK);
 	}
 	
 	@PostMapping(path = "/dataset")
@@ -61,11 +66,11 @@ public class ProductController {
 	}
 	
 	@GetMapping(path = "/dataset")
-	public ResponseEntity<CollectionResponse<ProductDataSet>> queryProductDataset(
+	public ResponseEntity<CollectionResponse<ProductDataSetResponse>> queryProductDataset(
 			@RequestParam(name = "code", required = false) String code){
 
-		List<ProductDataSet> userResponseList = productService.getProductDataset(code);
-		CollectionResponse<ProductDataSet> collectionResponse = new CollectionResponse<>(userResponseList);
+		List<ProductDataSetResponse> userResponseList = productService.getProductDataset(code);
+		CollectionResponse<ProductDataSetResponse> collectionResponse = new CollectionResponse<>(userResponseList);
 		collectionResponse.setMessage("All Dataset");
 		return new ResponseEntity<>(collectionResponse, HttpStatus.OK);
 	}

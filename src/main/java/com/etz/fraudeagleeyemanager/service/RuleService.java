@@ -5,6 +5,9 @@ import com.etz.fraudeagleeyemanager.dto.request.CreateRuleRequest;
 import com.etz.fraudeagleeyemanager.dto.request.MapRuleToProductRequest;
 import com.etz.fraudeagleeyemanager.dto.request.UpdateMapRuleToProductRequest;
 import com.etz.fraudeagleeyemanager.dto.request.UpdateRuleRequest;
+import com.etz.fraudeagleeyemanager.dto.response.ProductResponse;
+import com.etz.fraudeagleeyemanager.dto.response.ProductRuleResponse;
+import com.etz.fraudeagleeyemanager.dto.response.RuleResponse;
 import com.etz.fraudeagleeyemanager.entity.ProductEntity;
 import com.etz.fraudeagleeyemanager.entity.ProductRule;
 import com.etz.fraudeagleeyemanager.entity.Rule;
@@ -16,8 +19,10 @@ import com.etz.fraudeagleeyemanager.repository.EmailGroupRepository;
 import com.etz.fraudeagleeyemanager.repository.ProductEntityRepository;
 import com.etz.fraudeagleeyemanager.repository.ProductRuleRepository;
 import com.etz.fraudeagleeyemanager.repository.RuleRepository;
+import com.etz.fraudeagleeyemanager.util.AppUtil;
 import com.etz.fraudeagleeyemanager.util.PageRequestUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Example;
@@ -25,6 +30,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
@@ -59,14 +65,14 @@ public class RuleService {
 		Rule ruleEntity = new Rule();
 		ruleEntity.setSourceValueOne(request.getFirstSourceVal());
 		// check the operator
-		ruleEntity.setOperatorOne(checkOperator(request.getFirstOperator().toLowerCase()));
-		ruleEntity.setCompareValueOne(request.getFirstCompareVal());
-		ruleEntity.setDataSourceValOne(checkDataSource(request.getFirstDataSourceVal()));
+		ruleEntity.setOperatorOne(AppUtil.checkOperator(request.getFirstOperator().toLowerCase()));
+		ruleEntity.setCompareValueOne(String.valueOf(request.getFirstCompareVal()));
+		ruleEntity.setDataSourceValOne(AppUtil.checkDataSource(request.getFirstDataSourceVal()));
 		// check logical operator
-		ruleEntity.setLogicOperator(checkLogicOperator(request.getLogicOperator()));
+		ruleEntity.setLogicOperator(AppUtil.checkLogicOperator(request.getLogicOperator()));
 		ruleEntity.setSourceValueTwo(request.getSecondSourceVal());
 		// check operator
-		ruleEntity.setOperatorTwo(checkOperator(request.getSecondOperator().toLowerCase()));
+		ruleEntity.setOperatorTwo(AppUtil.checkOperator(request.getSecondOperator().toLowerCase()));
 		ruleEntity.setCompareValueTwo(request.getSecondCompareVal());
 		ruleEntity.setDataSourceValTwo(request.getSecondDataSourceVal());
 		ruleEntity.setSuspicionLevel(request.getSuspicion());
@@ -89,45 +95,7 @@ public class RuleService {
 		return createdEntity;
 	}
 
-	private String checkLogicOperator(String text){
-		List<String> dataSourceVal = Arrays.asList("AND", "OR", "NOT");
-		String output = "";
-		if(!(text.isEmpty())){
-			output = dataSourceVal.stream()
-					.filter(bl -> bl.toUpperCase().equalsIgnoreCase(text))
-					.findFirst()
-					.orElseThrow(() ->
-							new FraudEngineException("cannot found this logic operator " + text + " can be any of " + dataSourceVal.toString()));
-		}
-		return output;
-	}
 
-	private String checkDataSource(String text) {
-		List<String> dataSourceVal = Arrays.asList("FRAUD ENGINE", "STATISTICS");
-		String output = "";
-		if(!(text.isEmpty())){
-			output = dataSourceVal.stream()
-					.filter(bl -> bl.toUpperCase().equalsIgnoreCase(text))
-					.findFirst()
-					.orElseThrow(() ->
-							new FraudEngineException("cannot found this data source " + text + " can be any " + dataSourceVal.toString()));
-		}
-		return output;
-	}
-
-	private String checkOperator(String operatorRequest){
-		List<String> operators = Arrays.asList("<", ">","==", "<=", "!=", ">=", "change");
-		String output = "";
-		if (operatorRequest != null) {
-			output = operators.stream()
-					.filter(bl -> bl.toUpperCase().equalsIgnoreCase(operatorRequest))
-					.findFirst()
-					.orElseThrow(() ->
-							new FraudEngineException("Not found this Operator " + operatorRequest +
-									"can be any of " + operators.toString()));
-		}
-		return output;
-	}
 
 
 	public Rule updateRule(UpdateRuleRequest request) {
@@ -135,15 +103,15 @@ public class RuleService {
 									.orElseThrow(() -> new ResourceNotFoundException("Rule Not found for Id " + request.getRuleId() ));
 		ruleEntity.setSourceValueOne(request.getFirstSourceVal());
 		// check for the list of Operator
-		ruleEntity.setOperatorOne(checkOperator(request.getFirstOperator()));
+		ruleEntity.setOperatorOne(AppUtil.checkOperator(request.getFirstOperator()));
 		ruleEntity.setCompareValueOne(request.getFirstCompareVal());
-		ruleEntity.setDataSourceValOne(checkDataSource(request.getFirstDataSource()));
-		ruleEntity.setLogicOperator(checkLogicOperator(request.getLogicOperator()));
+		ruleEntity.setDataSourceValOne(AppUtil.checkDataSource(request.getFirstDataSource()));
+		ruleEntity.setLogicOperator(AppUtil.checkLogicOperator(request.getLogicOperator()));
 		ruleEntity.setSourceValueTwo(request.getSecondSourceVal());
 		// check for the list of operator
-		ruleEntity.setOperatorTwo(checkOperator(request.getSecondOperator()));
+		ruleEntity.setOperatorTwo(AppUtil.checkOperator(request.getSecondOperator()));
 		ruleEntity.setCompareValueTwo(request.getSecondCompareVal());
-		ruleEntity.setDataSourceValTwo(checkDataSource(request.getSecondDataSource()));
+		ruleEntity.setDataSourceValTwo(AppUtil.checkDataSource(request.getSecondDataSource()));
 		ruleEntity.setSuspicionLevel(request.getSuspicion());
 		ruleEntity.setAction(request.getAction());
 		ruleEntity.setAuthorised(request.getAuthorised());
@@ -153,28 +121,8 @@ public class RuleService {
 		Rule updatedEntity = ruleRepository.save(ruleEntity);
 
 		//update redis
-		Rule ruleRedis = ruleRedisRepository.findById(request.getRuleId());
-		ruleRedis.setSourceValueOne(request.getFirstSourceVal());
-		// check for the list of Operator
-		checkOperator(request.getFirstOperator());
-		ruleRedis.setOperatorOne(request.getFirstOperator());
-		ruleRedis.setCompareValueOne(request.getFirstCompareVal());
-		ruleRedis.setDataSourceValOne(request.getFirstDataSource());
-		ruleRedis.setLogicOperator(request.getLogicOperator());
-		ruleRedis.setSourceValueTwo(request.getSecondSourceVal());
-		// check for the list of operator
-		checkOperator(request.getSecondOperator());
-		ruleRedis.setOperatorTwo(request.getSecondOperator());
-		ruleRedis.setCompareValueTwo(request.getSecondCompareVal());
-		ruleRedis.setDataSourceValTwo(request.getSecondDataSource());
-		ruleRedis.setSuspicionLevel(request.getSuspicion());
-		ruleRedis.setAction(request.getAction());
-		ruleRedis.setAuthorised(request.getAuthorised());
-		ruleRedis.setStatus(request.getStatus());
-		ruleRedis.setUpdatedBy(request.getUpdatedBy());
-
 		ruleRedisRepository.setHashOperations(fraudEngineRedisTemplate);
-		ruleRedisRepository.update(ruleRedis);
+		ruleRedisRepository.update(updatedEntity);
 		
 		return updatedEntity;
 	}
@@ -198,6 +146,7 @@ public class RuleService {
 		}
 		Rule ruleEntity = ruleRepository.findById(ruleId).orElseThrow(() -> new ResourceNotFoundException("Rule Not found " + ruleId));
 		ruleEntity.setId(ruleId);
+
 		return ruleRepository.findAll(Example.of(ruleEntity), PageRequestUtil.getPageRequest());
 	}
 
@@ -262,4 +211,24 @@ public class RuleService {
 		productRuleRedisRepository.delete(redisId);
 		return true;
 	}
+
+	public List<RuleResponse> getRuleProduct(String code) {
+		List<Rule> ruleList = new ArrayList<>();
+		if (code != null) {
+			ruleList =  ruleRepository.getRuleWithCode(code);
+		}
+		return outputRuleResponse(ruleList);
+	}
+
+	private List<RuleResponse> outputRuleResponse(List<Rule> ruleList){
+		List<RuleResponse> ruleResponseList = new ArrayList<>();
+		ruleList.forEach(ruleVal -> {
+			RuleResponse ruleResponse = new RuleResponse();
+			BeanUtils.copyProperties(ruleVal,ruleResponse,"productRule");
+			ruleResponseList.add(ruleResponse);
+		});
+		return ruleResponseList;
+	}
+
+
 }

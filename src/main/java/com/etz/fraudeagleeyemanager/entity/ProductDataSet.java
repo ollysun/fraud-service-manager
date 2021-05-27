@@ -41,7 +41,7 @@ public class ProductDataSet extends BaseEntity implements Serializable {
 	@Column(nullable = false, name = "authorised", columnDefinition = "TINYINT", length = 1)
 	private Boolean authorised;
 
-	@ManyToOne(fetch = FetchType.LAZY, optional = false)
+	@ManyToOne
 	@MapsId("productCode")
 	@JoinColumn(foreignKey = @ForeignKey(name = "FK_PRODUCT_CODE"),
 			name = "product_code",
