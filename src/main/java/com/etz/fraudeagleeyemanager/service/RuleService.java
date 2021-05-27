@@ -66,7 +66,7 @@ public class RuleService {
 		ruleEntity.setSourceValueOne(request.getFirstSourceVal());
 		// check the operator
 		ruleEntity.setOperatorOne(AppUtil.checkOperator(request.getFirstOperator().toLowerCase()));
-		ruleEntity.setCompareValueOne(request.getFirstCompareVal());
+		ruleEntity.setCompareValueOne(String.valueOf(request.getFirstCompareVal()));
 		ruleEntity.setDataSourceValOne(AppUtil.checkDataSource(request.getFirstDataSourceVal()));
 		// check logical operator
 		ruleEntity.setLogicOperator(AppUtil.checkLogicOperator(request.getLogicOperator()));
@@ -121,26 +121,8 @@ public class RuleService {
 		Rule updatedEntity = ruleRepository.save(ruleEntity);
 
 		//update redis
-		Rule ruleRedis = ruleRedisRepository.findById(request.getRuleId());
-		ruleRedis.setSourceValueOne(request.getFirstSourceVal());
-		// check for the list of Operator
-		ruleRedis.setOperatorOne(AppUtil.checkOperator(request.getFirstOperator()));
-		ruleRedis.setCompareValueOne(request.getFirstCompareVal());
-		ruleRedis.setDataSourceValOne(request.getFirstDataSource());
-		ruleRedis.setLogicOperator(request.getLogicOperator());
-		ruleRedis.setSourceValueTwo(request.getSecondSourceVal());
-		// check for the list of operator
-		ruleRedis.setOperatorTwo(AppUtil.checkOperator(request.getSecondOperator()));
-		ruleRedis.setCompareValueTwo(request.getSecondCompareVal());
-		ruleRedis.setDataSourceValTwo(request.getSecondDataSource());
-		ruleRedis.setSuspicionLevel(request.getSuspicion());
-		ruleRedis.setAction(request.getAction());
-		ruleRedis.setAuthorised(request.getAuthorised());
-		ruleRedis.setStatus(request.getStatus());
-		ruleRedis.setUpdatedBy(request.getUpdatedBy());
-
 		ruleRedisRepository.setHashOperations(fraudEngineRedisTemplate);
-		ruleRedisRepository.update(ruleRedis);
+		ruleRedisRepository.update(updatedEntity);
 		
 		return updatedEntity;
 	}

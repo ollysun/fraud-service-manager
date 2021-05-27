@@ -32,7 +32,7 @@ public class Rule extends BaseEntity implements Serializable {
 	private String operatorOne;
 
 	@Column(name = "compare_value_1")
-	private Integer compareValueOne;
+	private String compareValueOne;
 
 	@Column(name = "data_source_1", nullable=false)
 	private String dataSourceValOne;
@@ -47,14 +47,13 @@ public class Rule extends BaseEntity implements Serializable {
 	private String operatorTwo;
 
 	@Column(name = "compare_value_2")
-	private Integer compareValueTwo;
+	private String compareValueTwo;
 
 	@Column(name = "data_source_2")
 	private String dataSourceValTwo;
 
-	@Column(name = "suspicion_level", columnDefinition = "TINYINT", length = 10, nullable=false)
-	@Enumerated(EnumType.ORDINAL)
-	private SuspicionLevel suspicionLevel;
+
+	private Integer suspicionLevel;
 
 	@Column(name = "action")
 	private String action;

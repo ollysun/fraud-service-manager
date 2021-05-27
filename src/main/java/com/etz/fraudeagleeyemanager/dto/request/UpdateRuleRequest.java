@@ -15,16 +15,16 @@ public class UpdateRuleRequest{
     @NotBlank(message="firstOperator cannot be empty")
     private String firstOperator;
     @NotNull(message="firstCompareVal cannot be empty")
-    private Integer firstCompareVal;
+    private String firstCompareVal;
     @NotBlank(message="firstDataSource cannot be empty")
     private String firstDataSource;
     private String logicOperator;
     private String secondSourceVal;
     private String secondOperator;
-    private Integer secondCompareVal;
+    private String secondCompareVal;
     private String secondDataSource;
     @NotNull(message="suspicion cannot be empty")
-    private SuspicionLevel suspicion;
+    private Integer suspicion;
     @NotNull(message="action cannot be empty")
     private String action;
     @NotNull(message="updatedBy cannot be empty")
