@@ -59,5 +59,4 @@ public class EventLogEntity implements Serializable {
 	@Column(name = "event_time", nullable = false)
 	private LocalDateTime eventTime;
 
-
 }

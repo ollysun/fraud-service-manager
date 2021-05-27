@@ -1,24 +1,25 @@
 package com.etz.fraudeagleeyemanager.service;
 
 
-import com.etz.fraudeagleeyemanager.dto.request.CardRequest;
-import com.etz.fraudeagleeyemanager.dto.request.CardToProductRequest;
-import com.etz.fraudeagleeyemanager.dto.request.UpdateCardProductRequest;
-import com.etz.fraudeagleeyemanager.entity.Card;
-import com.etz.fraudeagleeyemanager.entity.CardProduct;
-import com.etz.fraudeagleeyemanager.exception.ResourceNotFoundException;
-import com.etz.fraudeagleeyemanager.redisrepository.AccountRedisRepository;
-import com.etz.fraudeagleeyemanager.redisrepository.CardProductRedisRepository;
-import com.etz.fraudeagleeyemanager.redisrepository.CardRedisRepository;
-import com.etz.fraudeagleeyemanager.repository.CardProductRepository;
-import com.etz.fraudeagleeyemanager.repository.CardRepository;
-import com.etz.fraudeagleeyemanager.util.PageRequestUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.Page;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
+
+import com.etz.fraudeagleeyemanager.dto.request.CardRequest;
+import com.etz.fraudeagleeyemanager.dto.request.CardToProductRequest;
+import com.etz.fraudeagleeyemanager.dto.request.UpdateCardProductRequest;
+import com.etz.fraudeagleeyemanager.entity.Card;
+import com.etz.fraudeagleeyemanager.entity.CardProduct;
+import com.etz.fraudeagleeyemanager.exception.ResourceNotFoundException;
+import com.etz.fraudeagleeyemanager.redisrepository.CardProductRedisRepository;
+import com.etz.fraudeagleeyemanager.redisrepository.CardRedisRepository;
+import com.etz.fraudeagleeyemanager.repository.CardProductRepository;
+import com.etz.fraudeagleeyemanager.repository.CardRepository;
+import com.etz.fraudeagleeyemanager.util.JsonConverter;
+import com.etz.fraudeagleeyemanager.util.PageRequestUtil;
 
 
 @Service
@@ -54,6 +55,11 @@ public class CardService {
 		cardEntity.setSuspicionCount(request.getSuspicionCount());
 		cardEntity.setBlockReason(request.getBlockReason());
 		cardEntity.setStatus(request.getStatus());
+		
+		// for auditing purpose for CREATE
+		cardEntity.setEntityId(null);
+		cardEntity.setRecordBefore(null);
+		cardEntity.setRequestDump(request);
 
 		Card savedCard = cardRepository.save(cardEntity);
 
@@ -90,6 +96,11 @@ public class CardService {
 		cardToProdEntity.setCardId(request.getCardId().longValue());
 		cardToProdEntity.setStatus(Boolean.TRUE);
 		cardToProdEntity.setCreatedBy(request.getCreatedBy());
+		
+		// for auditing purpose for CREATE
+		cardToProdEntity.setEntityId(null);
+		cardToProdEntity.setRecordBefore(null);
+		cardToProdEntity.setRequestDump(request);
 
 		CardProduct cardProduct = cardProductRepository.save(cardToProdEntity);
 		cardProductRedisRepository.setHashOperations(fraudEngineRedisTemplate);
@@ -103,7 +114,12 @@ public class CardService {
 		cardToProdEntity.setStatus(request.getStatus());
 		cardToProdEntity.setUpdatedBy(request.getUpdatedBy());
 		cardToProdEntity.setProductCode(request.getProductCode());
-// todo fetch and update on redis as well
+
+		// for auditing purpose for UPDATE
+		cardToProdEntity.setEntityId(request.getCardId().toString());
+		cardToProdEntity.setRecordBefore(JsonConverter.objectToJson(cardToProdEntity));
+		cardToProdEntity.setRequestDump(request);
+
 		CardProduct cardProduct = cardProductRepository.save(cardToProdEntity);
 		cardProductRedisRepository.setHashOperations(fraudEngineRedisTemplate);
 		cardProductRedisRepository.update(cardProduct);

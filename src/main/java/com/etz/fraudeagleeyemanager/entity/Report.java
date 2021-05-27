@@ -14,7 +14,7 @@ import java.util.Set;
 @Setter
 @ToString
 @RequiredArgsConstructor
-public class Report extends BaseEntity implements Serializable {
+public class Report extends BaseAuditEntity implements Serializable {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)

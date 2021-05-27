@@ -11,7 +11,7 @@ import java.io.Serializable;
 @Table(name = "account_product", uniqueConstraints = @UniqueConstraint(name="UC_ACCOUNT_PRODUCT",
         columnNames = {"account_id"}))
 @IdClass(AccountProductId.class)
-public class AccountProduct extends BaseEntity implements Serializable {
+public class AccountProduct extends BaseAuditEntity implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

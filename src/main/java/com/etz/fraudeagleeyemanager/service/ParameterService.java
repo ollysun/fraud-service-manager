@@ -1,25 +1,26 @@
 package com.etz.fraudeagleeyemanager.service;
 
 
-import com.etz.fraudeagleeyemanager.dto.request.CreateParameterRequest;
-import com.etz.fraudeagleeyemanager.dto.request.UpdateParameterRequest;
-import com.etz.fraudeagleeyemanager.entity.Card;
-import com.etz.fraudeagleeyemanager.entity.Parameter;
-import com.etz.fraudeagleeyemanager.exception.FraudEngineException;
-import com.etz.fraudeagleeyemanager.exception.ResourceNotFoundException;
-import com.etz.fraudeagleeyemanager.redisrepository.ParameterRedisRepository;
-import com.etz.fraudeagleeyemanager.repository.ParameterRepository;
-import com.etz.fraudeagleeyemanager.util.PageRequestUtil;
-import lombok.extern.slf4j.Slf4j;
+import java.util.Objects;
+import java.util.Optional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.Page;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
-import java.util.Objects;
-import java.util.Optional;
+import com.etz.fraudeagleeyemanager.dto.request.CreateParameterRequest;
+import com.etz.fraudeagleeyemanager.dto.request.UpdateParameterRequest;
+import com.etz.fraudeagleeyemanager.entity.Parameter;
+import com.etz.fraudeagleeyemanager.exception.FraudEngineException;
+import com.etz.fraudeagleeyemanager.exception.ResourceNotFoundException;
+import com.etz.fraudeagleeyemanager.redisrepository.ParameterRedisRepository;
+import com.etz.fraudeagleeyemanager.repository.ParameterRepository;
+import com.etz.fraudeagleeyemanager.util.JsonConverter;
+import com.etz.fraudeagleeyemanager.util.PageRequestUtil;
+
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service
@@ -42,6 +43,11 @@ public class ParameterService {
 		parameterEntity.setRequireValue(request.getRequireValue());
 		parameterEntity.setAuthorised(request.getAuthorised());
 		parameterEntity.setCreatedBy(request.getCreatedBy());
+		
+		// for auditing purpose for CREATE
+		parameterEntity.setEntityId(null);
+		parameterEntity.setRecordBefore(null);
+		parameterEntity.setRequestDump(request);
 
 		Parameter createdEntity = parameterRepository.save(parameterEntity);
 		parameterRedisRepository.setHashOperations(fraudEngineRedisTemplate);
@@ -60,6 +66,11 @@ public class ParameterService {
 		parameterEntity.setAuthorised(request.getAuthorised());
 		parameterEntity.setUpdatedBy(request.getUpdatedBy());
 
+		// for auditing purpose for UPDATE
+		parameterEntity.setEntityId(request.getParamId().toString());
+		parameterEntity.setRecordBefore(JsonConverter.objectToJson(parameterEntity));
+		parameterEntity.setRequestDump(request);
+
 		Parameter updatedEntity = parameterRepository.save(parameterEntity);
 		parameterRedisRepository.setHashOperations(fraudEngineRedisTemplate);
 		parameterRedisRepository.update(updatedEntity);
@@ -76,7 +87,16 @@ public class ParameterService {
 
 		Optional<Parameter> parameterEntity  = parameterRepository.findById(parameterId);
 		if (parameterEntity.isPresent()) {
-			parameterRepository.deleteById(parameterId);
+
+			Parameter parameter = parameterEntity.get();
+			// for auditing purpose for DELETE
+			parameter.setEntityId(parameterId.toString());
+			parameter.setRecordBefore(JsonConverter.objectToJson(parameter));
+			parameter.setRecordAfter(null);
+			parameter.setRequestDump(parameterId);
+			
+			//parameterRepository.deleteById(parameterId);
+			parameterRepository.delete(parameter);
 			parameterRedisRepository.setHashOperations(fraudEngineRedisTemplate);
 			parameterRedisRepository.delete(parameterId);
 		}else{

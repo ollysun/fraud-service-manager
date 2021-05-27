@@ -48,13 +48,12 @@ public class ProductService {
 		productEntity.setDescription(request.getProductDesc());
 		productEntity.setUseCard(request.getUseCard());
 		productEntity.setUseAccount(request.getUseAccount());
-
 		productEntity.setSupportHold(Status.ENABLED);
-
 		productEntity.setCallbackURL(request.getCallback());
 		productEntity.setStatus(request.getStatus());
 		productEntity.setCreatedBy(request.getCreatedBy());
-		// for auditing purpose
+		
+		// for auditing purpose for CREATE
 		productEntity.setEntityId(null);
 		productEntity.setRecordBefore(null);
 		productEntity.setRequestDump(request);
@@ -88,8 +87,8 @@ public class ProductService {
 		productEntity.setStatus(request.getStatus());
 		productEntity.setUpdatedBy(request.getUpdatedBy());
 		productEntity.setUpdatedAt(LocalDateTime.now());
-
-		// for auditing purpose
+		
+		// for auditing purpose for UPDATE
 		productEntity.setEntityId(request.getProductCode());
 		productEntity.setRecordBefore(JsonConverter.objectToJson(productEntity));
 		productEntity.setRequestDump(request);
@@ -106,13 +105,14 @@ public class ProductService {
 			throw new ResourceNotFoundException("Product Entity not found for productCode " + productCode);
 		}
 		
-		// for auditing purpose
+		// for auditing purpose for DELETE
 		productEntity.setEntityId(productCode);
 		productEntity.setRecordBefore(JsonConverter.objectToJson(productEntity));
 		productEntity.setRecordAfter(null);
 		productEntity.setRequestDump(productCode);
 		
-		productEntityRepository.deleteByCode(productCode);
+		//productEntityRepository.deleteByCode(productCode);
+		productEntityRepository.delete(productEntity);
 		productRedisRepository.setHashOperations(fraudEngineRedisTemplate);
 		productRedisRepository.delete(productCode);
 		return Boolean.TRUE;
@@ -126,6 +126,11 @@ public class ProductService {
 		prodDatasetEntity.setMandatory(request.getCompulsory());
 		prodDatasetEntity.setAuthorised(request.getAuthorised());
 		prodDatasetEntity.setCreatedBy(request.getCreatedBy());
+		
+		// for auditing purpose for CREATE
+		prodDatasetEntity.setEntityId(null);
+		prodDatasetEntity.setRecordBefore(null);
+		prodDatasetEntity.setRequestDump(request);
 
 		ProductDataSet savedProductDataset = productDataSetRepository.save(prodDatasetEntity);
 		productDatasetRedisRepository.setHashOperations(fraudEngineRedisTemplate);
@@ -154,6 +159,11 @@ public class ProductService {
 		productDatasetEntity.setMandatory(request.getCompulsory());
 		productDatasetEntity.setAuthorised(request.getAuthorised());
 		productDatasetEntity.setUpdatedBy(request.getUpdatedBy());
+		
+		// for auditing purpose for UPDATE
+		productDatasetEntity.setEntityId(request.getProductCode());
+		productDatasetEntity.setRecordBefore(JsonConverter.objectToJson(productDatasetEntity));
+		productDatasetEntity.setRequestDump(request);
 
 		ProductDataSet savedProductDataset = productDataSetRepository.save(productDatasetEntity);
 		productDatasetRedisRepository.setHashOperations(fraudEngineRedisTemplate);
@@ -166,7 +176,15 @@ public class ProductService {
 		if (productDatasetEntity == null){
 			throw new ResourceNotFoundException("Product dataset details not found for this code " + productCode);
 		}
-		productDataSetRepository.deleteByProductCode(productCode);
+		
+		// for auditing purpose for DELETE
+		productDatasetEntity.setEntityId(productCode);
+		productDatasetEntity.setRecordBefore(JsonConverter.objectToJson(productDatasetEntity));
+		productDatasetEntity.setRecordAfter(null);
+		productDatasetEntity.setRequestDump(productCode);
+		
+		//productDataSetRepository.deleteByProductCode(productCode);
+		productDataSetRepository.delete(productDatasetEntity);
 		productDatasetRedisRepository.setHashOperations(fraudEngineRedisTemplate);
 		productDatasetRedisRepository.delete(productDatasetEntity.getId());
 		return true;

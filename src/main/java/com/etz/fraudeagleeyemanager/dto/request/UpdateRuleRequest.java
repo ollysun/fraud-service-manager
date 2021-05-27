@@ -5,10 +5,13 @@ import com.etz.fraudeagleeyemanager.constant.LogicOperator;
 import com.etz.fraudeagleeyemanager.constant.SuspicionLevel;
 import lombok.Data;
 
+import java.io.Serializable;
+
 import javax.validation.constraints.NotNull;
 
 @Data
-public class UpdateRuleRequest{
+public class UpdateRuleRequest implements Serializable {
+	private static final long serialVersionUID = 1L;
     @NotNull(message="ruleId cannot be empty")
     private Long ruleId;
     @NotNull(message="firstSourceVal cannot be empty")

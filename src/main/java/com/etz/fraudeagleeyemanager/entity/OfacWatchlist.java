@@ -1,13 +1,24 @@
 package com.etz.fraudeagleeyemanager.entity;
 
-import com.etz.fraudeagleeyemanager.constant.BooleanStatus;
+import java.io.Serializable;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.Table;
+import javax.validation.constraints.NotBlank;
+
 import com.etz.fraudeagleeyemanager.constant.Status;
 import com.etz.fraudeagleeyemanager.constant.UserCategory;
-import lombok.*;
 
-import javax.persistence.*;
-import javax.validation.constraints.NotBlank;
-import java.io.Serializable;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 
 
 @Entity
@@ -16,7 +27,7 @@ import java.io.Serializable;
 @Setter
 @ToString
 @RequiredArgsConstructor
-public class OfacWatchlist extends BaseEntity implements Serializable {
+public class OfacWatchlist extends BaseAuditEntity implements Serializable {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)

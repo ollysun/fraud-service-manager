@@ -45,7 +45,7 @@ public class ProductController {
 		return new ResponseEntity<>(response, HttpStatus.CREATED);
 	}
 		
-	@PutMapping
+	@PutMapping(path = "/{product_code}")
 	public ModelResponse<ProductEntity> updateProduct(@PathVariable(name = "product_code") String productCode,
 			@RequestBody @Valid UpdateProductRequest request){
 		request.setProductCode(productCode);

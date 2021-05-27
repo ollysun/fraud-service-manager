@@ -7,7 +7,8 @@ import java.io.Serializable;
 
 @Data
 public class UpdateProductRequest implements Serializable {
-	
+	private static final long serialVersionUID = 1L;
+
 	@NotNull(message="Please enter the product Code")
 	private String productCode;
 

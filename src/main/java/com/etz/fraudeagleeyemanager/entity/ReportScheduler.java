@@ -16,7 +16,7 @@ import java.time.LocalDateTime;
 @Setter
 @ToString
 @RequiredArgsConstructor
-public class ReportScheduler extends BaseEntity implements Serializable {
+public class ReportScheduler extends BaseAuditEntity implements Serializable {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -25,11 +25,11 @@ public class ReportScheduler extends BaseEntity implements Serializable {
 	@Column(name = "interval_value")
 	private Integer intervalValue;
 	
-	@Column(name = "interval_type", nullable = false,  columnDefinition = "VARCHAR", length = 20)
+	@Column(name = "interval_type", nullable = false,  columnDefinition = "VARCHAR(45)", length = 20)
 	@Enumerated(EnumType.STRING)
 	private IntervalType intervalType;
 	
-	@Column(nullable = false, name = "loop", columnDefinition = "TINYINT", length = 1)
+	@Column(nullable = false, name = "\"loop\"", columnDefinition = "TINYINT", length = 1)
 	private Boolean loop;
 
 	@Column(nullable = false, name = "status", columnDefinition = "TINYINT", length = 1)

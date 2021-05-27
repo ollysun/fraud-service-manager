@@ -1,13 +1,14 @@
 package com.etz.fraudeagleeyemanager.dto.request;
 
-import com.fasterxml.jackson.annotation.JsonAlias;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.Data;
+import java.io.Serializable;
 
 import javax.validation.constraints.NotNull;
 
+import lombok.Data;
+
 @Data
-public class MapRuleToProductRequest {
+public class MapRuleToProductRequest implements Serializable {
+	private static final long serialVersionUID = 1L;
 
 	@NotNull(message="productCode cannot be empty")
 	private String productCode;

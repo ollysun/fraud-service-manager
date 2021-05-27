@@ -1,11 +1,17 @@
 package com.etz.fraudeagleeyemanager.entity;
 
-import com.etz.fraudeagleeyemanager.constant.Status;
+import java.io.Serializable;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
+
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-
-import javax.persistence.*;
-import javax.validation.constraints.NotBlank;
 
 @EqualsAndHashCode(callSuper = true)
 @Entity
@@ -13,7 +19,7 @@ import javax.validation.constraints.NotBlank;
 uniqueConstraints = @UniqueConstraint(
 		columnNames = {"name", "operator"}, name = "UC_Parameter"))
 @Data
-public class Parameter extends BaseEntity {
+public class Parameter extends BaseAuditEntity implements Serializable {
 		
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)

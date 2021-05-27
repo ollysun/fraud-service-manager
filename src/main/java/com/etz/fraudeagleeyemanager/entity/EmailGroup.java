@@ -17,7 +17,7 @@ import java.util.Set;
 @RequiredArgsConstructor
 @Entity
 @Table(name="email_group")
-public class EmailGroup extends BaseEntity implements Serializable {
+public class EmailGroup extends BaseAuditEntity implements Serializable {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)

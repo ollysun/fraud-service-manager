@@ -1,26 +1,26 @@
 package com.etz.fraudeagleeyemanager.service;
 
 
-import com.etz.fraudeagleeyemanager.dto.request.AccountToProductRequest;
-import com.etz.fraudeagleeyemanager.dto.request.AddAccountRequest;
-import com.etz.fraudeagleeyemanager.dto.request.UpdateAccountProductRequest;
-import com.etz.fraudeagleeyemanager.entity.Account;
-import com.etz.fraudeagleeyemanager.entity.AccountProduct;
-import com.etz.fraudeagleeyemanager.exception.FraudEngineException;
-import com.etz.fraudeagleeyemanager.exception.ResourceNotFoundException;
-import com.etz.fraudeagleeyemanager.redisrepository.AccountProductRedisRepository;
-import com.etz.fraudeagleeyemanager.redisrepository.AccountRedisRepository;
-import com.etz.fraudeagleeyemanager.repository.AccountProductRepository;
-import com.etz.fraudeagleeyemanager.repository.AccountRepository;
-import com.etz.fraudeagleeyemanager.util.PageRequestUtil;
+import java.util.Objects;
+
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.Page;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
-import java.util.Objects;
+import com.etz.fraudeagleeyemanager.dto.request.AccountToProductRequest;
+import com.etz.fraudeagleeyemanager.dto.request.AddAccountRequest;
+import com.etz.fraudeagleeyemanager.dto.request.UpdateAccountProductRequest;
+import com.etz.fraudeagleeyemanager.entity.Account;
+import com.etz.fraudeagleeyemanager.entity.AccountProduct;
+import com.etz.fraudeagleeyemanager.exception.ResourceNotFoundException;
+import com.etz.fraudeagleeyemanager.redisrepository.AccountProductRedisRepository;
+import com.etz.fraudeagleeyemanager.redisrepository.AccountRedisRepository;
+import com.etz.fraudeagleeyemanager.repository.AccountProductRepository;
+import com.etz.fraudeagleeyemanager.repository.AccountRepository;
+import com.etz.fraudeagleeyemanager.util.JsonConverter;
+import com.etz.fraudeagleeyemanager.util.PageRequestUtil;
 
 
 @Service
@@ -47,6 +47,7 @@ public class AccountService {
 		Account accountEntity = new Account();
 
 		// check for account number digits
+		accountEntity.setAccountNo(request.getAccountNo());
 		accountEntity.setAccountName(request.getAccountName());
 		accountEntity.setBankCode(request.getBankCode());
 		accountEntity.setBankName(request.getBankName());
@@ -54,9 +55,13 @@ public class AccountService {
 		accountEntity.setCreatedBy(request.getCreatedBy());
 		accountEntity.setSuspicionCount(request.getSuspicion());
 		accountEntity.setBlockReason(request.getBlockReason());
-// saving to database
+		
+		// for auditing purpose for CREATE
+		accountEntity.setEntityId(null);
+		accountEntity.setRecordBefore(null);
+		accountEntity.setRequestDump(request);
+
 		Account account = accountRepository.save(accountEntity);
- // redis saving
 		accountRedisRepository.setHashOperations(redisTemplate);
 		accountRedisRepository.create(account);
 		return account;
@@ -88,6 +93,11 @@ public class AccountService {
 		accountProductEntity.setAccountId(request.getAccountId());
 		accountProductEntity.setStatus(Boolean.TRUE);
 		accountProductEntity.setCreatedBy(request.getCreatedBy());
+		
+		// for auditing purpose for CREATE
+		accountProductEntity.setEntityId(null);
+		accountProductEntity.setRecordBefore(null);
+		accountProductEntity.setRequestDump(request);
 
 		AccountProduct accountProduct = accountProductRepository.save(accountProductEntity);
 
@@ -101,8 +111,13 @@ public class AccountService {
 		accountEntity.setStatus(request.getStatus());
 		accountEntity.setUpdatedBy(request.getUpdatedBy());
 		accountEntity.setProductCode(request.getProductCode());
+
+		// for auditing purpose for UPDATE
+		accountEntity.setEntityId(request.getAccountId().toString());
+		accountEntity.setRecordBefore(JsonConverter.objectToJson(accountEntity));
+		accountEntity.setRequestDump(request);
+		
 		AccountProduct accountProduct = accountProductRepository.save(accountEntity);
-//  todo fetch from redis and update as well just like Database update
 		accountProductRedisRepository.setHashOperations(redisTemplate);
 		accountProductRedisRepository.update(accountProduct);
 		return accountProduct;

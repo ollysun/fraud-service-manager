@@ -14,7 +14,7 @@ import java.util.Set;
 @Table(name = "product")
 @EqualsAndHashCode(callSuper = true)
 @Data
-public class ProductEntity extends BaseEntity implements Serializable {
+public class ProductEntity extends BaseAuditVersionEntity implements Serializable {
 
     @Id
     @Column(name = "code", unique=true,columnDefinition="VARCHAR(100)")

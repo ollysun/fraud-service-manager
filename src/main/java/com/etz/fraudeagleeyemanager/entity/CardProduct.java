@@ -11,7 +11,7 @@ import java.io.Serializable;
         columnNames = {"card_id"}))
 @Entity
 @IdClass(CardProductId.class)
-public class CardProduct extends BaseEntity implements Serializable {
+public class CardProduct extends BaseAuditEntity implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

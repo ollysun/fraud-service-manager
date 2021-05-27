@@ -12,9 +12,9 @@ import java.io.Serializable;
 @Entity
 @Table(name = "product_dataset")
 @IdClass(ProductDatasetId.class)
-public class ProductDataSet extends BaseEntity implements Serializable {
+public class ProductDataSet extends BaseAuditEntity implements Serializable {
 	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	//@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
 	@Id

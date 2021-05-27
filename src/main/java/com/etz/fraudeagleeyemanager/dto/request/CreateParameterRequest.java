@@ -2,10 +2,13 @@ package com.etz.fraudeagleeyemanager.dto.request;
 
 import lombok.Data;
 
+import java.io.Serializable;
+
 import javax.validation.constraints.NotNull;
 
 @Data
-public class CreateParameterRequest {
+public class CreateParameterRequest implements Serializable {
+	private static final long serialVersionUID = 1L;
 	@NotNull(message = "Name cannot be empty")
 	private String name;
 	@NotNull(message = "Operator cannot be empty")

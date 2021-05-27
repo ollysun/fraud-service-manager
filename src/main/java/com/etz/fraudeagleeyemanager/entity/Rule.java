@@ -15,7 +15,7 @@ import java.util.Set;
 @Entity
 @Table(name = "rule")
 @Data
-public class Rule extends BaseEntity implements Serializable {
+public class Rule extends BaseAuditEntity implements Serializable {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)

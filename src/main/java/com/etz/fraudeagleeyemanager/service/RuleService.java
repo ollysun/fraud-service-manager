@@ -13,6 +13,7 @@ import com.etz.fraudeagleeyemanager.redisrepository.ProductRuleRedisRepository;
 import com.etz.fraudeagleeyemanager.redisrepository.RuleRedisRepository;
 import com.etz.fraudeagleeyemanager.repository.ProductRuleRepository;
 import com.etz.fraudeagleeyemanager.repository.RuleRepository;
+import com.etz.fraudeagleeyemanager.util.JsonConverter;
 import com.etz.fraudeagleeyemanager.util.PageRequestUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -58,8 +59,13 @@ public class RuleService {
 		ruleEntity.setAction(request.getAction());
 		ruleEntity.setAuthorised(request.getAuthorised());
 		ruleEntity.setStatus(Boolean.TRUE);
-		Rule createdEntity = ruleRepository.save(ruleEntity);
 		
+		// for auditing purpose for CREATE
+		ruleEntity.setEntityId(null);
+		ruleEntity.setRecordBefore(null);
+		ruleEntity.setRequestDump(request);
+		
+		Rule createdEntity = ruleRepository.save(ruleEntity);
 		ruleRedisRepository.setHashOperations(fraudEngineRedisTemplate);
 		ruleRedisRepository.create(createdEntity);
 		
@@ -106,6 +112,11 @@ public class RuleService {
 		ruleEntity.setAuthorised(request.getAuthorised());
 		ruleEntity.setStatus(request.getStatus());
 		ruleEntity.setUpdatedBy(request.getUpdatedBy());
+		
+		// for auditing purpose for UPDATE
+		ruleEntity.setEntityId(request.getRuleId().toString());
+		ruleEntity.setRecordBefore(JsonConverter.objectToJson(ruleEntity));
+		ruleEntity.setRequestDump(request);
 
 		Rule updatedEntity = ruleRepository.save(ruleEntity);
 		ruleRedisRepository.setHashOperations(fraudEngineRedisTemplate);
@@ -114,14 +125,24 @@ public class RuleService {
 		return updatedEntity;
 	}
 
-	public boolean deleteRule(Long parameterId) {
-		ruleRepository.deleteById(parameterId);
+	public boolean deleteRule(Long ruleId) {
+		Rule ruleEntity = ruleRepository.findById(ruleId)
+				.orElseThrow(() -> new ResourceNotFoundException("Rule Entity not found for Id " + ruleId));
+		
+		// for auditing purpose for DELETE
+		ruleEntity.setEntityId(ruleId.toString());
+		ruleEntity.setRecordBefore(JsonConverter.objectToJson(ruleId));
+		ruleEntity.setRecordAfter(null);
+		ruleEntity.setRequestDump(ruleId);
+		
+		//ruleRepository.deleteById(ruleId);
+		ruleRepository.delete(ruleEntity);
 		ruleRedisRepository.setHashOperations(fraudEngineRedisTemplate);
-		ruleRedisRepository.delete(parameterId);
+		ruleRedisRepository.delete(ruleId);
 		
 		// child records have to be deleted in Redis
 		productRuleRedisRepository.setHashOperations(fraudEngineRedisTemplate);
-		Set<String> keys = productRuleRedisRepository.scanKeys("*:" + parameterId);
+		Set<String> keys = productRuleRedisRepository.scanKeys("*:" + ruleId);
 		keys.forEach(key -> productRuleRedisRepository.delete(key));
 		
 		return true;
@@ -146,6 +167,11 @@ public class RuleService {
 		prodRuleEntity.setStatus(Boolean.TRUE);
 		prodRuleEntity.setAuthorised(request.getAuthorised());
 		prodRuleEntity.setCreatedBy(request.getCreatedBy());
+		
+		// for auditing purpose for CREATE
+		prodRuleEntity.setEntityId(null);
+		prodRuleEntity.setRecordBefore(null);
+		prodRuleEntity.setRequestDump(request);
 
 		ProductRule createdEntity = productRuleRepository.save(prodRuleEntity);
 		productRuleRedisRepository.setHashOperations(fraudEngineRedisTemplate);
@@ -163,6 +189,11 @@ public class RuleService {
 		prodRuleEntity.setStatus(request.getStatus());
 		prodRuleEntity.setAuthorised(request.getAuthorised());
 		prodRuleEntity.setUpdatedBy(request.getUpdatedBy());
+		
+		// for auditing purpose for UPDATE
+		prodRuleEntity.setEntityId(request.getProductRuleId().toString());
+		prodRuleEntity.setRecordBefore(JsonConverter.objectToJson(prodRuleEntity));
+		prodRuleEntity.setRequestDump(request);
 
 		ProductRule updatedEntity = productRuleRepository.save(prodRuleEntity);
 		productRuleRedisRepository.setHashOperations(fraudEngineRedisTemplate);
@@ -174,9 +205,16 @@ public class RuleService {
 		ProductRule prodRuleEntity = productRuleRepository.findById(productRuleId)
 				.orElseThrow(() -> new ResourceNotFoundException("ProductRule Not found for Id " + productRuleId ));
 
+		// for auditing purpose for DELETE
+		prodRuleEntity.setEntityId(productRuleId.toString());
+		prodRuleEntity.setRecordBefore(JsonConverter.objectToJson(productRuleId));
+		prodRuleEntity.setRecordAfter(null);
+		prodRuleEntity.setRequestDump(productRuleId);
+		
 		String redisId = prodRuleEntity.getProductCode()+ ":"+prodRuleEntity.getRuleId();
 		
-		productRuleRepository.deleteById(productRuleId);
+		//productRuleRepository.deleteById(productRuleId);
+		productRuleRepository.delete(prodRuleEntity);
 		productRuleRedisRepository.setHashOperations(fraudEngineRedisTemplate);
 		productRuleRedisRepository.delete(redisId);
 		return true;

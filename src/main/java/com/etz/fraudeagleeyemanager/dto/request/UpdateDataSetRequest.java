@@ -7,8 +7,9 @@ import java.io.Serializable;
 
 @Data
 public class UpdateDataSetRequest implements Serializable {
+	private static final long serialVersionUID = 1L;
 
-    @NotNull(message="Please enter the product Code")
+	@NotNull(message="Please enter the product Code")
     private String productCode;
 
     @NotNull(message="Please enter the field name")

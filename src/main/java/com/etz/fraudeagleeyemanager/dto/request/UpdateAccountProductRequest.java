@@ -1,14 +1,14 @@
 package com.etz.fraudeagleeyemanager.dto.request;
 
-import com.etz.fraudeagleeyemanager.constant.Status;
-import com.fasterxml.jackson.annotation.JsonAlias;
-import lombok.Data;
+import java.io.Serializable;
 
-import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
+import lombok.Data;
+
 @Data
-public class UpdateAccountProductRequest {
+public class UpdateAccountProductRequest implements Serializable {
+	private static final long serialVersionUID = 1L;
 	@NotNull(message = "AccountId cannot be null")
 	private Long accountId;
 	@NotNull(message = "ProductCode cannot be null")

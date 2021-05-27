@@ -18,8 +18,6 @@ public class AuditTrailService {
 	
 	//@Async
 	public void save(BaseAuditEntity baseAuditEntity) {
-		Long userId = 0L;//userRepository.findByUsername(baseEntityModel.getUsername()).getId();
-		
 		EventLogEntity eventLogEntity = new EventLogEntity();
 		eventLogEntity.setEntity(baseAuditEntity.getEntity());
 		eventLogEntity.setEntityId(baseAuditEntity.getEntityId());
@@ -28,7 +26,7 @@ public class AuditTrailService {
 		eventLogEntity.setRecordAfter(baseAuditEntity.getRecordAfter());
 		eventLogEntity.setEndpoint(baseAuditEntity.getEndpoint());
 		eventLogEntity.setRequestDump(JsonConverter.objectToJson(baseAuditEntity.getRequestDump()));
-		eventLogEntity.setUserId(userId);
+		eventLogEntity.setUserId(baseAuditEntity.getUserId());
 		eventLogEntity.setEventType(baseAuditEntity.getEventType());
 		eventLogEntity.setEventTime(LocalDateTime.now());
 		

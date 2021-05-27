@@ -15,7 +15,7 @@ import java.util.Set;
 		uniqueConstraints = @UniqueConstraint(name="UC_ACCOUNT",
 				columnNames = {"account_no", "bank_code"}))
 @Data
-public class Account extends BaseEntity implements Serializable {
+public class Account extends BaseAuditEntity implements Serializable {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -29,7 +29,7 @@ public class Account extends BaseEntity implements Serializable {
 	private String accountName;
 
 	@NotBlank(message = "Bank code cannot be empty")
-	@Column(name = "bank_code", unique = true, length=200)
+	@Column(name = "bank_code", length=200)
 	private String bankCode;
 
 	@NotBlank(message = "Bank name cannot be empty")

@@ -15,7 +15,7 @@ import java.io.Serializable;
 @Setter
 @RequiredArgsConstructor
 @ToString
-public class ProductRule extends BaseEntity implements Serializable {
+public class ProductRule extends BaseAuditEntity implements Serializable {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)

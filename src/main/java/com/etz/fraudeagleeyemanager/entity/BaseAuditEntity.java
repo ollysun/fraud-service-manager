@@ -4,15 +4,16 @@ import java.io.Serializable;
 
 import javax.persistence.MappedSuperclass;
 import javax.persistence.Transient;
-import javax.persistence.Version;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 @MappedSuperclass
 @Data
-public class BaseAuditEntity implements Serializable {
+@EqualsAndHashCode(callSuper = true)
+public class BaseAuditEntity extends BaseEntity implements Serializable {
 
 	private static final long serialVersionUID = 1L;
     
@@ -52,12 +53,4 @@ public class BaseAuditEntity implements Serializable {
     @Transient
     private String eventType = ""; //Event activity type i.e INSERT, UPDATE etc
 
-	/*
-	 * This resolves JPA calling merge instead of persist on a new entity that manually sets
-	 * its primary key column.
-	 */
-	@JsonIgnore
-    @Version
-    private Long version;
-	
 }

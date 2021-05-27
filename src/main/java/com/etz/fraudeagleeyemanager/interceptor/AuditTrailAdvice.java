@@ -27,6 +27,16 @@ public class AuditTrailAdvice {
 
 		return processintercept(jp, entity, eventType, eventDescription);
 	}
+	
+//	@Around("execution(* javax.persistence.EntityManager.persist(..))"
+//			+ " && execution(* org.springframework.data.repository.CrudRepository.save(..))"
+//			+ " && args(entity,..) && !args(com.etz.fraudeagleeyemanager.entity.EventLogEntity)")
+//	public Object interceptCreate(ProceedingJoinPoint jp, Object entity) {
+//		String eventType = CrudOperation.CREATE.getValue();
+//		String eventDescription = "Created " + entity.getClass().getSimpleName();
+//		
+//		return processintercept(jp, entity, eventType, eventDescription);
+//	}
 
 	@Around("execution(* javax.persistence.EntityManager.merge(..))"
 			+ " && !execution(* javax.persistence.EntityManager.merge(com.etz.fraudeagleeyemanager.entity.EventLogEntity))"
@@ -49,7 +59,6 @@ public class AuditTrailAdvice {
 	}
 
 	private Object processintercept(ProceedingJoinPoint jp, Object entity, String eventType, String eventDescription) {
-
 		Object response = null;
 		
 		try {
@@ -57,14 +66,15 @@ public class AuditTrailAdvice {
 		} catch (Throwable throwable) {
 			throwable.printStackTrace();
 		}
-		
+		System.out.println("entity: " + entity);
+		System.out.println("response: " + response);
 		// only entities that extend the BaseEntityModel class will be audited
 		if (entity instanceof BaseAuditEntity) {
 			BaseAuditEntity baseAuditEntity = (BaseAuditEntity) entity;
 			baseAuditEntity.setEntity(entity.getClass().getSimpleName());
 			baseAuditEntity.setEventDescription(eventDescription);
 			baseAuditEntity.setEndpoint(RequestUtil.getSourceURL());
-			baseAuditEntity.setUserId(Long.valueOf(RequestUtil.getAccessTokenClaim("user_id")));
+			baseAuditEntity.setUserId(0L);//Long.valueOf(RequestUtil.getAccessTokenClaim("user_id")));
 			baseAuditEntity.setEventType(eventType);
 
 			if (baseAuditEntity.getRecordAfter() != null) {
