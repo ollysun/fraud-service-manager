@@ -11,6 +11,8 @@ import org.hibernate.annotations.Where;
 import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
 import java.io.Serializable;
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
 
 @Entity
 @Table(name = "product_rule")
@@ -48,21 +50,22 @@ public class ProductRule extends BaseEntity implements Serializable {
 	private Boolean authorised;
 
 	@ToString.Exclude
-	@ManyToOne(fetch = FetchType.LAZY, optional = false)
+	@ManyToOne
 	@JoinColumn(name = "product_code", foreignKey = @ForeignKey(name = "FK_PRODUCT_RULE_CODE"),
 			referencedColumnName="code", insertable = false, updatable = false)
 	private ProductEntity productEntity;
 
 	@ToString.Exclude
-	@ManyToOne(fetch = FetchType.LAZY, optional = false)
+	@ManyToOne
 	@JoinColumn(name = "email_group_id", foreignKey = @ForeignKey(name = "FK_PRODUCT_RULE_EMAIL_GROUP_ID"),
 			referencedColumnName="id", insertable = false, updatable = false)
 	private EmailGroup emailGroup;
 
 	@ToString.Exclude
-	@ManyToOne(fetch = FetchType.LAZY, optional = false)
+	@ManyToOne
 	@JoinColumn(name = "rule_id", foreignKey = @ForeignKey(name = "FK_PRODUCT_RULE_RULE_ID"),
 			referencedColumnName="id", insertable = false, updatable = false)
+	@Fetch(FetchMode.JOIN)
 	private Rule rule;
 
 
