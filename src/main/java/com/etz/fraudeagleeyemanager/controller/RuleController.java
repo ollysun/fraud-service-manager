@@ -4,11 +4,7 @@ import com.etz.fraudeagleeyemanager.dto.request.CreateRuleRequest;
 import com.etz.fraudeagleeyemanager.dto.request.MapRuleToProductRequest;
 import com.etz.fraudeagleeyemanager.dto.request.UpdateMapRuleToProductRequest;
 import com.etz.fraudeagleeyemanager.dto.request.UpdateRuleRequest;
-import com.etz.fraudeagleeyemanager.dto.response.BooleanResponse;
-import com.etz.fraudeagleeyemanager.dto.response.CollectionResponse;
-import com.etz.fraudeagleeyemanager.dto.response.ModelResponse;
-import com.etz.fraudeagleeyemanager.dto.response.PageResponse;
-import com.etz.fraudeagleeyemanager.entity.Account;
+import com.etz.fraudeagleeyemanager.dto.response.*;
 import com.etz.fraudeagleeyemanager.entity.ProductRule;
 import com.etz.fraudeagleeyemanager.entity.Rule;
 import com.etz.fraudeagleeyemanager.service.RuleService;
@@ -20,6 +16,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.util.List;
 
 @Slf4j
 @Validated
@@ -68,6 +65,14 @@ public class RuleController {
 	@DeleteMapping(path = "/product/{productRuleId}")
 	public BooleanResponse deleteProductRule(@PathVariable(name = "productRuleId") Long productRuleId){
 		return new BooleanResponse(ruleService.deleteProductRule(productRuleId));
+	}
+
+	@GetMapping(path = "/product")
+	public ResponseEntity<CollectionResponse<RuleResponse>> getRuleProduct(
+			@RequestParam(name = "code", required = true) String code){
+		List<RuleResponse> roleResponseList = ruleService.getRuleProduct(code);
+		CollectionResponse<RuleResponse> collectionResponse = new CollectionResponse<>(roleResponseList);
+		return new ResponseEntity<>(collectionResponse, HttpStatus.OK);
 	}
 
 }

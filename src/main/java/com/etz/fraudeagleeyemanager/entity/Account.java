@@ -51,11 +51,11 @@ public class Account extends BaseEntity implements Serializable {
 	@Column(name = "block_reason")
 	private String blockReason;
 
-	@OneToMany(mappedBy = "account",
-			cascade = CascadeType.ALL,
-			orphanRemoval = true,
-			fetch = FetchType.EAGER)
-	private Set<AccountProduct> accounts;
+//	@OneToMany(mappedBy = "account",
+//			cascade = CascadeType.ALL,
+//			orphanRemoval = true,
+//			fetch = FetchType.LAZY)
+//	private Set<AccountProduct> accounts;
 
 
 

@@ -26,7 +26,7 @@ public class AccountProductRedisRepository implements RedisRepository<AccountPro
     
 	@Override
 	public void create(AccountProduct model) {
-		hashOperations.put(FraudRedisKey.ACCOUNTPRODUCT.name(), model.getAccountId(), model);
+		hashOperations.put(FraudRedisKey.ACCOUNTPRODUCT.name(), model.getAccountProductId().getAccountId(), model);
 	}
 
 	@Override

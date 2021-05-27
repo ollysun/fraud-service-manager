@@ -4,11 +4,11 @@ package com.etz.fraudeagleeyemanager.controller;
 import com.etz.fraudeagleeyemanager.dto.request.AccountToProductRequest;
 import com.etz.fraudeagleeyemanager.dto.request.AddAccountRequest;
 import com.etz.fraudeagleeyemanager.dto.request.UpdateAccountProductRequest;
-import com.etz.fraudeagleeyemanager.dto.response.ModelResponse;
-import com.etz.fraudeagleeyemanager.dto.response.PageResponse;
+import com.etz.fraudeagleeyemanager.dto.response.*;
 import com.etz.fraudeagleeyemanager.entity.Account;
 import com.etz.fraudeagleeyemanager.entity.AccountProduct;
 import com.etz.fraudeagleeyemanager.service.AccountService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,7 +16,9 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.util.List;
 
+@Slf4j
 @Validated
 @RestController
 @RequestMapping("/v1/account")
@@ -43,6 +45,7 @@ public class AccountController {
 	@PostMapping(path = "/product")
 	public ResponseEntity<ModelResponse<AccountProduct>> mapAccountToProduct(
 			@RequestBody @Valid AccountToProductRequest request) {
+		log.info(request.toString());
 		ModelResponse<AccountProduct> response = new ModelResponse<>(
 				accountService.mapAccountProduct(request));
 		response.setStatus(HttpStatus.CREATED.value());
@@ -50,8 +53,12 @@ public class AccountController {
 	}
 
 	@PutMapping(path = "/product")
-	public ModelResponse<AccountProduct> updateAccount(@RequestBody @Valid UpdateAccountProductRequest request) {
-		return new ModelResponse<>(accountService.updateAccountProduct(request));
+	public ResponseEntity<CollectionResponse<AccountProductResponse>> updateAccount(@RequestBody @Valid UpdateAccountProductRequest request) {
+		log.info(request.toString());
+		List<AccountProductResponse> userResponseList = accountService.updateAccountProduct(request);
+		CollectionResponse<AccountProductResponse> collectionResponse = new CollectionResponse<>(userResponseList);
+		collectionResponse.setMessage("All Updated AccountProduct");
+		return new ResponseEntity<>(collectionResponse, HttpStatus.OK);
 	}
 
 }

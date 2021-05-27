@@ -11,6 +11,8 @@ import org.hibernate.annotations.Where;
 import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
 import java.io.Serializable;
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
 
 @Entity
 @Table(name = "product_rule")
@@ -63,6 +65,7 @@ public class ProductRule extends BaseEntity implements Serializable {
 	@ManyToOne
 	@JoinColumn(name = "rule_id", foreignKey = @ForeignKey(name = "FK_PRODUCT_RULE_RULE_ID"),
 			referencedColumnName="id", insertable = false, updatable = false)
+	@Fetch(FetchMode.JOIN)
 	private Rule rule;
 
 

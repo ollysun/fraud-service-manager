@@ -62,8 +62,8 @@ public class ProductEntity extends BaseEntity implements Serializable {
             cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<CardProduct> products;
 
-    @ToString.Exclude
-    @OneToMany(mappedBy = "productEntity", fetch = FetchType.EAGER,
-            cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<AccountProduct> productLists;
+//    @ToString.Exclude
+//    @OneToMany(mappedBy = "productEntity", fetch = FetchType.LAZY,
+//            cascade = CascadeType.ALL, orphanRemoval = true)
+//    private Set<AccountProduct> productLists;
 }

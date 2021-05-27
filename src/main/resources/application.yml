@@ -46,6 +46,9 @@ spring:
     password: root
     url: jdbc:mysql://localhost:3306/eagle_eye?useLegacyDatetimeCode=false&serverTimezone=Africa/Lagos&createDatabaseIfNotExist=true
     driverClassName: com.mysql.cj.jdbc.Driver
+    initialization-mode: always
+    data: classpath:data.sql
+
   jackson:
     default-property-inclusion: NON_NULL
     mapper:
@@ -60,7 +63,7 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: create
     properties:
       hibernate:
         dialect: org.hibernate.dialect.MySQL55Dialect

@@ -10,6 +10,7 @@ import com.etz.fraudeagleeyemanager.dto.response.*;
 import com.etz.fraudeagleeyemanager.entity.ProductEntity;
 import com.etz.fraudeagleeyemanager.entity.ProductDataSet;
 import com.etz.fraudeagleeyemanager.service.ProductService;
+import com.etz.fraudeagleeyemanager.util.RestTemplateUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -26,6 +27,8 @@ public class ProductController {
 
 	@Autowired
 	ProductService productService;
+
+	private RestTemplateUtil restTemplateUtil;
 	
 	@PostMapping
 	public ResponseEntity<ModelResponse<ProductEntity>> createProduct(
@@ -48,6 +51,7 @@ public class ProductController {
 	@GetMapping
 	public ResponseEntity<CollectionResponse<ProductResponse>> queryProduct(@RequestParam(name = "code", required = false)
 																	  String code){
+		//log.info(restTemplateUtil.getAllProducts();
 		List<ProductResponse> userResponseList = productService.getProduct(code);
 		CollectionResponse<ProductResponse> collectionResponse = new CollectionResponse<>(userResponseList);
 		collectionResponse.setMessage("All Product");
