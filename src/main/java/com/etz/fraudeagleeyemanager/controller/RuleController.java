@@ -45,7 +45,7 @@ public class RuleController {
 	}
 	
 	@GetMapping
-	public PageResponse<Rule> queryRule(@RequestParam(name = "ruleId", required = false) Long ruleId){
+	public PageResponse<RuleResponse> queryRule(@RequestParam(name = "ruleId", required = false) Long ruleId){
 		return new PageResponse<>(ruleService.getRule(ruleId));
 	}
 		

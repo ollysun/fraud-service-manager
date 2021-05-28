@@ -18,7 +18,6 @@ import java.util.Set;
 @SQLDelete(sql = "UPDATE rule SET deleted = true WHERE id = ?", check = ResultCheckStyle.COUNT)
 @Where(clause = "deleted = false")
 @Data
-@ToString(exclude = {"productRule"})
 public class Rule extends BaseEntity implements Serializable {
 
 	@Id
@@ -52,7 +51,6 @@ public class Rule extends BaseEntity implements Serializable {
 	@Column(name = "data_source_2")
 	private String dataSourceValTwo;
 
-
 	private Integer suspicionLevel;
 
 	@Column(name = "action")
@@ -64,6 +62,7 @@ public class Rule extends BaseEntity implements Serializable {
 	@Column(name = "authorised")
 	private Boolean authorised;
 
+	@ToString.Exclude
 	@OneToMany(mappedBy = "rule",fetch = FetchType.LAZY,
 			cascade = CascadeType.ALL, orphanRemoval = true)
 	private Set<ProductRule> productRule;
