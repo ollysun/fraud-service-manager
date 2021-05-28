@@ -27,6 +27,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
@@ -140,15 +142,36 @@ public class RuleService {
 		return true;
 	}
 
-	public Page<Rule> getRule(Long ruleId) {
+
+	public static <T> Page<T> listConvertToPage1(List<T> list, Pageable pageable) {
+		int start = (int) pageable.getOffset();
+		int end = (start + pageable.getPageSize()) > list.size() ? list.size() : (start + pageable.getPageSize());
+		return new PageImpl<T>(list.subList(start, end), pageable, list.size());
+	}
+
+
+	public Page<RuleResponse> getRule(Long ruleId) {
+		List<RuleResponse> ruleResponseList;
 		if (ruleId == null) {
-			return ruleRepository.findAll(PageRequestUtil.getPageRequest());
+			ruleResponseList = outputRuleResponse(ruleRepository.findAll());
+			return listConvertToPage1(ruleResponseList, PageRequestUtil.getPageRequest());
 		}
 		Rule ruleEntity = ruleRepository.findById(ruleId).orElseThrow(() -> new ResourceNotFoundException("Rule Not found " + ruleId));
 		ruleEntity.setId(ruleId);
+		ruleResponseList = outputRuleResponse(ruleRepository.findAll(Example.of(ruleEntity)));
 
-		return ruleRepository.findAll(Example.of(ruleEntity), PageRequestUtil.getPageRequest());
+		return listConvertToPage1(ruleResponseList, PageRequestUtil.getPageRequest());
 	}
+
+//	private List<RuleResponse> outputRuleResponse(List<ProductEntity> productEntityList){
+//		List<ProductResponse> productResponseList = new ArrayList<>();
+//		productEntityList.forEach(productVal -> {
+//			ProductResponse productResponse = new ProductResponse();
+//			BeanUtils.copyProperties(productVal,productResponse,"productDataset, productRules, products, productLists");
+//			productResponseList.add(productResponse);
+//		});
+//		return productResponseList;
+//	}
 
 	public ProductRule mapRuleToProduct(MapRuleToProductRequest request) {
 		ProductRule prodRuleEntity = new ProductRule();
