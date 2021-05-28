@@ -50,22 +50,21 @@ public class ProductRule extends BaseEntity implements Serializable {
 	private Boolean authorised;
 
 	@ToString.Exclude
-	@ManyToOne
+	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "product_code", foreignKey = @ForeignKey(name = "FK_PRODUCT_RULE_CODE"),
 			referencedColumnName="code", insertable = false, updatable = false)
 	private ProductEntity productEntity;
 
 	@ToString.Exclude
-	@ManyToOne
+	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "email_group_id", foreignKey = @ForeignKey(name = "FK_PRODUCT_RULE_EMAIL_GROUP_ID"),
 			referencedColumnName="id", insertable = false, updatable = false)
 	private EmailGroup emailGroup;
 
 	@ToString.Exclude
-	@ManyToOne
+	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "rule_id", foreignKey = @ForeignKey(name = "FK_PRODUCT_RULE_RULE_ID"),
 			referencedColumnName="id", insertable = false, updatable = false)
-	@Fetch(FetchMode.JOIN)
 	private Rule rule;
 
 
