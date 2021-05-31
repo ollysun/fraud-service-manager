@@ -1,6 +1,5 @@
 package com.etz.fraudeagleeyemanager.dto.request;
 
-import com.etz.fraudeagleeyemanager.constant.SuspicionLevel;
 import lombok.Data;
 
 import javax.validation.constraints.NotBlank;
@@ -8,6 +7,8 @@ import javax.validation.constraints.NotNull;
 
 @Data
 public class CreateRuleRequest {
+	@NotBlank(message="ruleName cannot be empty")
+	private String ruleName;
 	@NotNull(message="firstSourceVal cannot be empty")
 	private String firstSourceVal;
 	@NotNull(message="firstOperator cannot be empty")
