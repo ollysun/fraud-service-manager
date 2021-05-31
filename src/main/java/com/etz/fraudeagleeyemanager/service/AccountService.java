@@ -95,7 +95,7 @@ public class AccountService {
 
 	// update account to increment suspicious count
 	public Account updateAccount(UpdateAccountRequestDto updateAccountRequestDto){
-		Account account = accountRepository.findByAccountNo(Long.valueOf(updateAccountRequestDto.getAccountNumber()))
+		Account account = accountRepository.findByAccountNo(updateAccountRequestDto.getAccountNumber())
 				.orElseThrow(() ->  new ResourceNotFoundException("Account details not found for account number " + updateAccountRequestDto.getAccountNumber()));
 		account.setSuspicionCount(updateAccountRequestDto.getCount());
 		account.setBlockReason(updateAccountRequestDto.getBlockReason());
