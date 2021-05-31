@@ -5,9 +5,7 @@ import com.etz.fraudeagleeyemanager.dto.request.CreateRuleRequest;
 import com.etz.fraudeagleeyemanager.dto.request.MapRuleToProductRequest;
 import com.etz.fraudeagleeyemanager.dto.request.UpdateMapRuleToProductRequest;
 import com.etz.fraudeagleeyemanager.dto.request.UpdateRuleRequest;
-import com.etz.fraudeagleeyemanager.dto.response.ProductResponse;
-import com.etz.fraudeagleeyemanager.dto.response.ProductRuleResponse;
-import com.etz.fraudeagleeyemanager.dto.response.RuleResponse;
+import com.etz.fraudeagleeyemanager.dto.response.*;
 import com.etz.fraudeagleeyemanager.entity.ProductEntity;
 import com.etz.fraudeagleeyemanager.entity.ProductRule;
 import com.etz.fraudeagleeyemanager.entity.Rule;
@@ -27,15 +25,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Set;
+import javax.persistence.*;
+
+import java.util.*;
 
 @Slf4j
 @Service
@@ -53,6 +48,10 @@ public class RuleService {
 	@Autowired
 	RuleRepository ruleRepository;
 
+	@PersistenceContext
+	private EntityManager em;
+
+
 	@Autowired
 	ProductRuleRepository productRuleRepository;
 
@@ -65,6 +64,7 @@ public class RuleService {
 	
 	public Rule createRule(CreateRuleRequest request) {
 		Rule ruleEntity = new Rule();
+		ruleEntity.setName(request.getRuleName());
 		ruleEntity.setSourceValueOne(request.getFirstSourceVal());
 		// check the operator
 		ruleEntity.setOperatorOne(AppUtil.checkOperator(request.getFirstOperator().toLowerCase()));
@@ -101,6 +101,7 @@ public class RuleService {
 
 
 	public Rule updateRule(UpdateRuleRequest request) {
+
 		Rule ruleEntity = ruleRepository.findById(request.getRuleId())
 									.orElseThrow(() -> new ResourceNotFoundException("Rule Not found for Id " + request.getRuleId() ));
 		ruleEntity.setSourceValueOne(request.getFirstSourceVal());
@@ -126,7 +127,16 @@ public class RuleService {
 		ruleRedisRepository.setHashOperations(fraudEngineRedisTemplate);
 		ruleRedisRepository.update(updatedEntity);
 		
-		return updatedEntity;
+		return outputUpdatedRuleResponse(updatedEntity);
+	}
+
+
+
+	private UpdatedRuleResponse outputUpdatedRuleResponse(Rule rule){
+
+		UpdatedRuleResponse updatedRuleResponse = new UpdatedRuleResponse();
+		BeanUtils.copyProperties(rule,updatedRuleResponse, "address","createdAt","createdBy");
+		return updatedRuleResponse;
 	}
 
 	public boolean deleteRule(Long parameterId) {
@@ -143,35 +153,20 @@ public class RuleService {
 	}
 
 
-	public static <T> Page<T> listConvertToPage1(List<T> list, Pageable pageable) {
-		int start = (int) pageable.getOffset();
-		int end = (start + pageable.getPageSize()) > list.size() ? list.size() : (start + pageable.getPageSize());
-		return new PageImpl<T>(list.subList(start, end), pageable, list.size());
-	}
-
 
 	public Page<RuleResponse> getRule(Long ruleId) {
 		List<RuleResponse> ruleResponseList;
 		if (ruleId == null) {
-			ruleResponseList = outputRuleResponse(ruleRepository.findAll());
-			return listConvertToPage1(ruleResponseList, PageRequestUtil.getPageRequest());
+			ruleResponseList = outputRuleResponseList(ruleRepository.findAll());
+			return AppUtil.listConvertToPage(ruleResponseList, PageRequestUtil.getPageRequest());
 		}
 		Rule ruleEntity = ruleRepository.findById(ruleId).orElseThrow(() -> new ResourceNotFoundException("Rule Not found " + ruleId));
 		ruleEntity.setId(ruleId);
-		ruleResponseList = outputRuleResponse(ruleRepository.findAll(Example.of(ruleEntity)));
+		ruleResponseList = outputRuleResponseList(ruleRepository.findAll(Example.of(ruleEntity)));
 
-		return listConvertToPage1(ruleResponseList, PageRequestUtil.getPageRequest());
+		return AppUtil.listConvertToPage(ruleResponseList, PageRequestUtil.getPageRequest());
 	}
 
-//	private List<RuleResponse> outputRuleResponse(List<ProductEntity> productEntityList){
-//		List<ProductResponse> productResponseList = new ArrayList<>();
-//		productEntityList.forEach(productVal -> {
-//			ProductResponse productResponse = new ProductResponse();
-//			BeanUtils.copyProperties(productVal,productResponse,"productDataset, productRules, products, productLists");
-//			productResponseList.add(productResponse);
-//		});
-//		return productResponseList;
-//	}
 
 	public ProductRule mapRuleToProduct(MapRuleToProductRequest request) {
 		ProductRule prodRuleEntity = new ProductRule();
@@ -226,24 +221,35 @@ public class RuleService {
 	}
 
 	public boolean deleteProductRule(Long productRuleId) {
-		ProductRule prodRuleEntity = productRuleRepository.findById(productRuleId)
+		ProductRule prodRuleEntity = productRuleRepository.findByRuleId(productRuleId)
 				.orElseThrow(() -> new ResourceNotFoundException("ProductRule Not found for Id " + productRuleId ));
 		String redisId = prodRuleEntity.getProductCode()+ ":"+prodRuleEntity.getRuleId();
-		productRuleRepository.deleteById(productRuleId);
+		productRuleRepository.deleteById(prodRuleEntity.getRuleId());
 		productRuleRedisRepository.setHashOperations(fraudEngineRedisTemplate);
 		productRuleRedisRepository.delete(redisId);
 		return true;
 	}
 
-	public List<RuleResponse> getRuleProduct(String code) {
-		List<Rule> ruleList = new ArrayList<>();
+
+
+	public List<RuleProductResponse> getRuleProduct(String code) {
+		List<RuleProductResponse> ruleProductResponseList = new ArrayList<>();
+		TypedQuery<RuleProductResponse> ruleProductResponseTypedQuery;
 		if (code != null) {
-			ruleList =  ruleRepository.getRuleWithCode(code);
+			String sqlString = " SELECT NEW com.etz.fraudeagleeyemanager.dto.response.RuleProductResponse(" +
+					"rl.id,rl.name,rl.sourceValueOne, rl.operatorOne, rl.compareValueOne, rl.dataSourceValOne," +
+					"rl.logicOperator,rl.sourceValueTwo,rl.operatorTwo,rl.compareValueTwo, rl.dataSourceValTwo," +
+					"rl.suspicionLevel, rl.action, rl.status, rl.authorised,pr.productCode, pr.ruleId as productRuleId)"
+					+ " FROM Rule rl inner JOIN rl.productRule pr "
+					+ " WHERE pr.productCode = :code";
+			ruleProductResponseTypedQuery =  em.createQuery(sqlString.trim(), RuleProductResponse.class)
+					                     .setParameter("code",code);
+			ruleProductResponseList = ruleProductResponseTypedQuery.getResultList();
 		}
-		return outputRuleResponse(ruleList);
+		return ruleProductResponseList;
 	}
 
-	private List<RuleResponse> outputRuleResponse(List<Rule> ruleList){
+	private List<RuleResponse> outputRuleResponseList(List<Rule> ruleList){
 		List<RuleResponse> ruleResponseList = new ArrayList<>();
 		ruleList.forEach(ruleVal -> {
 			RuleResponse ruleResponse = new RuleResponse();
