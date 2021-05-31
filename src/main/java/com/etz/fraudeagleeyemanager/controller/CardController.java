@@ -52,7 +52,7 @@ public class CardController {
 	}
 
 	
-	@PutMapping
+	@PutMapping("/product")
 	public ModelResponse<CardProduct> updateCardProduct(@RequestBody UpdateCardProductRequest request){
 		return new ModelResponse<>(cardService.updateCardProduct(request));
 	}
