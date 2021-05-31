@@ -2,6 +2,7 @@ package com.etz.fraudeagleeyemanager.entity;
 
 import com.etz.fraudeagleeyemanager.constant.CardBrand;
 import com.etz.fraudeagleeyemanager.constant.CardType;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import lombok.*;
 import org.hibernate.annotations.ResultCheckStyle;
 import org.hibernate.annotations.SQLDelete;
@@ -78,6 +79,7 @@ public class Card extends BaseEntity implements Serializable {
 	@Column(nullable = false, name = "status", columnDefinition = "TINYINT", length = 1)
 	private Boolean status;
 
+	@JsonManagedReference
 	@OneToMany(mappedBy = "card",fetch = FetchType.EAGER, orphanRemoval = true, cascade = CascadeType.ALL)
 	private Set<CardProduct> cards;
 

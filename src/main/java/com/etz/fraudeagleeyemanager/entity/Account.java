@@ -1,5 +1,7 @@
 package com.etz.fraudeagleeyemanager.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import lombok.*;
 import org.hibernate.annotations.ResultCheckStyle;
 import org.hibernate.annotations.SQLDelete;
@@ -8,6 +10,8 @@ import org.hibernate.annotations.Where;
 import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 
 
@@ -19,6 +23,7 @@ import java.util.Set;
 @SQLDelete(sql = "UPDATE account SET deleted = true WHERE id = ?", check = ResultCheckStyle.COUNT)
 @Where(clause = "deleted = false")
 @Data
+@ToString(exclude = { "products" })
 public class Account extends BaseEntity implements Serializable {
 
 	@Id
@@ -51,12 +56,11 @@ public class Account extends BaseEntity implements Serializable {
 	@Column(name = "block_reason")
 	private String blockReason;
 
-//	@OneToMany(mappedBy = "account",
-//			cascade = CascadeType.ALL,
-//			orphanRemoval = true,
-//			fetch = FetchType.LAZY)
-//	private Set<AccountProduct> accounts;
-
+	@ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+	@JoinTable(name = "account_product",
+			joinColumns = @JoinColumn(name = "account_id"),
+			inverseJoinColumns = @JoinColumn(name = "product_code"))
+	private List<ProductEntity> products = new ArrayList<>();
 
 
 }

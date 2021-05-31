@@ -140,6 +140,11 @@ public class RuleService {
 	}
 
 	public boolean deleteRule(Long parameterId) {
+		ProductRule prodRuleEntity = productRuleRepository.findByRuleId(parameterId)
+				.orElseThrow(() -> new ResourceNotFoundException("ProductRule Not found for productRuleId " + parameterId ));
+		if (prodRuleEntity != null){
+			throw new FraudEngineException("Please unmap the ruleId before deleting " + parameterId);
+		}
 		ruleRepository.deleteById(parameterId);
 		ruleRedisRepository.setHashOperations(fraudEngineRedisTemplate);
 		ruleRedisRepository.delete(parameterId);
@@ -198,7 +203,7 @@ public class RuleService {
 		return createdProductRuleEntity;
 	}
 
-	public ProductRule updateProductRule(UpdateMapRuleToProductRequest request) {
+	public ProductRuleResponse updateProductRule(UpdateMapRuleToProductRequest request) {
 		ProductRule prodRuleEntity = productRuleRepository.findById(request.getProductRuleId())
 				.orElseThrow(() -> new ResourceNotFoundException("ProductRule Not found for Id " + request.getProductRuleId() ));
 
@@ -217,14 +222,14 @@ public class RuleService {
 		//update Redis
 		productRuleRedisRepository.setHashOperations(fraudEngineRedisTemplate);
 		productRuleRedisRepository.update(prodRuleEntity);
-		return updatedEntity;
+		return outputProductRuleResponseList(updatedEntity);
 	}
 
 	public boolean deleteProductRule(Long productRuleId) {
 		ProductRule prodRuleEntity = productRuleRepository.findByRuleId(productRuleId)
 				.orElseThrow(() -> new ResourceNotFoundException("ProductRule Not found for productRuleId " + productRuleId ));
 		String redisId = prodRuleEntity.getProductCode()+ ":"+prodRuleEntity.getRuleId();
-		productRuleRepository.deleteById(prodRuleEntity.getRuleId());
+		productRuleRepository.deleteByRuleId(productRuleId);
 		productRuleRedisRepository.setHashOperations(fraudEngineRedisTemplate);
 		productRuleRedisRepository.delete(redisId);
 		return true;
@@ -257,6 +262,13 @@ public class RuleService {
 			ruleResponseList.add(ruleResponse);
 		});
 		return ruleResponseList;
+	}
+
+	private ProductRuleResponse outputProductRuleResponseList(ProductRule productRule){
+
+			ProductRuleResponse ruleResponse = new ProductRuleResponse();
+			BeanUtils.copyProperties(productRule,ruleResponse,"productEntity", "emailGroup", "rule");
+			return ruleResponse;
 	}
 
 
