@@ -6,6 +6,8 @@ import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.Where;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 
 @EqualsAndHashCode(callSuper = true)
@@ -15,29 +17,19 @@ import java.io.Serializable;
         columnNames = {"account_id"}))
 @SQLDelete(sql = "UPDATE account_product SET deleted = true WHERE id = ?", check = ResultCheckStyle.COUNT)
 @Where(clause = "deleted = false")
-//@IdClass(AccountProductId.class)
 public class AccountProduct extends BaseEntity implements Serializable {
 
-//    @Id
-//    @Column(name = "product_code", nullable = false, columnDefinition="VARCHAR(100)")
-//    private String productCode;
-//
-//    @Id
-//    @Column(name = "account_id", nullable = false, columnDefinition = "bigint")
-//    private Long accountId;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-    @EmbeddedId
-    private AccountProductId accountProductId;
+    @NotBlank
+    @Column(name = "product_code", nullable = false, columnDefinition="VARCHAR(100)")
+    private String productCode;
 
-//    @ManyToOne
-//    @MapsId("productCode")
-//    @JoinColumn(name = "product_code")
-//    private ProductEntity productEntity;
-//
-//    @ManyToOne
-//    @MapsId("accountId")
-//    @JoinColumn(name = "account_id")
-//    private Account account;
+    @NotNull
+    @Column(name = "account_id", nullable = false, columnDefinition = "bigint")
+    private Long accountId;
 
     @Column(nullable = false, name = "status", columnDefinition = "TINYINT", length = 1)
     private Boolean status;

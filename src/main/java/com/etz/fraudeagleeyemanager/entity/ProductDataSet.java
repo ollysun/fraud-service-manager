@@ -1,5 +1,6 @@
 package com.etz.fraudeagleeyemanager.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import lombok.*;
 import org.hibernate.annotations.ResultCheckStyle;
 import org.hibernate.annotations.SQLDelete;
@@ -41,6 +42,7 @@ public class ProductDataSet extends BaseEntity implements Serializable {
 	@Column(nullable = false, name = "authorised", columnDefinition = "TINYINT", length = 1)
 	private Boolean authorised;
 
+	@JsonBackReference
 	@ManyToOne
 	@MapsId("productCode")
 	@JoinColumn(foreignKey = @ForeignKey(name = "FK_PRODUCT_CODE"),

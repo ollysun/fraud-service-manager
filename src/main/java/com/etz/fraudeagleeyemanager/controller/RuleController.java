@@ -58,7 +58,7 @@ public class RuleController {
 	}
 	
 	@PutMapping(path = "/product")
-	public ModelResponse<ProductRule> updateProductRule(@RequestBody @Valid UpdateMapRuleToProductRequest request){
+	public ModelResponse<ProductRuleResponse> updateProductRule(@RequestBody @Valid UpdateMapRuleToProductRequest request){
 		return new ModelResponse<>(ruleService.updateProductRule(request));
 	}
 	

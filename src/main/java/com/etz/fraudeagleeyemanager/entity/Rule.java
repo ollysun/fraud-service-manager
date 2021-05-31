@@ -1,9 +1,9 @@
 package com.etz.fraudeagleeyemanager.entity;
 
 import com.etz.fraudeagleeyemanager.constant.SuspicionLevel;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.ToString;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+import lombok.*;
 import org.hibernate.annotations.ResultCheckStyle;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.Where;
@@ -12,13 +12,14 @@ import javax.persistence.*;
 import java.io.Serializable;
 import java.util.Set;
 
-@EqualsAndHashCode(callSuper = true)
 @Entity
 @Table(name = "rule",uniqueConstraints = @UniqueConstraint(name="UQ_RULE",
 		columnNames = {"rule_name"}))
 @SQLDelete(sql = "UPDATE rule SET deleted = true WHERE id = ?", check = ResultCheckStyle.COUNT)
 @Where(clause = "deleted = false")
-@Data
+@Getter
+@Setter
+@EqualsAndHashCode(exclude = {"productRule"}, callSuper = false)
 public class Rule extends BaseEntity implements Serializable {
 
 	@Id
@@ -66,7 +67,7 @@ public class Rule extends BaseEntity implements Serializable {
 	@Column(name = "authorised")
 	private Boolean authorised;
 
-	@ToString.Exclude
+	@JsonManagedReference
 	@OneToMany(mappedBy = "rule",fetch = FetchType.LAZY,
 			cascade = CascadeType.ALL, orphanRemoval = true)
 	private Set<ProductRule> productRule;
