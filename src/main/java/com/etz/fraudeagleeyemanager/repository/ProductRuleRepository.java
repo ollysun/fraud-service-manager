@@ -9,4 +9,6 @@ import java.util.Optional;
 @Repository
 public interface ProductRuleRepository extends JpaRepository<ProductRule, Long> {
     Optional<ProductRule> findByProductCode(String code);
+    Optional<ProductRule> findByRuleId(Long ruleId);
+
 }

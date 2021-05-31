@@ -14,7 +14,8 @@ import java.util.Set;
 
 @EqualsAndHashCode(callSuper = true)
 @Entity
-@Table(name = "rule")
+@Table(name = "rule",uniqueConstraints = @UniqueConstraint(name="UQ_RULE",
+		columnNames = {"rule_name"}))
 @SQLDelete(sql = "UPDATE rule SET deleted = true WHERE id = ?", check = ResultCheckStyle.COUNT)
 @Where(clause = "deleted = false")
 @Data
@@ -23,6 +24,9 @@ public class Rule extends BaseEntity implements Serializable {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
+
+	@Column(name = "rule_name", unique = true, nullable=false)
+	private String name;
 	
 	@Column(name = "source_value_1", nullable=false)
 	private String sourceValueOne;

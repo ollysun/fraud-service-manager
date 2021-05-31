@@ -4,6 +4,7 @@ package com.etz.fraudeagleeyemanager.service;
 import com.etz.fraudeagleeyemanager.dto.request.AccountToProductRequest;
 import com.etz.fraudeagleeyemanager.dto.request.AddAccountRequest;
 import com.etz.fraudeagleeyemanager.dto.request.UpdateAccountProductRequest;
+import com.etz.fraudeagleeyemanager.dto.request.UpdateAccountRequestDto;
 import com.etz.fraudeagleeyemanager.dto.response.AccountProductResponse;
 import com.etz.fraudeagleeyemanager.entity.Account;
 import com.etz.fraudeagleeyemanager.entity.AccountProduct;
@@ -58,9 +59,7 @@ public class AccountService {
 	public Account createAccount(AddAccountRequest request){
 		Account accountEntity = new Account();
 
-		if (!isNumeric(request.getAccountNo())){
-			throw new FraudEngineException("Incorrect Account Number");
-		}
+
 		try {
 			// check for account number digits
 			accountEntity.setAccountName(request.getAccountName());
@@ -95,12 +94,12 @@ public class AccountService {
 	}
 
 	// update account to increment suspicious count
-	public Account updateAccount(Long accountNumber, int count, Boolean status, String blockReason){
-		Account account = accountRepository.findByAccountNo(accountNumber)
-				.orElseThrow(() ->  new ResourceNotFoundException("Account details not found for account number " + accountNumber));
-		account.setSuspicionCount(count);
-		account.setBlockReason(blockReason);
-		account.setStatus(status);
+	public Account updateAccount(UpdateAccountRequestDto updateAccountRequestDto){
+		Account account = accountRepository.findByAccountNo(updateAccountRequestDto.getAccountNumber())
+				.orElseThrow(() ->  new ResourceNotFoundException("Account details not found for account number " + updateAccountRequestDto.getAccountNumber()));
+		account.setSuspicionCount(updateAccountRequestDto.getCount());
+		account.setBlockReason(updateAccountRequestDto.getBlockReason());
+		account.setStatus(updateAccountRequestDto.getStatus());
 		return account;
 	}
 
@@ -146,7 +145,7 @@ public class AccountService {
 	
 	public List<AccountProductResponse> updateAccountProduct(UpdateAccountProductRequest request) {
 		List<AccountProduct> accountEntity = accountProductRepository.findByAccountProductIdAccountId(request.getAccountId());
-		if (accountEntity.size() < 1){
+		if (accountEntity.isEmpty()){
 			throw new ResourceNotFoundException("Account Product not found for this ID " +  request.getAccountId());
 		}
 		ProductEntity productEntity = productRepository.findByCode(request.getProductCode());

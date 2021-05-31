@@ -115,7 +115,6 @@ public class ProductService {
 		productEntity.setCallbackURL(request.getCallback());
 		productEntity.setStatus(request.getStatus());
 		productEntity.setUpdatedBy(request.getUpdatedBy());
-		productEntity.setUpdatedAt(LocalDateTime.now());
 
 		ProductEntity savedProduct = productEntityRepository.save(productEntity);
 		productRedisRepository.setHashOperations(fraudEngineRedisTemplate);
@@ -141,6 +140,10 @@ public class ProductService {
 	}
 
 	public ProductDataSet createProductDataset(DatasetProductRequest request) {
+		ProductEntity productEntity = productEntityRepository.findByCode(request.getProductCode());
+		if (productEntity == null){
+			throw new ResourceNotFoundException("Product not found for Code " + request.getProductCode());
+		}
 		ProductDataSet prodDatasetEntity = new ProductDataSet();
 		prodDatasetEntity.setProductCode(request.getProductCode());
 		prodDatasetEntity.setFieldName(request.getFieldName());

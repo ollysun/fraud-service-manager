@@ -9,14 +9,11 @@ import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.Where;
 
 import javax.persistence.*;
-import javax.validation.constraints.NotBlank;
 import java.io.Serializable;
-import org.hibernate.annotations.Fetch;
-import org.hibernate.annotations.FetchMode;
 
 @Entity
 @Table(name = "product_rule")
-@SQLDelete(sql = "UPDATE product_rule SET deleted = true WHERE id = ?", check = ResultCheckStyle.COUNT)
+@SQLDelete(sql = "UPDATE product_rule SET deleted = true WHERE rule_id = ?", check = ResultCheckStyle.COUNT)
 @Where(clause = "deleted = false")
 @Getter
 @Setter
