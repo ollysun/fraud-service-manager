@@ -43,7 +43,7 @@ public class ResourceServerConfig extends ResourceServerConfigurerAdapter {
                         "/webjars/**","/swagger.html")
                 .permitAll();
         http.authorizeRequests().antMatchers("/**")
-                .authenticated();
+                .permitAll();//.authenticated();
 
         //http.authorizeRequests().antMatchers("/api/v1/**").authenticated();
     }
