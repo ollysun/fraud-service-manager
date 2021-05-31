@@ -222,7 +222,7 @@ public class RuleService {
 
 	public boolean deleteProductRule(Long productRuleId) {
 		ProductRule prodRuleEntity = productRuleRepository.findByRuleId(productRuleId)
-				.orElseThrow(() -> new ResourceNotFoundException("ProductRule Not found for Id " + productRuleId ));
+				.orElseThrow(() -> new ResourceNotFoundException("ProductRule Not found for productRuleId " + productRuleId ));
 		String redisId = prodRuleEntity.getProductCode()+ ":"+prodRuleEntity.getRuleId();
 		productRuleRepository.deleteById(prodRuleEntity.getRuleId());
 		productRuleRedisRepository.setHashOperations(fraudEngineRedisTemplate);
