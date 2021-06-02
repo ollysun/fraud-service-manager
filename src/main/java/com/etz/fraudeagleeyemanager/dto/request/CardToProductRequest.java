@@ -1,14 +1,17 @@
 package com.etz.fraudeagleeyemanager.dto.request;
 
 import lombok.Data;
+import org.slf4j.Logger;
+
+import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
 @Data
 public class CardToProductRequest {
-	@NotNull(message = "please enter the productCode")
+	@NotBlank(message = "please enter the productCode")
 	private String productCode;
 	@NotNull(message="Please enter the cardId")
-	private Integer cardId;
-	@NotNull(message="CreatedBy cannot be null")
+	private Long cardId;
+	@NotBlank(message="CreatedBy cannot be null")
 	private String createdBy;
 }
