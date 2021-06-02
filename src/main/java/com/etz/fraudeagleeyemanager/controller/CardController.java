@@ -4,11 +4,13 @@ import com.etz.fraudeagleeyemanager.dto.request.CardRequest;
 import com.etz.fraudeagleeyemanager.dto.request.CardToProductRequest;
 import com.etz.fraudeagleeyemanager.dto.request.UpdateCardProductRequest;
 import com.etz.fraudeagleeyemanager.dto.request.UpdateCardRequestDto;
+import com.etz.fraudeagleeyemanager.dto.response.CardResponse;
 import com.etz.fraudeagleeyemanager.dto.response.ModelResponse;
 import com.etz.fraudeagleeyemanager.dto.response.PageResponse;
 import com.etz.fraudeagleeyemanager.entity.Card;
 import com.etz.fraudeagleeyemanager.entity.CardProduct;
 import com.etz.fraudeagleeyemanager.service.CardService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,6 +19,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 
+@Slf4j
 @Validated
 @RestController
 @RequestMapping("/v1/card")
@@ -26,17 +29,17 @@ public class CardController {
 	CardService cardService;
 	
 	@PostMapping
-	public ResponseEntity<ModelResponse<Card>> createCard(
-			@RequestBody @Valid CardRequest request){
+	public ResponseEntity<ModelResponse<Card>> createCard(@RequestBody @Valid CardRequest request){
+		log.info("am here");
 		ModelResponse<Card> response = new ModelResponse<>(cardService.createCard(request));
 		response.setStatus(HttpStatus.CREATED.value());
 		return new ResponseEntity<>(response, HttpStatus.CREATED);
 	}
 		
 	@GetMapping
-	public PageResponse<Card> queryCard(
-			@RequestParam(name = "cardId", defaultValue = "") String cardId){
-		return new PageResponse<>(cardService.getCards(Long.parseLong(cardId.trim())));
+	public PageResponse<CardResponse> queryCard(
+			@RequestParam(name = "cardId", defaultValue = "") Long cardId){
+		return new PageResponse<>(cardService.getCards(cardId));
 	}
 		
 	@PostMapping(path = "/product")

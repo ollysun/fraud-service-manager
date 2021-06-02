@@ -140,9 +140,8 @@ public class RuleService {
 	}
 
 	public boolean deleteRule(Long parameterId) {
-		ProductRule prodRuleEntity = productRuleRepository.findByRuleId(parameterId)
-				.orElseThrow(() -> new ResourceNotFoundException("ProductRule Not found for productRuleId " + parameterId ));
-		if (prodRuleEntity != null){
+		Optional<ProductRule> prodRuleEntity = productRuleRepository.findByRuleId(parameterId);
+		if (prodRuleEntity.isPresent()){
 			throw new FraudEngineException("Please unmap the ruleId before deleting " + parameterId);
 		}
 		ruleRepository.deleteById(parameterId);
