@@ -31,6 +31,6 @@ public class AddAccountRequest implements Serializable {
 	private String createdBy;
 	
 	private String blockReason;
-	private Integer suspicion;
+	private Integer suspicionCount;
 	
 }

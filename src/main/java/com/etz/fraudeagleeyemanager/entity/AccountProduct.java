@@ -3,10 +3,14 @@ package com.etz.fraudeagleeyemanager.entity;
 import java.io.Serializable;
 
 import javax.persistence.Column;
-import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 
 import org.hibernate.annotations.ResultCheckStyle;
 import org.hibernate.annotations.SQLDelete;
@@ -25,26 +29,17 @@ import lombok.EqualsAndHashCode;
 //@IdClass(AccountProductId.class)
 public class AccountProduct extends BaseAuditEntity implements Serializable {
 
-//    @Id
-//    @Column(name = "product_code", nullable = false, columnDefinition="VARCHAR(100)")
-//    private String productCode;
-//
-//    @Id
-//    @Column(name = "account_id", nullable = false, columnDefinition = "bigint")
-//    private Long accountId;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-    @EmbeddedId
-    private AccountProductId accountProductId;
+    @NotBlank
+    @Column(name = "product_code", nullable = false, columnDefinition="VARCHAR(100)")
+    private String productCode;
 
-//    @ManyToOne
-//    @MapsId("productCode")
-//    @JoinColumn(name = "product_code")
-//    private ProductEntity productEntity;
-//
-//    @ManyToOne
-//    @MapsId("accountId")
-//    @JoinColumn(name = "account_id")
-//    private Account account;
+    @NotNull
+    @Column(name = "account_id", nullable = false, columnDefinition = "bigint")
+    private Long accountId;
 
     @Column(nullable = false, name = "status", columnDefinition = "TINYINT", length = 1)
     private Boolean status;

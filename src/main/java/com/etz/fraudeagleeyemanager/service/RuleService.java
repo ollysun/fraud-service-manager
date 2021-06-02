@@ -5,6 +5,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import javax.persistence.TypedQuery;
+
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -17,10 +21,14 @@ import com.etz.fraudeagleeyemanager.dto.request.CreateRuleRequest;
 import com.etz.fraudeagleeyemanager.dto.request.MapRuleToProductRequest;
 import com.etz.fraudeagleeyemanager.dto.request.UpdateMapRuleToProductRequest;
 import com.etz.fraudeagleeyemanager.dto.request.UpdateRuleRequest;
+import com.etz.fraudeagleeyemanager.dto.response.ProductRuleResponse;
+import com.etz.fraudeagleeyemanager.dto.response.RuleProductResponse;
 import com.etz.fraudeagleeyemanager.dto.response.RuleResponse;
+import com.etz.fraudeagleeyemanager.dto.response.UpdatedRuleResponse;
 import com.etz.fraudeagleeyemanager.entity.ProductEntity;
 import com.etz.fraudeagleeyemanager.entity.ProductRule;
 import com.etz.fraudeagleeyemanager.entity.Rule;
+import com.etz.fraudeagleeyemanager.exception.FraudEngineException;
 import com.etz.fraudeagleeyemanager.exception.ResourceNotFoundException;
 import com.etz.fraudeagleeyemanager.redisrepository.ProductRuleRedisRepository;
 import com.etz.fraudeagleeyemanager.redisrepository.RuleRedisRepository;
@@ -50,6 +58,10 @@ public class RuleService {
 	@Autowired
 	RuleRepository ruleRepository;
 
+	@PersistenceContext
+	private EntityManager em;
+
+
 	@Autowired
 	ProductRuleRepository productRuleRepository;
 
@@ -62,6 +74,7 @@ public class RuleService {
 	
 	public Rule createRule(CreateRuleRequest request) {
 		Rule ruleEntity = new Rule();
+		ruleEntity.setName(request.getRuleName());
 		ruleEntity.setSourceValueOne(request.getFirstSourceVal());
 		// check the operator
 		ruleEntity.setOperatorOne(AppUtil.checkOperator(request.getFirstOperator().toLowerCase()));
@@ -103,6 +116,7 @@ public class RuleService {
 
 
 	public Rule updateRule(UpdateRuleRequest request) {
+
 		Rule ruleEntity = ruleRepository.findById(request.getRuleId())
 									.orElseThrow(() -> new ResourceNotFoundException("Rule Not found for Id " + request.getRuleId() ));
 		ruleEntity.setSourceValueOne(request.getFirstSourceVal());
@@ -133,10 +147,25 @@ public class RuleService {
 		ruleRedisRepository.setHashOperations(fraudEngineRedisTemplate);
 		ruleRedisRepository.update(updatedEntity);
 		
-		return updatedEntity;
+		return outputUpdatedRuleResponse(updatedEntity);
+	}
+
+
+
+	private UpdatedRuleResponse outputUpdatedRuleResponse(Rule rule){
+
+		UpdatedRuleResponse updatedRuleResponse = new UpdatedRuleResponse();
+		BeanUtils.copyProperties(rule,updatedRuleResponse, "address","createdAt","createdBy");
+		return updatedRuleResponse;
 	}
 
 	public boolean deleteRule(Long ruleId) {
+		ProductRule prodRuleEntity = productRuleRepository.findByRuleId(ruleId)
+				.orElseThrow(() -> new ResourceNotFoundException("ProductRule Not found for productRuleId " + ruleId ));
+		if (prodRuleEntity != null){
+			throw new FraudEngineException("Please unmap the ruleId before deleting " + ruleId);
+		}
+		
 		Rule ruleEntity = ruleRepository.findById(ruleId)
 				.orElseThrow(() -> new ResourceNotFoundException("Rule Entity not found for Id " + ruleId));
 		
@@ -146,7 +175,7 @@ public class RuleService {
 		ruleEntity.setRecordAfter(null);
 		ruleEntity.setRequestDump(ruleId);
 		
-		//ruleRepository.deleteById(ruleId);
+		//ruleRepository.deleteById(parameterId);
 		ruleRepository.delete(ruleEntity);
 		ruleRedisRepository.setHashOperations(fraudEngineRedisTemplate);
 		ruleRedisRepository.delete(ruleId);
@@ -159,15 +188,21 @@ public class RuleService {
 		return true;
 	}
 
-	public Page<Rule> getRule(Long ruleId) {
+
+
+	public Page<RuleResponse> getRule(Long ruleId) {
+		List<RuleResponse> ruleResponseList;
 		if (ruleId == null) {
-			return ruleRepository.findAll(PageRequestUtil.getPageRequest());
+			ruleResponseList = outputRuleResponseList(ruleRepository.findAll());
+			return AppUtil.listConvertToPage(ruleResponseList, PageRequestUtil.getPageRequest());
 		}
 		Rule ruleEntity = ruleRepository.findById(ruleId).orElseThrow(() -> new ResourceNotFoundException("Rule Not found " + ruleId));
 		ruleEntity.setId(ruleId);
+		ruleResponseList = outputRuleResponseList(ruleRepository.findAll(Example.of(ruleEntity)));
 
-		return ruleRepository.findAll(Example.of(ruleEntity), PageRequestUtil.getPageRequest());
+		return AppUtil.listConvertToPage(ruleResponseList, PageRequestUtil.getPageRequest());
 	}
+
 
 	public ProductRule mapRuleToProduct(MapRuleToProductRequest request) {
 		ProductRule prodRuleEntity = new ProductRule();
@@ -204,7 +239,7 @@ public class RuleService {
 		return createdProductRuleEntity;
 	}
 
-	public ProductRule updateProductRule(UpdateMapRuleToProductRequest request) {
+	public ProductRuleResponse updateProductRule(UpdateMapRuleToProductRequest request) {
 		ProductRule prodRuleEntity = productRuleRepository.findById(request.getProductRuleId())
 				.orElseThrow(() -> new ResourceNotFoundException("ProductRule Not found for Id " + request.getProductRuleId() ));
 
@@ -229,37 +264,47 @@ public class RuleService {
 		//update Redis
 		productRuleRedisRepository.setHashOperations(fraudEngineRedisTemplate);
 		productRuleRedisRepository.update(prodRuleEntity);
-		return updatedEntity;
+		return outputProductRuleResponseList(updatedEntity);
 	}
 
 	public boolean deleteProductRule(Long productRuleId) {
 		ProductRule prodRuleEntity = productRuleRepository.findById(productRuleId)
-				.orElseThrow(() -> new ResourceNotFoundException("ProductRule Not found for Id " + productRuleId ));
+				.orElseThrow(() -> new ResourceNotFoundException("ProductRule Not found for productRuleId " + productRuleId ));
 
 		// for auditing purpose for DELETE
 		prodRuleEntity.setEntityId(productRuleId.toString());
 		prodRuleEntity.setRecordBefore(JsonConverter.objectToJson(productRuleId));
 		prodRuleEntity.setRecordAfter(null);
 		prodRuleEntity.setRequestDump(productRuleId);
-		
+
 		String redisId = prodRuleEntity.getProductCode()+ ":"+prodRuleEntity.getRuleId();
-		
-		//productRuleRepository.deleteById(productRuleId);
-		productRuleRepository.delete(prodRuleEntity);
+		productRuleRepository.deleteByRuleId(productRuleId);
+		//productRuleRepository.delete(prodRuleEntity);
 		productRuleRedisRepository.setHashOperations(fraudEngineRedisTemplate);
 		productRuleRedisRepository.delete(redisId);
 		return true;
 	}
 
-	public List<RuleResponse> getRuleProduct(String code) {
-		List<Rule> ruleList = new ArrayList<>();
+
+
+	public List<RuleProductResponse> getRuleProduct(String code) {
+		List<RuleProductResponse> ruleProductResponseList = new ArrayList<>();
+		TypedQuery<RuleProductResponse> ruleProductResponseTypedQuery;
 		if (code != null) {
-			ruleList =  ruleRepository.getRuleWithCode(code);
+			String sqlString = " SELECT NEW com.etz.fraudeagleeyemanager.dto.response.RuleProductResponse(" +
+					"rl.id,rl.name,rl.sourceValueOne, rl.operatorOne, rl.compareValueOne, rl.dataSourceValOne," +
+					"rl.logicOperator,rl.sourceValueTwo,rl.operatorTwo,rl.compareValueTwo, rl.dataSourceValTwo," +
+					"rl.suspicionLevel, rl.action, rl.status, rl.authorised,pr.productCode, pr.ruleId as productRuleId)"
+					+ " FROM Rule rl inner JOIN rl.productRule pr "
+					+ " WHERE pr.productCode = :code";
+			ruleProductResponseTypedQuery =  em.createQuery(sqlString.trim(), RuleProductResponse.class)
+					                     .setParameter("code",code);
+			ruleProductResponseList = ruleProductResponseTypedQuery.getResultList();
 		}
-		return outputRuleResponse(ruleList);
+		return ruleProductResponseList;
 	}
 
-	private List<RuleResponse> outputRuleResponse(List<Rule> ruleList){
+	private List<RuleResponse> outputRuleResponseList(List<Rule> ruleList){
 		List<RuleResponse> ruleResponseList = new ArrayList<>();
 		ruleList.forEach(ruleVal -> {
 			RuleResponse ruleResponse = new RuleResponse();
@@ -267,6 +312,13 @@ public class RuleService {
 			ruleResponseList.add(ruleResponse);
 		});
 		return ruleResponseList;
+	}
+
+	private ProductRuleResponse outputProductRuleResponseList(ProductRule productRule){
+
+			ProductRuleResponse ruleResponse = new ProductRuleResponse();
+			BeanUtils.copyProperties(productRule,ruleResponse,"productEntity", "emailGroup", "rule");
+			return ruleResponse;
 	}
 
 

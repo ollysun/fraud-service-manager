@@ -3,6 +3,7 @@ package com.etz.fraudeagleeyemanager.controller;
 import com.etz.fraudeagleeyemanager.dto.request.CardRequest;
 import com.etz.fraudeagleeyemanager.dto.request.CardToProductRequest;
 import com.etz.fraudeagleeyemanager.dto.request.UpdateCardProductRequest;
+import com.etz.fraudeagleeyemanager.dto.request.UpdateCardRequestDto;
 import com.etz.fraudeagleeyemanager.dto.response.ModelResponse;
 import com.etz.fraudeagleeyemanager.dto.response.PageResponse;
 import com.etz.fraudeagleeyemanager.entity.Card;
@@ -44,12 +45,15 @@ public class CardController {
 		response.setStatus(HttpStatus.CREATED.value());
 		return new ResponseEntity<>(response, HttpStatus.CREATED);
 	}
+
+	@PutMapping
+	public ModelResponse<Card> updateCard(@RequestBody UpdateCardRequestDto request){
+		return new ModelResponse<>(cardService.updateCard(request));
+	}
+
 	
-	@PutMapping(path = "/{cardID}")
-	public ModelResponse<CardProduct> updateCard(@PathVariable(name = "cardID") Integer cardId,
-												 @RequestBody UpdateCardProductRequest request){
-				   
-		request.setCardId(cardId);
+	@PutMapping("/product")
+	public ModelResponse<CardProduct> updateCardProduct(@RequestBody UpdateCardProductRequest request){
 		return new ModelResponse<>(cardService.updateCardProduct(request));
 	}
 	

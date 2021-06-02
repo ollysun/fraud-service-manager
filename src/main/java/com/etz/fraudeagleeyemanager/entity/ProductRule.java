@@ -1,25 +1,21 @@
 package com.etz.fraudeagleeyemanager.entity;
 
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import lombok.*;
 import org.hibernate.annotations.ResultCheckStyle;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.Where;
 
 import javax.persistence.*;
-import javax.validation.constraints.NotBlank;
 import java.io.Serializable;
-import org.hibernate.annotations.Fetch;
-import org.hibernate.annotations.FetchMode;
 
 @Entity
 @Table(name = "product_rule")
-@SQLDelete(sql = "UPDATE product_rule SET deleted = true WHERE id = ?", check = ResultCheckStyle.COUNT)
+//@SQLDelete(sql = "UPDATE product_rule SET deleted = true WHERE rule_id = ?", check = ResultCheckStyle.COUNT)
 @Where(clause = "deleted = false")
 @Getter
 @Setter
+@EqualsAndHashCode(exclude = {"productEntity", "emailGroup", "rule"}, callSuper = false)
 @RequiredArgsConstructor
 @ToString
 public class ProductRule extends BaseAuditEntity implements Serializable {
@@ -49,37 +45,21 @@ public class ProductRule extends BaseAuditEntity implements Serializable {
 	@Column(nullable = false, name = "authorised", columnDefinition = "TINYINT", length = 1)
 	private Boolean authorised;
 
-	@ToString.Exclude
-	@ManyToOne
-	@JoinColumn(name = "product_code", foreignKey = @ForeignKey(name = "FK_PRODUCT_RULE_CODE"),
-			referencedColumnName="code", insertable = false, updatable = false)
+	@JsonBackReference
+	@ManyToOne(fetch = FetchType.LAZY)
 	private ProductEntity productEntity;
 
-	@ToString.Exclude
-	@ManyToOne
+	@JsonBackReference
+	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "email_group_id", foreignKey = @ForeignKey(name = "FK_PRODUCT_RULE_EMAIL_GROUP_ID"),
 			referencedColumnName="id", insertable = false, updatable = false)
 	private EmailGroup emailGroup;
 
-	@ToString.Exclude
-	@ManyToOne
-	@JoinColumn(name = "rule_id", foreignKey = @ForeignKey(name = "FK_PRODUCT_RULE_RULE_ID"),
-			referencedColumnName="id", insertable = false, updatable = false)
-	@Fetch(FetchMode.JOIN)
+	@JsonBackReference
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "rule_id", insertable = false, updatable = false)
 	private Rule rule;
 
 
-	@Override
-	public boolean equals(Object o) {
-		if (this == o) return true;
-		if (o == null || getClass() != o.getClass()) return false;
-		ProductRule that = (ProductRule) o;
 
-		return id != null && id.equals(that.id);
-	}
-
-	@Override
-	public int hashCode() {
-		return getClass().hashCode();
-	}
 }

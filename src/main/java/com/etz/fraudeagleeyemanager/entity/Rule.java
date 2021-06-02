@@ -12,27 +12,34 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
 
 import org.hibernate.annotations.ResultCheckStyle;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.Where;
 
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.ToString;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 
-@EqualsAndHashCode(callSuper = true)
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.Setter;
+
 @Entity
-@Table(name = "rule")
+@Table(name = "rule",uniqueConstraints = @UniqueConstraint(name="UQ_RULE",
+		columnNames = {"rule_name"}))
 @SQLDelete(sql = "UPDATE rule SET deleted = true WHERE id = ?", check = ResultCheckStyle.COUNT)
 @Where(clause = "deleted = false")
-@Data
-@ToString(exclude = {"productRule"})
+@Getter
+@Setter
+@EqualsAndHashCode(exclude = {"productRule"}, callSuper = false)
 public class Rule extends BaseAuditEntity implements Serializable {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
+
+	@Column(name = "rule_name", unique = true, nullable=false)
+	private String name;
 	
 	@Column(name = "source_value_1", nullable=false)
 	private String sourceValueOne;
@@ -61,7 +68,6 @@ public class Rule extends BaseAuditEntity implements Serializable {
 	@Column(name = "data_source_2")
 	private String dataSourceValTwo;
 
-
 	private Integer suspicionLevel;
 
 	@Column(name = "action")
@@ -73,6 +79,7 @@ public class Rule extends BaseAuditEntity implements Serializable {
 	@Column(name = "authorised")
 	private Boolean authorised;
 
+	@JsonManagedReference
 	@OneToMany(mappedBy = "rule",fetch = FetchType.LAZY,
 			cascade = CascadeType.ALL, orphanRemoval = true)
 	private Set<ProductRule> productRule;

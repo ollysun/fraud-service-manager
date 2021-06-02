@@ -26,8 +26,8 @@ public class ReportScheduler extends BaseAuditEntity implements Serializable {
 	@Enumerated(EnumType.STRING)
 	private IntervalType intervalType;
 	
-	@Column(nullable = false, name = "\"loop\"", columnDefinition = "TINYINT", length = 1)
-	private Boolean loop;
+	@Column(nullable = false, name = "report_loop", columnDefinition = "TINYINT", length = 1)
+	private Boolean reportLoop;
 
 	@Column(nullable = false, name = "status", columnDefinition = "TINYINT", length = 1)
 	private Boolean status;

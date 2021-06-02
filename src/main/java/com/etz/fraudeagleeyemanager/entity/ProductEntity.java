@@ -1,15 +1,29 @@
 package com.etz.fraudeagleeyemanager.entity;
 
-import lombok.*;
+import java.io.Serializable;
+import java.util.List;
+import java.util.Set;
+
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.Id;
+import javax.persistence.ManyToMany;
+import javax.persistence.OneToMany;
+import javax.persistence.Table;
+import javax.validation.constraints.NotBlank;
+
 import org.hibernate.annotations.ResultCheckStyle;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.Where;
 
-import javax.persistence.*;
-import javax.validation.constraints.NotBlank;
-import java.io.Serializable;
-import java.util.List;
-import java.util.Set;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
 
 
 @EqualsAndHashCode(callSuper = true)
@@ -17,7 +31,8 @@ import java.util.Set;
 @Table(name = "product")
 @SQLDelete(sql = "UPDATE product SET deleted = true WHERE code = ?", check = ResultCheckStyle.COUNT)
 @Where(clause = "deleted = false")
-@Data
+@Getter
+@Setter
 public class ProductEntity extends BaseAuditVersionEntity implements Serializable {
 
     @Id
@@ -47,23 +62,25 @@ public class ProductEntity extends BaseAuditVersionEntity implements Serializabl
     @Column(nullable = false, name = "status", columnDefinition = "TINYINT", length = 1)
     private Boolean status;
 
+    @JsonManagedReference
     @ToString.Exclude
     @OneToMany(mappedBy = "productEntity", fetch = FetchType.EAGER,
             cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ProductDataSet> productDataset;
 
+    @JsonManagedReference
     @ToString.Exclude
     @OneToMany(mappedBy = "productEntity", fetch = FetchType.EAGER,
             cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<ProductRule> productRules;
 
+    @JsonManagedReference
     @ToString.Exclude
     @OneToMany(mappedBy = "productEntity",fetch = FetchType.EAGER,
             cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<CardProduct> products;
 
-//    @ToString.Exclude
-//    @OneToMany(mappedBy = "productEntity", fetch = FetchType.LAZY,
-//            cascade = CascadeType.ALL, orphanRemoval = true)
-//    private Set<AccountProduct> productLists;
+    @ToString.Exclude
+    @ManyToMany(mappedBy = "products", cascade = CascadeType.PERSIST, fetch = FetchType.EAGER)
+    private Set<Account> account;
 }

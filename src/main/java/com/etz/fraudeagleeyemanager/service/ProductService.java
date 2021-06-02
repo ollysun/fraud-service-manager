@@ -123,7 +123,6 @@ public class ProductService {
 		productEntity.setCallbackURL(request.getCallback());
 		productEntity.setStatus(request.getStatus());
 		productEntity.setUpdatedBy(request.getUpdatedBy());
-		productEntity.setUpdatedAt(LocalDateTime.now());
 		
 		// for auditing purpose for UPDATE
 		productEntity.setEntityId(request.getProductCode());
@@ -162,6 +161,10 @@ public class ProductService {
 	}
 
 	public ProductDataSet createProductDataset(DatasetProductRequest request) {
+		ProductEntity productEntity = productEntityRepository.findByCode(request.getProductCode());
+		if (productEntity == null){
+			throw new ResourceNotFoundException("Product not found for Code " + request.getProductCode());
+		}
 		ProductDataSet prodDatasetEntity = new ProductDataSet();
 		prodDatasetEntity.setProductCode(request.getProductCode());
 		prodDatasetEntity.setFieldName(request.getFieldName());

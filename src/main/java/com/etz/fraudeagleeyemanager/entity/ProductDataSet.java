@@ -17,6 +17,8 @@ import javax.validation.constraints.NotBlank;
 
 import org.hibernate.annotations.Where;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
@@ -53,6 +55,7 @@ public class ProductDataSet extends BaseAuditEntity implements Serializable {
 	@Column(nullable = false, name = "authorised", columnDefinition = "TINYINT", length = 1)
 	private Boolean authorised;
 
+	@JsonBackReference
 	@ManyToOne
 	@MapsId("productCode")
 	@JoinColumn(foreignKey = @ForeignKey(name = "FK_PRODUCT_CODE"),

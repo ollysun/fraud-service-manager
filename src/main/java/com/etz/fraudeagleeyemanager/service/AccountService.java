@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 import com.etz.fraudeagleeyemanager.dto.request.AccountToProductRequest;
 import com.etz.fraudeagleeyemanager.dto.request.AddAccountRequest;
 import com.etz.fraudeagleeyemanager.dto.request.UpdateAccountProductRequest;
+import com.etz.fraudeagleeyemanager.dto.request.UpdateAccountRequestDto;
 import com.etz.fraudeagleeyemanager.dto.response.AccountProductResponse;
 import com.etz.fraudeagleeyemanager.entity.Account;
 import com.etz.fraudeagleeyemanager.entity.AccountProduct;
@@ -58,9 +59,7 @@ public class AccountService {
 	public Account createAccount(AddAccountRequest request){
 		Account accountEntity = new Account();
 
-		if (!isNumeric(request.getAccountNo())){
-			throw new FraudEngineException("Incorrect Account Number");
-		}
+
 		try {
 			// check for account number digits
 			accountEntity.setAccountName(request.getAccountName());
@@ -68,7 +67,7 @@ public class AccountService {
 			accountEntity.setBankName(request.getBankName());
 			accountEntity.setStatus(Boolean.TRUE);
 			accountEntity.setCreatedBy(request.getCreatedBy());
-			accountEntity.setSuspicionCount(request.getSuspicion());
+			accountEntity.setSuspicionCount(request.getSuspicionCount());
 			accountEntity.setAccountNo(request.getAccountNo());
 			accountEntity.setBlockReason(request.getBlockReason());
 			
@@ -101,12 +100,12 @@ public class AccountService {
 	}
 
 	// update account to increment suspicious count
-	public Account updateAccount(Long accountNumber, int count, Boolean status, String blockReason){
-		Account account = accountRepository.findByAccountNo(accountNumber)
-				.orElseThrow(() ->  new ResourceNotFoundException("Account details not found for account number " + accountNumber));
-		account.setSuspicionCount(count);
-		account.setBlockReason(blockReason);
-		account.setStatus(status);
+	public Account updateAccount(UpdateAccountRequestDto updateAccountRequestDto){
+		Account account = accountRepository.findByAccountNo(updateAccountRequestDto.getAccountNumber())
+				.orElseThrow(() ->  new ResourceNotFoundException("Account details not found for account number " + updateAccountRequestDto.getAccountNumber()));
+		account.setSuspicionCount(updateAccountRequestDto.getCount());
+		account.setBlockReason(updateAccountRequestDto.getBlockReason());
+		account.setStatus(updateAccountRequestDto.getStatus());
 		return account;
 	}
 
@@ -133,10 +132,9 @@ public class AccountService {
 			accountRepository.findById(request.getAccountId()).orElseThrow(
 					() -> new ResourceNotFoundException("Account Not found " + request.getAccountId()));
 
-			AccountProductId accountProductId = new AccountProductId();
-			accountProductId.setProductCode(request.getProductCode());
-			accountProductId.setAccountId(request.getAccountId());
-			accountProductEntity.setAccountProductId(accountProductId);
+
+			accountProductEntity.setAccountId(request.getAccountId());
+			accountProductEntity.setProductCode(request.getProductCode());
 			accountProductEntity.setStatus(Boolean.TRUE);
 			accountProductEntity.setCreatedBy(request.getCreatedBy());
 			
@@ -157,8 +155,8 @@ public class AccountService {
 	}
 	
 	public List<AccountProductResponse> updateAccountProduct(UpdateAccountProductRequest request) {
-		List<AccountProduct> accountEntity = accountProductRepository.findByAccountProductIdAccountId(request.getAccountId());
-		if (accountEntity.size() < 1){
+		List<AccountProduct> accountEntity = accountProductRepository.findByAccountId(request.getAccountId());
+		if (accountEntity.isEmpty()){
 			throw new ResourceNotFoundException("Account Product not found for this ID " +  request.getAccountId());
 		}
 		ProductEntity productEntity = productRepository.findByCode(request.getProductCode());
@@ -169,7 +167,7 @@ public class AccountService {
 		accountEntity.forEach(acctprod -> {
 			acctprod.setStatus(request.getStatus());
 			acctprod.setUpdatedBy(request.getUpdatedBy());
-			acctprod.getAccountProductId().setProductCode(request.getProductCode());
+			acctprod.setProductCode(request.getProductCode());
 			
 			//for auditing purpose for UPDATE
 			acctprod.setEntityId(null);
@@ -183,11 +181,14 @@ public class AccountService {
 		});
 
 		accountProductRedisRepository.setHashOperations(redisTemplate);
-		AccountProduct account = accountProductRedisRepository.findById(request.getAccountId());
-		account.setStatus(request.getStatus());
-		account.setUpdatedBy(request.getUpdatedBy());
-		account.getAccountProductId().setProductCode(request.getProductCode());
-		accountProductRedisRepository.update(account);
+		accountEntity.forEach(acctprod -> {
+			acctprod.setStatus(request.getStatus());
+			acctprod.setUpdatedBy(request.getUpdatedBy());
+			acctprod.setProductCode(request.getProductCode());
+			AccountProduct accountProduct = accountProductRepository.save(acctprod);
+			accountProductRedisRepository.update(accountProduct);
+		});
+
 		return accountProductResponseList;
 	}
 	

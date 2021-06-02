@@ -1,8 +1,25 @@
 package com.etz.fraudeagleeyemanager.dto.response;
 
-import com.etz.fraudeagleeyemanager.entity.ProductRule;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import lombok.Data;
 
-@JsonIgnoreProperties({ "productEntity", "emailGroup"})
-public class ProductRuleResponse extends ProductRule {
+@Data
+@JsonIgnoreProperties({ "productEntity", "emailGroup", "rule"})
+public class ProductRuleResponse {
+
+    private Long id;
+
+    private Long ruleId;
+
+    private String productCode;
+
+    private Long emailGroupId;
+
+    private Boolean notifyAdmin;
+
+    private Boolean notifyCustomer;
+
+    private Boolean status;
+
+    private Boolean authorised;
 }

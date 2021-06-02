@@ -1,14 +1,30 @@
 package com.etz.fraudeagleeyemanager.entity;
 
-import lombok.*;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.ManyToMany;
+import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
+import javax.validation.constraints.NotBlank;
+
 import org.hibernate.annotations.ResultCheckStyle;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.Where;
 
-import javax.persistence.*;
-import javax.validation.constraints.NotBlank;
-import java.io.Serializable;
-import java.util.Set;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
 
 
 @EqualsAndHashCode(callSuper = true)
@@ -18,6 +34,7 @@ import java.util.Set;
 				columnNames = {"account_no"}))
 @SQLDelete(sql = "UPDATE account SET deleted = true WHERE id = ?", check = ResultCheckStyle.COUNT)
 @Where(clause = "deleted = false")
+@ToString(exclude = { "products" })
 @Data
 public class Account extends BaseAuditEntity implements Serializable {
 
@@ -51,12 +68,11 @@ public class Account extends BaseAuditEntity implements Serializable {
 	@Column(name = "block_reason")
 	private String blockReason;
 
-//	@OneToMany(mappedBy = "account",
-//			cascade = CascadeType.ALL,
-//			orphanRemoval = true,
-//			fetch = FetchType.LAZY)
-//	private Set<AccountProduct> accounts;
-
+	@ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+	@JoinTable(name = "account_product",
+			joinColumns = @JoinColumn(name = "account_id"),
+			inverseJoinColumns = @JoinColumn(name = "product_code"))
+	private List<ProductEntity> products = new ArrayList<>();
 
 
 }

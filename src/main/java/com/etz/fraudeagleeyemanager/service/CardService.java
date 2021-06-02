@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import com.etz.fraudeagleeyemanager.dto.request.CardRequest;
 import com.etz.fraudeagleeyemanager.dto.request.CardToProductRequest;
 import com.etz.fraudeagleeyemanager.dto.request.UpdateCardProductRequest;
+import com.etz.fraudeagleeyemanager.dto.request.UpdateCardRequestDto;
 import com.etz.fraudeagleeyemanager.entity.Card;
 import com.etz.fraudeagleeyemanager.entity.CardProduct;
 import com.etz.fraudeagleeyemanager.exception.ResourceNotFoundException;
@@ -69,12 +70,12 @@ public class CardService {
 		return savedCard;
 	}
  	// update card to increment suspicious count
-	public Card updateCard(Integer cardBin, Integer count, Boolean status, String blockReason){
-		Card card = cardRepository.findByCardBin(cardBin)
-				    .orElseThrow(() ->  new ResourceNotFoundException("Card details not found for bin " + cardBin));
-		card.setSuspicionCount(count);
-		card.setBlockReason(blockReason);
-		card.setStatus(status);
+	public Card updateCard(UpdateCardRequestDto updateCardRequestDto){
+		Card card = cardRepository.findByCardBin(updateCardRequestDto.getCardBin())
+				    .orElseThrow(() ->  new ResourceNotFoundException("Card details not found for bin " + updateCardRequestDto.getCardBin()));
+		card.setSuspicionCount(updateCardRequestDto.getCount());
+		card.setBlockReason(updateCardRequestDto.getBlockReason());
+		card.setStatus(updateCardRequestDto.getStatus());
 		return card;
 	}
 

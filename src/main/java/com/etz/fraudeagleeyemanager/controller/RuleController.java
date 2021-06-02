@@ -60,7 +60,7 @@ public class RuleController {
 	}
 	
 	@GetMapping
-	public PageResponse<Rule> queryRule(@RequestParam(name = "ruleId", required = false) Long ruleId){
+	public PageResponse<RuleResponse> queryRule(@RequestParam(name = "ruleId", required = false) Long ruleId){
 		return new PageResponse<>(ruleService.getRule(ruleId));
 	}
 		
@@ -73,7 +73,7 @@ public class RuleController {
 	}
 	
 	@PutMapping(path = "/product")
-	public ModelResponse<ProductRule> updateProductRule(@RequestBody @Valid UpdateMapRuleToProductRequest request){
+	public ModelResponse<ProductRuleResponse> updateProductRule(@RequestBody @Valid UpdateMapRuleToProductRequest request){
 		return new ModelResponse<>(ruleService.updateProductRule(request));
 	}
 	
@@ -83,10 +83,10 @@ public class RuleController {
 	}
 
 	@GetMapping(path = "/product")
-	public ResponseEntity<CollectionResponse<RuleResponse>> getRuleProduct(
+	public ResponseEntity<CollectionResponse<RuleProductResponse>> getRuleProduct(
 			@RequestParam(name = "code", required = true) String code){
-		List<RuleResponse> roleResponseList = ruleService.getRuleProduct(code);
-		CollectionResponse<RuleResponse> collectionResponse = new CollectionResponse<>(roleResponseList);
+		List<RuleProductResponse> roleResponseList = ruleService.getRuleProduct(code);
+		CollectionResponse<RuleProductResponse> collectionResponse = new CollectionResponse<>(roleResponseList);
 		return new ResponseEntity<>(collectionResponse, HttpStatus.OK);
 	}
 

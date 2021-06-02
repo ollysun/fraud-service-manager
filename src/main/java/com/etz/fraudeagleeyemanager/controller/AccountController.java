@@ -1,12 +1,11 @@
 package com.etz.fraudeagleeyemanager.controller;
 
 
-import com.etz.fraudeagleeyemanager.dto.request.AccountToProductRequest;
-import com.etz.fraudeagleeyemanager.dto.request.AddAccountRequest;
-import com.etz.fraudeagleeyemanager.dto.request.UpdateAccountProductRequest;
+import com.etz.fraudeagleeyemanager.dto.request.*;
 import com.etz.fraudeagleeyemanager.dto.response.*;
 import com.etz.fraudeagleeyemanager.entity.Account;
 import com.etz.fraudeagleeyemanager.entity.AccountProduct;
+import com.etz.fraudeagleeyemanager.entity.Card;
 import com.etz.fraudeagleeyemanager.service.AccountService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,12 +52,16 @@ public class AccountController {
 	}
 
 	@PutMapping(path = "/product")
-	public ResponseEntity<CollectionResponse<AccountProductResponse>> updateAccount(@RequestBody @Valid UpdateAccountProductRequest request) {
-		log.info(request.toString());
+	public ResponseEntity<CollectionResponse<AccountProductResponse>> updateAccountProduct(@RequestBody @Valid UpdateAccountProductRequest request) {
 		List<AccountProductResponse> userResponseList = accountService.updateAccountProduct(request);
 		CollectionResponse<AccountProductResponse> collectionResponse = new CollectionResponse<>(userResponseList);
 		collectionResponse.setMessage("All Updated AccountProduct");
 		return new ResponseEntity<>(collectionResponse, HttpStatus.OK);
+	}
+
+	@PutMapping
+	public ModelResponse<Account> updateAccount(@RequestBody UpdateAccountRequestDto request){
+		return new ModelResponse<>(accountService.updateAccount(request));
 	}
 
 }

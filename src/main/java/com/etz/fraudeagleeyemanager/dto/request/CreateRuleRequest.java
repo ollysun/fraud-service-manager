@@ -7,6 +7,8 @@ import lombok.Data;
 
 @Data
 public class CreateRuleRequest {
+	@NotBlank(message="ruleName cannot be empty")
+	private String ruleName;
 	@NotNull(message="firstSourceVal cannot be empty")
 	private String firstSourceVal;
 	@NotNull(message="firstOperator cannot be empty")
