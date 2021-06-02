@@ -1,5 +1,6 @@
 package com.etz.fraudeagleeyemanager.config;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
@@ -17,6 +18,9 @@ import org.springframework.web.util.DefaultUriBuilderFactory;
 @EnableOAuth2Client
 public class Oauth2ClientConfig {
 
+    //@Value("${spring.authentication-server.create-token-url}")
+    //private String accessTokenURI;
+
 //    @Bean
 //    public ClientCredentialsResourceDetails resourceDetails(){
 //        ClientCredentialsResourceDetails resourceDetails = new ClientCredentialsResourceDetails();
@@ -24,6 +28,9 @@ public class Oauth2ClientConfig {
 //        resourceDetails.setClientSecret("");
 //        resourceDetails.setGrantType("");
 //        resourceDetails.setAccessTokenUri("");
+
+//        resourceDetails.setUsername("admin");
+//        resourceDetails.setPassword("pass");
 //        resourceDetails.setAuthenticationScheme(AuthenticationScheme.header); //this again depends on the OAuth2 server specifications
 //
 //        return resourceDetails;

@@ -23,11 +23,9 @@ public class AccountProduct extends BaseEntity implements Serializable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotBlank
     @Column(name = "product_code", nullable = false, columnDefinition="VARCHAR(100)")
     private String productCode;
 
-    @NotNull
     @Column(name = "account_id", nullable = false, columnDefinition = "bigint")
     private Long accountId;
 

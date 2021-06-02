@@ -16,36 +16,16 @@ import java.io.Serializable;
         columnNames = {"card_id"}))
 @SQLDelete(sql = "UPDATE card_product SET deleted = true WHERE id = ?", check = ResultCheckStyle.COUNT)
 @Where(clause = "deleted = false")
-@IdClass(CardProductId.class)
 public class CardProduct extends BaseEntity implements Serializable {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Id
     @Column(name = "product_code", nullable = false, columnDefinition="VARCHAR(100)")
     private String productCode;
 
-    @Id
     @Column(name = "card_id", nullable = false,  columnDefinition = "bigint")
     private Long cardId;
-
-    @JsonBackReference
-    @ManyToOne
-    @MapsId("productCode")
-    @JoinColumn(foreignKey = @ForeignKey(name = "FK_CARD_PRODUCT_CODE"),
-            name = "product_code",
-            referencedColumnName="code")
-    private ProductEntity productEntity;
-
-    @JsonBackReference
-    @ManyToOne
-    @MapsId("cardId")
-    @JoinColumn(foreignKey = @ForeignKey(name = "FK_CARD_PRODUCT_ID"),
-            name = "card_id",
-            referencedColumnName="id")
-    private Card card;
 
     @Column(nullable = false, name = "status", columnDefinition = "TINYINT", length = 1)
     private Boolean status;
