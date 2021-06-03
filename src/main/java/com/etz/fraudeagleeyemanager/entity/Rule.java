@@ -26,7 +26,7 @@ public class Rule extends BaseEntity implements Serializable {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
-	@Column(name = "rule_name", unique = true, nullable=false)
+	@Column(name = "rule_name", nullable=false)
 	private String name;
 	
 	@Column(name = "source_value_1", nullable=false)

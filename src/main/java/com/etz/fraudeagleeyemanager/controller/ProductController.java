@@ -31,15 +31,15 @@ public class ProductController {
 	private RestTemplateUtil restTemplateUtil;
 	
 	@PostMapping
-	public ResponseEntity<ModelResponse<ProductEntity>> createProduct(
+	public ResponseEntity<ModelResponse<ProductResponse>> createProduct(
 			@Valid @RequestBody  CreateProductRequest request){
-		ModelResponse<ProductEntity> response = new ModelResponse<>(productService.createProduct(request));
+		ModelResponse<ProductResponse> response = new ModelResponse<>(productService.createProduct(request));
 		response.setStatus(HttpStatus.CREATED.value());
 		return new ResponseEntity<>(response, HttpStatus.CREATED);
 	}
 		
 	@PutMapping
-	public ModelResponse<ProductEntity> updateProduct(@RequestBody @Valid UpdateProductRequest request){
+	public ModelResponse<ProductResponse> updateProduct(@RequestBody @Valid UpdateProductRequest request){
 		return new ModelResponse<>(productService.updateProduct(request));
 	}
 	

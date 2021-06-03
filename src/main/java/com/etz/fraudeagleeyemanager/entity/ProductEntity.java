@@ -27,7 +27,6 @@ public class ProductEntity extends BaseEntity implements Serializable {
     @Column(name = "code", unique=true,columnDefinition="VARCHAR(100)")
     private String code;
 
-    @NotBlank(message = "ProductEntity Name cannot be empty")
     @Column(nullable = false, name = "name", unique = true, length = 200)
     private String name;
 
