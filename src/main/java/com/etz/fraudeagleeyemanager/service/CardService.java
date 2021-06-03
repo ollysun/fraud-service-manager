@@ -56,7 +56,7 @@ public class CardService {
 	@Autowired @Qualifier("redisTemplate")
 	private RedisTemplate<String, Object> fraudEngineRedisTemplate;
 
-	public Card createCard(CardRequest request) {
+	public CardResponse createCard(CardRequest request) {
 		Card cardEntity = new Card();
 		cardEntity.setCardholderName(request.getHolderName());
 		cardEntity.setCardBin(request.getCardBin());
@@ -85,7 +85,7 @@ public class CardService {
 		cardRedisRepository.setHashOperations(fraudEngineRedisTemplate);
 		cardRedisRepository.create(savedCard);
 
-		return savedCard;
+		return outputCardResponse(savedCard);
 	}
  	// update card to increment suspicious count
 	public Card updateCard(UpdateCardRequestDto updateCardRequestDto){
@@ -157,7 +157,7 @@ public class CardService {
 		List<CardResponse> cardResponseList = new ArrayList<>();
 		cardList.forEach(cardVal -> {
 			CardResponse cardResponse = new CardResponse();
-			BeanUtils.copyProperties(cardVal,cardResponse,"productRule");
+			BeanUtils.copyProperties(cardVal,cardResponse,"products");
 			cardResponseList.add(cardResponse);
 		});
 		return cardResponseList;
@@ -168,6 +168,13 @@ public class CardService {
 		CardProductResponse cardProductResponse = new CardProductResponse();
 		BeanUtils.copyProperties(cardProduct,cardProductResponse,"productEntity", "card");
 		return cardProductResponse;
+	}
+
+	private CardResponse outputCardResponse(Card card){
+
+		CardResponse cardResponse = new CardResponse();
+		BeanUtils.copyProperties(card,cardResponse,"products");
+		return cardResponse;
 	}
 
 }

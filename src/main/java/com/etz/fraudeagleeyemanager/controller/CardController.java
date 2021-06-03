@@ -29,9 +29,8 @@ public class CardController {
 	CardService cardService;
 	
 	@PostMapping
-	public ResponseEntity<ModelResponse<Card>> createCard(@RequestBody @Valid CardRequest request){
-		log.info("am here");
-		ModelResponse<Card> response = new ModelResponse<>(cardService.createCard(request));
+	public ResponseEntity<ModelResponse<CardResponse>> createCard(@RequestBody @Valid CardRequest request){
+		ModelResponse<CardResponse> response = new ModelResponse<>(cardService.createCard(request));
 		response.setStatus(HttpStatus.CREATED.value());
 		return new ResponseEntity<>(response, HttpStatus.CREATED);
 	}

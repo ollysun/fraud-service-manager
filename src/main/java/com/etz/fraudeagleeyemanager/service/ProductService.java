@@ -103,7 +103,7 @@ public class ProductService {
 		return productResponseList;
 	}
 
-	public ProductEntity updateProduct(UpdateProductRequest request) {
+	public ProductResponse updateProduct(UpdateProductRequest request) {
 		ProductEntity productEntity = productEntityRepository.findByCode(request.getProductCode());
 		if (productEntity == null){
 			throw new ResourceNotFoundException("Product not found for Code " + request.getProductCode());
