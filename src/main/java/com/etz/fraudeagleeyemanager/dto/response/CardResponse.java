@@ -7,6 +7,6 @@ import lombok.EqualsAndHashCode;
 
 @EqualsAndHashCode(callSuper = true)
 @Data
-@JsonIgnoreProperties({ "cards"})
+@JsonIgnoreProperties({ "cards", "products"})
 public class CardResponse extends Card {
 }
