@@ -6,6 +6,7 @@ import com.etz.fraudeagleeyemanager.dto.request.MapRuleToProductRequest;
 import com.etz.fraudeagleeyemanager.dto.request.UpdateMapRuleToProductRequest;
 import com.etz.fraudeagleeyemanager.dto.request.UpdateRuleRequest;
 import com.etz.fraudeagleeyemanager.dto.response.*;
+import com.etz.fraudeagleeyemanager.entity.EmailGroup;
 import com.etz.fraudeagleeyemanager.entity.ProductEntity;
 import com.etz.fraudeagleeyemanager.entity.ProductRule;
 import com.etz.fraudeagleeyemanager.entity.Rule;
@@ -140,8 +141,8 @@ public class RuleService {
 	}
 
 	public boolean deleteRule(Long parameterId) {
-		Optional<ProductRule> prodRuleEntity = productRuleRepository.findByRuleId(parameterId);
-		if (prodRuleEntity.isPresent()){
+		List<ProductRule> prodRuleEntity = productRuleRepository.findByRuleId(parameterId);
+		if (!(prodRuleEntity.isEmpty())){
 			throw new FraudEngineException("Please unmap the ruleId before deleting " + parameterId);
 		}
 		ruleRepository.deleteById(parameterId);
@@ -202,38 +203,49 @@ public class RuleService {
 		return createdProductRuleEntity;
 	}
 
-	public ProductRuleResponse updateProductRule(UpdateMapRuleToProductRequest request) {
-		ProductRule prodRuleEntity = productRuleRepository.findById(request.getProductRuleId())
-				.orElseThrow(() -> new ResourceNotFoundException("ProductRule Not found for Id " + request.getProductRuleId() ));
-
+	public List<ProductRuleResponse> updateProductRule(UpdateMapRuleToProductRequest request) {
+		List<ProductRule> prodRuleEntityList = productRuleRepository.findByRuleId(request.getProductRuleId());
+		if(prodRuleEntityList.isEmpty()){
+			throw new FraudEngineException("ProductRule Not found for Id " + request.getProductRuleId());
+		}
+		List<ProductRule> updatedProductRuleEntity = new ArrayList<>();
 		if (request.getEmailGroupId() != null){
 			emailGroupRepository.findById(request.getEmailGroupId()).orElseThrow(() ->
 					new ResourceNotFoundException("Email Group Id Not found for  Id " + request.getEmailGroupId() ));
 		}
-		prodRuleEntity.setNotifyAdmin(request.getNotifyAdmin());
-		prodRuleEntity.setEmailGroupId(request.getEmailGroupId());
-		prodRuleEntity.setNotifyCustomer(request.getNotifyCustomer());
-		prodRuleEntity.setStatus(request.getStatus());
-		prodRuleEntity.setAuthorised(request.getAuthorised());
-		prodRuleEntity.setUpdatedBy(request.getUpdatedBy());
-		ProductRule updatedEntity = productRuleRepository.save(prodRuleEntity);
+
+		for (ProductRule prodRuleEntity:prodRuleEntityList) {
+			prodRuleEntity.setNotifyAdmin(request.getNotifyAdmin());
+			prodRuleEntity.setEmailGroupId(request.getEmailGroupId());
+			prodRuleEntity.setNotifyCustomer(request.getNotifyCustomer());
+			prodRuleEntity.setStatus(request.getStatus());
+			prodRuleEntity.setAuthorised(request.getAuthorised());
+			prodRuleEntity.setUpdatedBy(request.getUpdatedBy());
+			ProductRule updatedEntity = productRuleRepository.save(prodRuleEntity);
+			updatedProductRuleEntity.add(updatedEntity);
+		}
 
 		//update Redis
 		productRuleRedisRepository.setHashOperations(fraudEngineRedisTemplate);
-		productRuleRedisRepository.update(prodRuleEntity);
-		return outputProductRuleResponseList(updatedEntity);
+		for (ProductRule prodRuleEntity:updatedProductRuleEntity) {
+			productRuleRedisRepository.update(prodRuleEntity);
+		}
+		return outputProductRuleResponseList(updatedProductRuleEntity);
 	}
 
 	public boolean deleteProductRule(Long productRuleId) {
-		ProductRule prodRuleEntity = productRuleRepository.findByRuleId(productRuleId)
-				.orElseThrow(() -> new ResourceNotFoundException("ProductRule Not found for productRuleId " + productRuleId ));
-		String redisId = prodRuleEntity.getProductCode()+ ":"+prodRuleEntity.getRuleId();
-		productRuleRepository.deleteByRuleId(productRuleId);
+		List<ProductRule> prodRuleEntityList = productRuleRepository.findByRuleId(productRuleId);
+		if(prodRuleEntityList.isEmpty()){
+			throw new FraudEngineException("ProductRule Not found for Id " + productRuleId);
+		}
 		productRuleRedisRepository.setHashOperations(fraudEngineRedisTemplate);
-		productRuleRedisRepository.delete(redisId);
+		prodRuleEntityList.forEach(productRule -> {
+			String redisId = productRule.getProductCode()+ ":"+productRule.getRuleId();
+			productRuleRepository.deleteByRuleId(productRuleId);
+			productRuleRedisRepository.delete(redisId);
+		});
 		return true;
 	}
-
 
 
 	public List<RuleProductResponse> getRuleProduct(String code) {
@@ -263,11 +275,14 @@ public class RuleService {
 		return ruleResponseList;
 	}
 
-	private ProductRuleResponse outputProductRuleResponseList(ProductRule productRule){
-
+	private List<ProductRuleResponse> outputProductRuleResponseList(List<ProductRule> productRuleList){
+		List<ProductRuleResponse> productRules = new ArrayList<>();
+		productRuleList.forEach( productRule -> {
 			ProductRuleResponse ruleResponse = new ProductRuleResponse();
 			BeanUtils.copyProperties(productRule,ruleResponse,"productEntity", "emailGroup", "rule");
-			return ruleResponse;
+			productRules.add(ruleResponse);
+		});
+		return productRules;
 	}
 
 

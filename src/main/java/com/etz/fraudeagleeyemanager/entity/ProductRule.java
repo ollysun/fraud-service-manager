@@ -11,22 +11,25 @@ import java.io.Serializable;
 
 @Entity
 @Table(name = "product_rule")
-//@SQLDelete(sql = "UPDATE product_rule SET deleted = true WHERE rule_id = ?", check = ResultCheckStyle.COUNT)
+@SQLDelete(sql = "UPDATE product_rule SET deleted = true WHERE rule_id = ?", check = ResultCheckStyle.COUNT)
 @Where(clause = "deleted = false")
 @Getter
 @Setter
 @EqualsAndHashCode(exclude = {"productEntity", "emailGroup", "rule"}, callSuper = false)
 @RequiredArgsConstructor
 @ToString
+@IdClass(ProductRuleId.class)
 public class ProductRule extends BaseEntity implements Serializable {
 
 	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@GeneratedValue(strategy = GenerationType.AUTO)
 	private Long id;
 
+	@Id
 	@Column(name = "rule_id")
 	private Long ruleId;
 
+	@Id
 	@Column(name = "product_code",  columnDefinition="VARCHAR(100)")
 	private String productCode;
 
@@ -45,21 +48,26 @@ public class ProductRule extends BaseEntity implements Serializable {
 	@Column(nullable = false, name = "authorised", columnDefinition = "TINYINT", length = 1)
 	private Boolean authorised;
 
-	@JsonBackReference
-	@ManyToOne(fetch = FetchType.LAZY)
-	private ProductEntity productEntity;
 
 	@JsonBackReference
-	@ManyToOne(fetch = FetchType.LAZY)
+	@OneToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "email_group_id", foreignKey = @ForeignKey(name = "FK_PRODUCT_RULE_EMAIL_GROUP_ID"),
-			referencedColumnName="id", insertable = false, updatable = false)
+			 insertable = false, updatable = false)
 	private EmailGroup emailGroup;
 
+
 	@JsonBackReference
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "rule_id", insertable = false, updatable = false)
+	@MapsId("ruleId")
+	@JoinColumn(name = "rule_id")
 	private Rule rule;
 
+
+	@JsonBackReference
+	@ManyToOne(fetch = FetchType.LAZY)
+	@MapsId("productCode")
+	@JoinColumn(name = "product_code")
+	private ProductEntity productEntity;
 
 
 }

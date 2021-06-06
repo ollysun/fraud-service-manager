@@ -12,7 +12,6 @@ import javax.validation.constraints.NotBlank;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 
 @EqualsAndHashCode(callSuper = true)
@@ -20,7 +19,7 @@ import java.util.Set;
 @Table(name = "account",
 		uniqueConstraints = @UniqueConstraint(name="UC_ACCOUNT",
 				columnNames = {"account_no"}))
-@SQLDelete(sql = "UPDATE account SET deleted = true WHERE id = ?", check = ResultCheckStyle.COUNT)
+@SQLDelete(sql = "UPDATE account SET deleted = true, status=0 WHERE id = ?", check = ResultCheckStyle.COUNT)
 @Where(clause = "deleted = false")
 @Data
 @ToString(exclude = { "products" })

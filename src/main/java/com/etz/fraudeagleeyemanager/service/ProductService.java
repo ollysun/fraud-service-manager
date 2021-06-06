@@ -21,7 +21,6 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -165,44 +164,53 @@ public class ProductService {
 	}
 
 	public List<ProductDataSetResponse> getProductDataset(String productCode) {
-		List<ProductDataSet> productDatasetList = new ArrayList<>();
 		if (productCode == null) return outputProductDatasetEntity(productDataSetRepository.findAll());
-		productDatasetList.add(productDataSetRepository.findByProductCode(productCode));
+		List<ProductDataSet> productDatasetList = new ArrayList<>(productDataSetRepository.findByProductCode(productCode));
 		return outputProductDatasetEntity(productDatasetList);
 	}
 
-	public ProductDataSet updateProductDataset(UpdateDataSetRequest request) {
-		ProductDataSet productDatasetEntity = productDataSetRepository.findByProductCode(request.getProductCode());
-		if (productDatasetEntity == null){
+	public List<ProductDataSetResponse> updateProductDataset(UpdateDataSetRequest request) {
+		List<ProductDataSet> productDataSetList = productDataSetRepository.findByProductCode(request.getProductCode());
+		List<ProductDataSet> updatedDatasetList = new ArrayList<>();
+		if (productDataSetList.isEmpty()){
 			throw new ResourceNotFoundException("Product dataset details not found for this code " + request.getProductCode());
 		}
-		productDatasetEntity.setProductCode(request.getProductCode());
-		productDatasetEntity.setFieldName(request.getFieldName());
-		productDatasetEntity.setDataType(request.getDataType());
-		productDatasetEntity.setMandatory(request.getCompulsory());
-		productDatasetEntity.setAuthorised(request.getAuthorised());
-		productDatasetEntity.setUpdatedBy(request.getUpdatedBy());
+		productDataSetList.forEach(productDataSet -> {
+			productDataSet.setProductCode(request.getProductCode());
+			productDataSet.setFieldName(request.getFieldName());
+			productDataSet.setDataType(request.getDataType());
+			productDataSet.setMandatory(request.getCompulsory());
+			productDataSet.setAuthorised(request.getAuthorised());
+			productDataSet.setUpdatedBy(request.getUpdatedBy());
+			ProductDataSet savedProductDataset = productDataSetRepository.save(productDataSet);
+			updatedDatasetList.add(savedProductDataset);
+		});
 
-		ProductDataSet savedProductDataset = productDataSetRepository.save(productDatasetEntity);
 		productDatasetRedisRepository.setHashOperations(fraudEngineRedisTemplate);
-		productDatasetRedisRepository.update(savedProductDataset);
-		return outputUpdatedProductDatasetResponse(savedProductDataset);
+		updatedDatasetList.forEach(productDatasetRedisRepository::update);
+		return outputUpdatedProductDatasetResponse(updatedDatasetList);
 	}
 
-	private ProductDataSetResponse outputUpdatedProductDatasetResponse(ProductDataSet productEntity){
-		ProductDataSetResponse productResponse = new ProductDataSetResponse();
-		BeanUtils.copyProperties(productEntity,productResponse,"createdBy, createdAt,productDataset, productRules, products, productLists");
-		return productResponse;
+	private List<ProductDataSetResponse> outputUpdatedProductDatasetResponse(List<ProductDataSet> productDataSetList){
+		List<ProductDataSetResponse> updatedProductDatasetResponseList = new ArrayList<>();
+		productDataSetList.forEach(productDataSet -> {
+			ProductDataSetResponse productDataSetResponse = new ProductDataSetResponse();
+			BeanUtils.copyProperties(productDataSet,productDataSetResponse,"createdBy","createdAt","productEntity");
+			updatedProductDatasetResponseList.add(productDataSetResponse);
+		});
+		return updatedProductDatasetResponseList;
 	}
 
 	public boolean deleteProductDataset(String productCode) {
-		ProductDataSet productDatasetEntity = productDataSetRepository.findByProductCode(productCode);
-		if (productDatasetEntity == null){
+		List<ProductDataSet> productDatasetEntityList = productDataSetRepository.findByProductCode(productCode);
+		if (productDatasetEntityList.isEmpty()){
 			throw new ResourceNotFoundException("Product dataset details not found for this code " + productCode);
 		}
-		productDataSetRepository.deleteById(productDatasetEntity.getId());
+		productDatasetEntityList.forEach(productDataset -> {
+			productDataSetRepository.delete(productDataset.getId());
+			productDatasetRedisRepository.delete(productDataset.getId());
+		});
 		productDatasetRedisRepository.setHashOperations(fraudEngineRedisTemplate);
-		productDatasetRedisRepository.delete(productDatasetEntity.getId());
 		return true;
 	}
 

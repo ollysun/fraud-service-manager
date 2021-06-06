@@ -1,18 +1,20 @@
 package com.etz.fraudeagleeyemanager.repository;
 
 import com.etz.fraudeagleeyemanager.entity.ProductRule;
+import com.etz.fraudeagleeyemanager.entity.ProductRuleId;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface ProductRuleRepository extends JpaRepository<ProductRule, Long> {
+public interface ProductRuleRepository extends JpaRepository<ProductRule, ProductRuleId> {
     Optional<ProductRule> findByProductCode(String code);
-    Optional<ProductRule> findByRuleId(Long ruleId);
+    List<ProductRule> findByRuleId(Long ruleId);
 
     // NOTE: you have return void
     @Modifying

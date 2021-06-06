@@ -1,5 +1,6 @@
 package com.etz.fraudeagleeyemanager.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import lombok.*;
 import org.hibernate.annotations.ResultCheckStyle;
@@ -9,7 +10,6 @@ import org.hibernate.annotations.Where;
 import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
@@ -51,15 +51,21 @@ public class ProductEntity extends BaseEntity implements Serializable {
 
     @JsonManagedReference
     @ToString.Exclude
-    @OneToMany(mappedBy = "productEntity", fetch = FetchType.EAGER,
+    @OneToMany(mappedBy = "productEntity", fetch = FetchType.LAZY,
             cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ProductDataSet> productDataset;
 
     @JsonManagedReference
     @ToString.Exclude
-    @OneToMany(mappedBy = "productEntity", fetch = FetchType.EAGER,
+    @OneToMany(mappedBy = "productEntity", fetch = FetchType.LAZY,
             cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<ProductRule> productRules;
+
+//    @JsonBackReference
+//    @ManyToOne(fetch = FetchType.LAZY)
+//    @MapsId("ruleId")
+//    @JoinColumn(name = "rule_id")
+//    private Rule rule;
 
 
     @ToString.Exclude
