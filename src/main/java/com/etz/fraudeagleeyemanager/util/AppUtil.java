@@ -133,5 +133,17 @@ public class AppUtil {
                 Integer.parseInt(arrOfStr[1]) >= currentYear;
     }
 
+    public static boolean isNumeric(String strNum) {
+        if (strNum == null) {
+            return false;
+        }
+        try {
+            Long d = Long.parseLong(strNum);
+        } catch (NumberFormatException nfe) {
+            return false;
+        }
+        return true;
+    }
+
 
 }

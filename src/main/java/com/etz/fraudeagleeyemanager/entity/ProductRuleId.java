@@ -12,8 +12,6 @@ import java.io.Serializable;
 @NoArgsConstructor
 public class ProductRuleId implements Serializable {
 
-    private Long id;
-
     private Long ruleId;
 
     private String productCode;

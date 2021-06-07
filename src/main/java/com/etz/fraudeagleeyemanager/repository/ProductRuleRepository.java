@@ -19,6 +19,6 @@ public interface ProductRuleRepository extends JpaRepository<ProductRule, Produc
     // NOTE: you have return void
     @Modifying
     @Transactional
-    @Query(value="UPDATE ProductRule SET deleted = true WHERE ruleId = ?1")
-    void deleteByRuleId(Long ruleId);
+    @Query(value="UPDATE ProductRule SET deleted = true, status=0 WHERE ruleId = ?1 and productCode = ?2")
+    void deleteByRuleId(Long ruleId, String code);
 }

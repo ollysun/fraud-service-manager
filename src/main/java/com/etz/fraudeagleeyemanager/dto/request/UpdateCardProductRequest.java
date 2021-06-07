@@ -2,7 +2,6 @@ package com.etz.fraudeagleeyemanager.dto.request;
 
 import lombok.Data;
 
-import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
 @Data
@@ -14,7 +13,6 @@ public class UpdateCardProductRequest {
 	private Boolean status;
 	@NotNull(message="Please enter the name of the updatedBy")
 	private String updatedBy;
-	@NotBlank(message="Please enter the name of the updatedBy")
 	private String productCode;
 
 }

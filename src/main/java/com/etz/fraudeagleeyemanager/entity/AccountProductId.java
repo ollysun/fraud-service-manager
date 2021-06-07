@@ -13,14 +13,10 @@ import java.io.Serializable;
 @AllArgsConstructor
 @NoArgsConstructor
 @ToString
-@Embeddable
 public class AccountProductId implements Serializable {
 
-    @NotNull
-    @Column(name = "product_code", nullable = false, columnDefinition="VARCHAR(100)")
+
     private String productCode;
 
-    @NotNull
-    @Column(name = "account_id", nullable = false, columnDefinition = "bigint")
     private Long accountId;
 }

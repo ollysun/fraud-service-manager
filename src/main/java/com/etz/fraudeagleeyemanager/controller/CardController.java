@@ -4,9 +4,7 @@ import com.etz.fraudeagleeyemanager.dto.request.CardRequest;
 import com.etz.fraudeagleeyemanager.dto.request.CardToProductRequest;
 import com.etz.fraudeagleeyemanager.dto.request.UpdateCardProductRequest;
 import com.etz.fraudeagleeyemanager.dto.request.UpdateCardRequestDto;
-import com.etz.fraudeagleeyemanager.dto.response.CardResponse;
-import com.etz.fraudeagleeyemanager.dto.response.ModelResponse;
-import com.etz.fraudeagleeyemanager.dto.response.PageResponse;
+import com.etz.fraudeagleeyemanager.dto.response.*;
 import com.etz.fraudeagleeyemanager.entity.Card;
 import com.etz.fraudeagleeyemanager.entity.CardProduct;
 import com.etz.fraudeagleeyemanager.service.CardService;
@@ -55,27 +53,8 @@ public class CardController {
 
 	
 	@PutMapping("/product")
-	public ModelResponse<CardProduct> updateCardProduct(@RequestBody UpdateCardProductRequest request){
-		return new ModelResponse<>(cardService.updateCardProduct(request));
+	public CollectionResponse<CardProductResponse> updateCardProduct(@RequestBody UpdateCardProductRequest request){
+		return new CollectionResponse<>(cardService.updateCardProduct(request));
 	}
-	
-	
-//	@DeleteMapping(path = "/{cardID}")
-//	public ResponseEntity<BooleanResponse> deleteProduct(
-//			@PathParam(value = "cardID") Integer cardId){
-//		
-//		boolean isCardDeleted = cardService.deleteCard(cardId);
-//		HttpStatus httpStatusCode = HttpStatus.CREATED;
-//		
-//		if(!isCardDeleted) {
-//			httpStatusCode = HttpStatus.INTERNAL_SERVER_ERROR;
-//		}
-//		
-//		BooleanResponse response = new BooleanResponse(isCardDeleted);
-//		return new ResponseEntity<>(response, httpStatusCode);
-//	}
-	
-
-	
 	
 }

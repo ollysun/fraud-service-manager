@@ -10,11 +10,10 @@ import java.io.Serializable;
 @EqualsAndHashCode
 @AllArgsConstructor
 @NoArgsConstructor
+@ToString
 public class CardProductId implements Serializable {
-
-    @NotNull
+    private Long id;
     private String productCode;
 
-    @NotNull
     private Long cardId;
 }

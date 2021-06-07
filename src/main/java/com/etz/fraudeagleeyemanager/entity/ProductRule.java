@@ -22,10 +22,6 @@ import java.io.Serializable;
 public class ProductRule extends BaseEntity implements Serializable {
 
 	@Id
-	@GeneratedValue(strategy = GenerationType.AUTO)
-	private Long id;
-
-	@Id
 	@Column(name = "rule_id")
 	private Long ruleId;
 

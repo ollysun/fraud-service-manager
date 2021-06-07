@@ -176,8 +176,6 @@ public class ProductService {
 			throw new ResourceNotFoundException("Product dataset details not found for this code " + request.getProductCode());
 		}
 		productDataSetList.forEach(productDataSet -> {
-			productDataSet.setProductCode(request.getProductCode());
-			productDataSet.setFieldName(request.getFieldName());
 			productDataSet.setDataType(request.getDataType());
 			productDataSet.setMandatory(request.getCompulsory());
 			productDataSet.setAuthorised(request.getAuthorised());

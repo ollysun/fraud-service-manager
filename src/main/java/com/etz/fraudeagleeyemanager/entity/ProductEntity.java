@@ -61,18 +61,13 @@ public class ProductEntity extends BaseEntity implements Serializable {
             cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<ProductRule> productRules;
 
-//    @JsonBackReference
-//    @ManyToOne(fetch = FetchType.LAZY)
-//    @MapsId("ruleId")
-//    @JoinColumn(name = "rule_id")
-//    private Rule rule;
+    @JsonManagedReference
+    @OneToMany(mappedBy = "productEntity",fetch = FetchType.LAZY,
+            cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<AccountProduct> accountProducts;
 
-
-    @ToString.Exclude
-    @ManyToMany(mappedBy = "products", cascade = CascadeType.PERSIST, fetch = FetchType.EAGER)
-    private Set<Account> account;
-
-    @ToString.Exclude
-    @ManyToMany(mappedBy = "products", cascade = CascadeType.PERSIST, fetch = FetchType.EAGER)
-    private Set<Card> cards;
+    @JsonManagedReference
+    @OneToMany(mappedBy = "productEntity",fetch = FetchType.LAZY,
+            cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<CardProduct> cardProducts;
 }

@@ -6,10 +6,7 @@ import com.etz.fraudeagleeyemanager.dto.request.MapRuleToProductRequest;
 import com.etz.fraudeagleeyemanager.dto.request.UpdateMapRuleToProductRequest;
 import com.etz.fraudeagleeyemanager.dto.request.UpdateRuleRequest;
 import com.etz.fraudeagleeyemanager.dto.response.*;
-import com.etz.fraudeagleeyemanager.entity.EmailGroup;
-import com.etz.fraudeagleeyemanager.entity.ProductEntity;
-import com.etz.fraudeagleeyemanager.entity.ProductRule;
-import com.etz.fraudeagleeyemanager.entity.Rule;
+import com.etz.fraudeagleeyemanager.entity.*;
 import com.etz.fraudeagleeyemanager.exception.FraudEngineException;
 import com.etz.fraudeagleeyemanager.exception.ResourceNotFoundException;
 import com.etz.fraudeagleeyemanager.redisrepository.ProductRuleRedisRepository;
@@ -38,7 +35,7 @@ import java.util.*;
 public class RuleService {
 
 	@Autowired @Qualifier("redisTemplate")
-	private RedisTemplate<String, Object> fraudEngineRedisTemplate;
+	private final RedisTemplate<String, Object> fraudEngineRedisTemplate;
 	
 	@Autowired
 	RuleRedisRepository ruleRedisRepository;
@@ -50,7 +47,7 @@ public class RuleService {
 	RuleRepository ruleRepository;
 
 	@PersistenceContext
-	private EntityManager em;
+	private final EntityManager em;
 
 
 	@Autowired
@@ -62,7 +59,12 @@ public class RuleService {
 	@Autowired
 	EmailGroupRepository emailGroupRepository;
 
-	
+	public RuleService(RedisTemplate<String, Object> fraudEngineRedisTemplate, EntityManager em) {
+		this.fraudEngineRedisTemplate = fraudEngineRedisTemplate;
+		this.em = em;
+	}
+
+
 	public Rule createRule(CreateRuleRequest request) {
 		Rule ruleEntity = new Rule();
 		ruleEntity.setName(request.getRuleName());
@@ -233,17 +235,20 @@ public class RuleService {
 		return outputProductRuleResponseList(updatedProductRuleEntity);
 	}
 
-	public boolean deleteProductRule(Long productRuleId) {
-		List<ProductRule> prodRuleEntityList = productRuleRepository.findByRuleId(productRuleId);
-		if(prodRuleEntityList.isEmpty()){
-			throw new FraudEngineException("ProductRule Not found for Id " + productRuleId);
+	public boolean deleteProductRule(Long ruleId, String code) {
+		if (ruleId == null && code == null){
+			throw new FraudEngineException("Please enter value for code and ruleId");
 		}
+		Optional<ProductRule> productRuleEntity = productRuleRepository.findById(new ProductRuleId(ruleId,code));
 		productRuleRedisRepository.setHashOperations(fraudEngineRedisTemplate);
-		prodRuleEntityList.forEach(productRule -> {
-			String redisId = productRule.getProductCode()+ ":"+productRule.getRuleId();
-			productRuleRepository.deleteByRuleId(productRuleId);
+
+		if(productRuleEntity.isPresent()){
+			String redisId = code + ":"+ruleId;
+			productRuleRepository.deleteByRuleId(ruleId, code);
 			productRuleRedisRepository.delete(redisId);
-		});
+		}else {
+			throw new ResourceNotFoundException("ProductRule Not found for ruleId " + ruleId + " and code " + code);
+		}
 		return true;
 	}
 

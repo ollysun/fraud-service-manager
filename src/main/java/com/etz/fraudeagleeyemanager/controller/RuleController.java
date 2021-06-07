@@ -16,6 +16,9 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Positive;
 import java.util.List;
 
 @Slf4j
@@ -61,10 +64,11 @@ public class RuleController {
 	public CollectionResponse<ProductRuleResponse> updateProductRule(@RequestBody @Valid UpdateMapRuleToProductRequest request){
 		return new CollectionResponse<>(ruleService.updateProductRule(request));
 	}
-	
-	@DeleteMapping(path = "/product/{productRuleId}")
-	public BooleanResponse deleteProductRule(@PathVariable(name = "productRuleId") Long productRuleId){
-		return new BooleanResponse(ruleService.deleteProductRule(productRuleId));
+
+	@DeleteMapping(path = "/product/{code}/ruleId/{ruleId}")
+	public BooleanResponse deleteProductRule(@NotNull @Positive @PathVariable(value = "ruleId") Long ruleId,
+											 @NotBlank @PathVariable(value = "code") String code){
+		return new BooleanResponse(ruleService.deleteProductRule(ruleId, code));
 	}
 
 	@GetMapping(path = "/product")

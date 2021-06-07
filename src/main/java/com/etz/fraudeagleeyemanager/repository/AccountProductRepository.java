@@ -9,6 +9,5 @@ import java.util.List;
 
 @Repository
 public interface AccountProductRepository extends JpaRepository<AccountProduct, AccountProductId> {
-
     List<AccountProduct> findByAccountId(Long accountId);
 }

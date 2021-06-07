@@ -12,6 +12,7 @@ import javax.validation.constraints.NotBlank;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 
 @EqualsAndHashCode(callSuper = true)
@@ -55,11 +56,16 @@ public class Account extends BaseEntity implements Serializable {
 	@Column(name = "block_reason")
 	private String blockReason;
 
-	@ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-	@JoinTable(name = "account_product",
-			joinColumns = @JoinColumn(name = "account_id"),
-			inverseJoinColumns = @JoinColumn(name = "product_code"))
-	private List<ProductEntity> products = new ArrayList<>();
+//	@ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+//	@JoinTable(name = "account_product",
+//			joinColumns = @JoinColumn(name = "account_id"),
+//			inverseJoinColumns = @JoinColumn(name = "product_code"))
+//	private List<ProductEntity> products = new ArrayList<>();
+
+	@JsonManagedReference
+	@OneToMany(mappedBy = "account",fetch = FetchType.LAZY,
+			cascade = CascadeType.ALL, orphanRemoval = true)
+	private Set<AccountProduct> accountProducts;
 
 
 }
