@@ -8,8 +8,6 @@ import org.hibernate.annotations.Where;
 
 import javax.persistence.*;
 import java.io.*;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -20,7 +18,7 @@ import java.util.Set;
 @Where(clause = "deleted = false")
 @Getter
 @Setter
-@ToString(exclude = { "cards" })
+@ToString(exclude = { "cardProducts" })
 @RequiredArgsConstructor
 public class Card extends BaseEntity implements Serializable {
 
@@ -67,11 +65,10 @@ public class Card extends BaseEntity implements Serializable {
 	@Column(nullable = false, name = "status", columnDefinition = "TINYINT", length = 1)
 	private Boolean status;
 
-	@ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-	@JoinTable(name = "card_product",
-			joinColumns = @JoinColumn(name = "card_id"),
-			inverseJoinColumns = @JoinColumn(name = "product_code"))
-	private List<ProductEntity> products = new ArrayList<>();
+	@JsonManagedReference
+	@OneToMany(mappedBy = "card",fetch = FetchType.LAZY,
+			cascade = CascadeType.ALL, orphanRemoval = true)
+	private Set<CardProduct> cardProducts;
 
 }
 

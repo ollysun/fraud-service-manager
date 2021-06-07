@@ -28,8 +28,7 @@ public class ProductController {
 	@Autowired
 	ProductService productService;
 
-	private RestTemplateUtil restTemplateUtil;
-	
+
 	@PostMapping
 	public ResponseEntity<ModelResponse<ProductResponse>> createProduct(
 			@Valid @RequestBody  CreateProductRequest request){
@@ -51,7 +50,6 @@ public class ProductController {
 	@GetMapping
 	public ResponseEntity<CollectionResponse<ProductResponse>> queryProduct(@RequestParam(name = "code", required = false)
 																	  String code){
-		//log.info(restTemplateUtil.getAllProducts();
 		List<ProductResponse> userResponseList = productService.getProduct(code);
 		CollectionResponse<ProductResponse> collectionResponse = new CollectionResponse<>(userResponseList);
 		collectionResponse.setMessage("All Product");
@@ -76,8 +74,8 @@ public class ProductController {
 	}
 	
 	@PutMapping(path = "/dataset")
-	public ModelResponse<ProductDataSet> updateProductDataset(@RequestBody UpdateDataSetRequest request){
-		return new ModelResponse<>(productService.updateProductDataset(request));
+	public ResponseEntity<CollectionResponse<ProductDataSetResponse>> updateProductDataset(@RequestBody UpdateDataSetRequest request){
+		return new ResponseEntity<>(new CollectionResponse<>(productService.updateProductDataset(request)), HttpStatus.OK);
 	}
 	
 	@DeleteMapping(path = "/dataset/{code}")

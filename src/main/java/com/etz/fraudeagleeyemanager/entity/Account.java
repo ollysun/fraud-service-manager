@@ -20,7 +20,7 @@ import java.util.Set;
 @Table(name = "account",
 		uniqueConstraints = @UniqueConstraint(name="UC_ACCOUNT",
 				columnNames = {"account_no"}))
-@SQLDelete(sql = "UPDATE account SET deleted = true WHERE id = ?", check = ResultCheckStyle.COUNT)
+@SQLDelete(sql = "UPDATE account SET deleted = true, status=0 WHERE id = ?", check = ResultCheckStyle.COUNT)
 @Where(clause = "deleted = false")
 @Data
 @ToString(exclude = { "products" })
@@ -56,11 +56,16 @@ public class Account extends BaseEntity implements Serializable {
 	@Column(name = "block_reason")
 	private String blockReason;
 
-	@ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-	@JoinTable(name = "account_product",
-			joinColumns = @JoinColumn(name = "account_id"),
-			inverseJoinColumns = @JoinColumn(name = "product_code"))
-	private List<ProductEntity> products = new ArrayList<>();
+//	@ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+//	@JoinTable(name = "account_product",
+//			joinColumns = @JoinColumn(name = "account_id"),
+//			inverseJoinColumns = @JoinColumn(name = "product_code"))
+//	private List<ProductEntity> products = new ArrayList<>();
+
+	@JsonManagedReference
+	@OneToMany(mappedBy = "account",fetch = FetchType.LAZY,
+			cascade = CascadeType.ALL, orphanRemoval = true)
+	private Set<AccountProduct> accountProducts;
 
 
 }

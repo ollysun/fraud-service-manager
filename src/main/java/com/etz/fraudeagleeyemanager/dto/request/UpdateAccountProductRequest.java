@@ -10,7 +10,6 @@ import javax.validation.constraints.NotNull;
 public class UpdateAccountProductRequest {
 	@NotNull(message = "AccountId cannot be null")
 	private Long accountId;
-	@NotBlank(message = "ProductCode cannot be null")
 	private String productCode;
 	@NotNull(message = "Please enter the status")
 	private Boolean status;

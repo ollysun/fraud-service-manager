@@ -14,11 +14,13 @@ import java.io.Serializable;
 @Entity
 @Table(name = "card_product", uniqueConstraints = @UniqueConstraint(name="UC_CARD_PRODUCT",
         columnNames = {"card_id"}))
-@SQLDelete(sql = "UPDATE card_product SET deleted = true WHERE id = ?", check = ResultCheckStyle.COUNT)
+@SQLDelete(sql = "UPDATE card_product SET deleted = true, status=0 WHERE id = ?", check = ResultCheckStyle.COUNT)
 @Where(clause = "deleted = false")
+@IdClass(CardProductId.class)
 public class CardProduct extends BaseEntity implements Serializable {
+
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
     @Column(name = "product_code", nullable = false, columnDefinition="VARCHAR(100)")
@@ -29,5 +31,17 @@ public class CardProduct extends BaseEntity implements Serializable {
 
     @Column(nullable = false, name = "status", columnDefinition = "TINYINT", length = 1)
     private Boolean status;
+
+    @JsonBackReference
+    @ManyToOne(fetch = FetchType.LAZY)
+    @MapsId("cardId")
+    @JoinColumn(name = "card_id")
+    private Card card;
+
+    @JsonBackReference
+    @ManyToOne(fetch = FetchType.LAZY)
+    @MapsId("productCode")
+    @JoinColumn(name = "product_code")
+    private ProductEntity productEntity;
 
 }
