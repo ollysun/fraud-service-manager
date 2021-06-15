@@ -13,7 +13,6 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.MapsId;
 import javax.persistence.Table;
-import javax.validation.constraints.NotBlank;
 
 import org.hibernate.annotations.Where;
 
@@ -38,14 +37,13 @@ public class ProductDataSet extends BaseAuditEntity implements Serializable {
 	private Long id;
 
 	@Id
-	@Column(name = "product_code",  nullable = false)
+	@Column(name = "product_code", nullable = false, columnDefinition="VARCHAR(100)")
 	private String productCode;
 
 	@Id
-	@Column(name = "field_name",  nullable = false)
+	@Column(name = "field_name",  nullable = false, columnDefinition="VARCHAR(250)")
 	private String fieldName;
 
-	@NotBlank(message = "data type cannot be empty")
 	@Column(name = "data_type")
 	private String dataType;
 
@@ -58,9 +56,7 @@ public class ProductDataSet extends BaseAuditEntity implements Serializable {
 	@JsonBackReference
 	@ManyToOne
 	@MapsId("productCode")
-	@JoinColumn(foreignKey = @ForeignKey(name = "FK_PRODUCT_CODE"),
-			name = "product_code",
-			referencedColumnName="code")
+	@JoinColumn(foreignKey = @ForeignKey(name = "FK_PRODUCT_CODE"), name = "product_code")
 	private ProductEntity productEntity;
 
 }

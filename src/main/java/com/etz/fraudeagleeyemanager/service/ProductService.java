@@ -110,7 +110,7 @@ public class ProductService {
 		return productResponseList;
 	}
 
-	public ProductEntity updateProduct(UpdateProductRequest request) {
+	public ProductResponse updateProduct(UpdateProductRequest request) {
 		ProductEntity productEntity = productEntityRepository.findByCode(request.getProductCode());
 		if (productEntity == null){
 			throw new ResourceNotFoundException("Product not found for Code " + request.getProductCode());
@@ -190,57 +190,67 @@ public class ProductService {
 	}
 
 	public List<ProductDataSetResponse> getProductDataset(String productCode) {
-		List<ProductDataSet> productDatasetList = new ArrayList<>();
 		if (productCode == null) return outputProductDatasetEntity(productDataSetRepository.findAll());
-		productDatasetList.add(productDataSetRepository.findByProductCode(productCode));
+		List<ProductDataSet> productDatasetList = new ArrayList<>(productDataSetRepository.findByProductCode(productCode));
 		return outputProductDatasetEntity(productDatasetList);
 	}
 
-	public ProductDataSet updateProductDataset(UpdateDataSetRequest request) {
-		ProductDataSet productDatasetEntity = productDataSetRepository.findByProductCode(request.getProductCode());
-		if (productDatasetEntity == null){
+	public List<ProductDataSetResponse> updateProductDataset(UpdateDataSetRequest request) {
+		List<ProductDataSet> productDataSetList = productDataSetRepository.findByProductCode(request.getProductCode());
+		List<ProductDataSet> updatedDatasetList = new ArrayList<>();
+		if (productDataSetList.isEmpty()){
 			throw new ResourceNotFoundException("Product dataset details not found for this code " + request.getProductCode());
 		}
-		productDatasetEntity.setProductCode(request.getProductCode());
-		productDatasetEntity.setFieldName(request.getFieldName());
-		productDatasetEntity.setDataType(request.getDataType());
-		productDatasetEntity.setMandatory(request.getCompulsory());
-		productDatasetEntity.setAuthorised(request.getAuthorised());
-		productDatasetEntity.setUpdatedBy(request.getUpdatedBy());
-		
-		// for auditing purpose for UPDATE
-		productDatasetEntity.setEntityId(request.getProductCode());
-		productDatasetEntity.setRecordBefore(JsonConverter.objectToJson(productDatasetEntity));
-		productDatasetEntity.setRequestDump(request);
 
-		ProductDataSet savedProductDataset = productDataSetRepository.save(productDatasetEntity);
+		productDataSetList.forEach(productDataSet -> {
+			productDataSet.setDataType(request.getDataType());
+			productDataSet.setMandatory(request.getCompulsory());
+			productDataSet.setAuthorised(request.getAuthorised());
+			productDataSet.setUpdatedBy(request.getUpdatedBy());
+			
+			// for auditing purpose for UPDATE
+			productDataSet.setEntityId(request.getProductCode());
+			productDataSet.setRecordBefore(JsonConverter.objectToJson(productDataSet));
+			productDataSet.setRequestDump(request);
+			
+			ProductDataSet savedProductDataset = productDataSetRepository.save(productDataSet);
+			updatedDatasetList.add(savedProductDataset);
+		});
+
 		productDatasetRedisRepository.setHashOperations(fraudEngineRedisTemplate);
-		productDatasetRedisRepository.update(savedProductDataset);
-		return outputUpdatedProductDatasetResponse(savedProductDataset);
+		updatedDatasetList.forEach(productDatasetRedisRepository::update);
+		return outputUpdatedProductDatasetResponse(updatedDatasetList);
 	}
 
-	private ProductDataSetResponse outputUpdatedProductDatasetResponse(ProductDataSet productEntity){
-		ProductDataSetResponse productResponse = new ProductDataSetResponse();
-		BeanUtils.copyProperties(productEntity,productResponse,"createdBy, createdAt,productDataset, productRules, products, productLists");
-		return productResponse;
+	private List<ProductDataSetResponse> outputUpdatedProductDatasetResponse(List<ProductDataSet> productDataSetList){
+		List<ProductDataSetResponse> updatedProductDatasetResponseList = new ArrayList<>();
+		productDataSetList.forEach(productDataSet -> {
+			ProductDataSetResponse productDataSetResponse = new ProductDataSetResponse();
+			BeanUtils.copyProperties(productDataSet,productDataSetResponse,"createdBy","createdAt","productEntity");
+			updatedProductDatasetResponseList.add(productDataSetResponse);
+		});
+		return updatedProductDatasetResponseList;
 	}
 
 	public boolean deleteProductDataset(String productCode) {
-		ProductDataSet productDatasetEntity = productDataSetRepository.findByProductCode(productCode);
-		if (productDatasetEntity == null){
+		List<ProductDataSet> productDatasetEntityList = productDataSetRepository.findByProductCode(productCode);
+		if (productDatasetEntityList.isEmpty()){
 			throw new ResourceNotFoundException("Product dataset details not found for this code " + productCode);
 		}
-		// for auditing purpose for DELETE
-		productDatasetEntity.setEntityId(productCode);
-		productDatasetEntity.setRecordBefore(JsonConverter.objectToJson(productDatasetEntity));
-		productDatasetEntity.setRecordAfter(null);
-		productDatasetEntity.setRequestDump(productCode);
-		
-		String redisId = productDatasetEntity.getProductCode()+ ":"+ productDatasetEntity.getId();
 		//productDataSetRepository.deleteByProductCode(productCode);
-		productDataSetRepository.delete(productDatasetEntity);
 		productDatasetRedisRepository.setHashOperations(fraudEngineRedisTemplate);
-		productDatasetRedisRepository.delete(redisId);
+		productDatasetEntityList.forEach(productDataset -> {
+			// for auditing purpose for DELETE
+			productDataset.setEntityId(productCode);
+			productDataset.setRecordBefore(JsonConverter.objectToJson(productDataset));
+			productDataset.setRecordAfter(null);
+			productDataset.setRequestDump(productCode);
+			
+			String redisId = productDataset.getProductCode()+ ":"+ productDataset.getId();
+			//productDataSetRepository.delete(productDataset.getId());
+			productDataSetRepository.delete(productDataset);
+			productDatasetRedisRepository.delete(redisId);
+		});
 		return true;
 	}
 

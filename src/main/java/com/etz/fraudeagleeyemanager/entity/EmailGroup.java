@@ -28,12 +28,9 @@ public class EmailGroup extends BaseAuditEntity implements Serializable {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
-	@NotBlank(message = "group name cannot be empty")
 	@Column(name = "group_name", unique = true)
 	private String groupName;
 
-	@Email(message="please enter valid email")
-	@NotBlank(message = "email cannot be empty")
 	@Column(name = "email", columnDefinition = "TEXT")
 	private String email;
 	
@@ -42,9 +39,9 @@ public class EmailGroup extends BaseAuditEntity implements Serializable {
 	private Status status;
 
 	@ToString.Exclude
-	@OneToMany(mappedBy = "emailGroup", fetch = FetchType.EAGER,
-			cascade = CascadeType.ALL, orphanRemoval = true)
-	private Set<ProductRule> productRules = new HashSet<>();
+	@OneToOne(mappedBy = "emailGroup", fetch = FetchType.LAZY,
+			cascade = CascadeType.ALL)
+	private ProductRule productRule;
 
 //	@ToString.Exclude
 //	@OneToMany(mappedBy = "emailGroup", fetch = FetchType.EAGER,

@@ -1,8 +1,7 @@
 package com.etz.fraudeagleeyemanager.entity;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Set;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -11,9 +10,7 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
-import javax.persistence.ManyToMany;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 import javax.validation.constraints.NotBlank;
@@ -21,6 +18,8 @@ import javax.validation.constraints.NotBlank;
 import org.hibernate.annotations.ResultCheckStyle;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.Where;
+
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -32,7 +31,7 @@ import lombok.ToString;
 @Table(name = "account",
 		uniqueConstraints = @UniqueConstraint(name="UC_ACCOUNT",
 				columnNames = {"account_no"}))
-@SQLDelete(sql = "UPDATE account SET deleted = true WHERE id = ?", check = ResultCheckStyle.COUNT)
+@SQLDelete(sql = "UPDATE account SET deleted = true, status=0 WHERE id = ?", check = ResultCheckStyle.COUNT)
 @Where(clause = "deleted = false")
 @ToString(exclude = { "products" })
 @Data
@@ -68,11 +67,16 @@ public class Account extends BaseAuditEntity implements Serializable {
 	@Column(name = "block_reason")
 	private String blockReason;
 
-	@ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-	@JoinTable(name = "account_product",
-			joinColumns = @JoinColumn(name = "account_id"),
-			inverseJoinColumns = @JoinColumn(name = "product_code"))
-	private List<ProductEntity> products = new ArrayList<>();
+//	@ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+//	@JoinTable(name = "account_product",
+//			joinColumns = @JoinColumn(name = "account_id"),
+//			inverseJoinColumns = @JoinColumn(name = "product_code"))
+//	private List<ProductEntity> products = new ArrayList<>();
+
+	@JsonManagedReference
+	@OneToMany(mappedBy = "account",fetch = FetchType.LAZY,
+			cascade = CascadeType.ALL, orphanRemoval = true)
+	private Set<AccountProduct> accountProducts;
 
 
 }

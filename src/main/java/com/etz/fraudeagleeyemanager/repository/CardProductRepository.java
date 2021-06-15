@@ -5,7 +5,9 @@ import com.etz.fraudeagleeyemanager.entity.CardProductId;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 @Repository
 public interface CardProductRepository extends JpaRepository<CardProduct, CardProductId>{
-        CardProduct findByCardId(Long cardId);
+        List<CardProduct> findByCardId(Long cardId);
 }

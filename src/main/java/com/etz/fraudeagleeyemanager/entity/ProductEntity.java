@@ -9,10 +9,8 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.Id;
-import javax.persistence.ManyToMany;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
-import javax.validation.constraints.NotBlank;
 
 import org.hibernate.annotations.ResultCheckStyle;
 import org.hibernate.annotations.SQLDelete;
@@ -39,7 +37,6 @@ public class ProductEntity extends BaseAuditVersionEntity implements Serializabl
     @Column(name = "code", unique=true,columnDefinition="VARCHAR(100)")
     private String code;
 
-    @NotBlank(message = "ProductEntity Name cannot be empty")
     @Column(nullable = false, name = "name", unique = true, length = 200)
     private String name;
 
@@ -64,23 +61,23 @@ public class ProductEntity extends BaseAuditVersionEntity implements Serializabl
 
     @JsonManagedReference
     @ToString.Exclude
-    @OneToMany(mappedBy = "productEntity", fetch = FetchType.EAGER,
+    @OneToMany(mappedBy = "productEntity", fetch = FetchType.LAZY,
             cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ProductDataSet> productDataset;
 
     @JsonManagedReference
     @ToString.Exclude
-    @OneToMany(mappedBy = "productEntity", fetch = FetchType.EAGER,
+    @OneToMany(mappedBy = "productEntity", fetch = FetchType.LAZY,
             cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<ProductRule> productRules;
 
     @JsonManagedReference
-    @ToString.Exclude
-    @OneToMany(mappedBy = "productEntity",fetch = FetchType.EAGER,
+    @OneToMany(mappedBy = "productEntity",fetch = FetchType.LAZY,
             cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<CardProduct> products;
+    private Set<AccountProduct> accountProducts;
 
-    @ToString.Exclude
-    @ManyToMany(mappedBy = "products", cascade = CascadeType.PERSIST, fetch = FetchType.EAGER)
-    private Set<Account> account;
+    @JsonManagedReference
+    @OneToMany(mappedBy = "productEntity",fetch = FetchType.LAZY,
+            cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<CardProduct> cardProducts;
 }

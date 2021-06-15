@@ -11,9 +11,9 @@ import org.springframework.stereotype.Repository;
 import java.util.Map;
 
 @Repository
-public class CardRedisRepository implements RedisRepository<Card, Integer> {
+public class CardRedisRepository implements RedisRepository<Card, Long> {
 	
-    private HashOperations<String, Integer, Card> hashOperations;
+    private HashOperations<String, Long, Card> hashOperations;
 	
 //	//@Autowired
 //    public CardRedisRepository(RedisTemplate<FraudRedisKey, Object> redisTemplate) {
@@ -26,16 +26,16 @@ public class CardRedisRepository implements RedisRepository<Card, Integer> {
     
 	@Override
 	public void create(Card model) {
-		hashOperations.put(FraudRedisKey.CARD.name(), model.getCardBin(), model);
+		hashOperations.put(FraudRedisKey.CARD.name(), model.getId(), model);
 	}
 
 	@Override
-	public Map<Integer, Card> findAll() {
+	public Map<Long, Card> findAll() {
         return hashOperations.entries(FraudRedisKey.CARD.name());
 	}
 
 	@Override
-	public Card findById(Integer cardBin) {
+	public Card findById(Long cardBin) {
 		return hashOperations.get(FraudRedisKey.CARD.name(), cardBin);
 	}
 
@@ -45,7 +45,7 @@ public class CardRedisRepository implements RedisRepository<Card, Integer> {
 	}
 
 	@Override
-	public void delete(Integer cardBin) {
+	public void delete(Long cardBin) {
         hashOperations.delete(FraudRedisKey.CARD.name(), cardBin);
 	}
 }

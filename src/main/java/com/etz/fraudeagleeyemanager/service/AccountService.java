@@ -4,6 +4,7 @@ package com.etz.fraudeagleeyemanager.service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,6 +29,7 @@ import com.etz.fraudeagleeyemanager.redisrepository.AccountRedisRepository;
 import com.etz.fraudeagleeyemanager.repository.AccountProductRepository;
 import com.etz.fraudeagleeyemanager.repository.AccountRepository;
 import com.etz.fraudeagleeyemanager.repository.ProductEntityRepository;
+import com.etz.fraudeagleeyemanager.util.JsonConverter;
 import com.etz.fraudeagleeyemanager.util.PageRequestUtil;
 
 import lombok.extern.slf4j.Slf4j;
@@ -36,7 +38,7 @@ import lombok.extern.slf4j.Slf4j;
 @Service
 public class AccountService {
 	@Autowired
-	private RedisTemplate<String, Object> redisTemplate;
+	private final RedisTemplate<String, Object> redisTemplate;
 
 	@Autowired
 	AccountRepository accountRepository;
@@ -53,9 +55,11 @@ public class AccountService {
 	@Autowired
 	AccountProductRedisRepository accountProductRedisRepository;
 
+	public AccountService(RedisTemplate<String, Object> redisTemplate) {
+		this.redisTemplate = redisTemplate;
+	}
 
-	
-		
+
 	public Account createAccount(AddAccountRequest request){
 		Account accountEntity = new Account();
 
@@ -87,17 +91,7 @@ public class AccountService {
 		}
 	}
 
-	public static boolean isNumeric(String strNum) {
-		if (strNum == null) {
-			return false;
-		}
-		try {
-			Long d = Long.parseLong(strNum);
-		} catch (NumberFormatException nfe) {
-			return false;
-		}
-		return true;
-	}
+
 
 	// update account to increment suspicious count
 	public Account updateAccount(UpdateAccountRequestDto updateAccountRequestDto){
@@ -159,36 +153,45 @@ public class AccountService {
 		if (accountEntity.isEmpty()){
 			throw new ResourceNotFoundException("Account Product not found for this ID " +  request.getAccountId());
 		}
-		ProductEntity productEntity = productRepository.findByCode(request.getProductCode());
-		if(productEntity == null){
-			throw new ResourceNotFoundException("Product not found for this code " + request.getProductCode());
-		}
 		List<AccountProductResponse> accountProductResponseList = new ArrayList<>();
+		AccountProductResponse accountProductResponse = new AccountProductResponse();
+		accountProductRedisRepository.setHashOperations(redisTemplate);
+
+		// if productCode is not null, disable/enable
+		if(request.getProductCode() != null){
+			Optional<AccountProduct> accountProductOptional = accountProductRepository.findById(new AccountProductId(request.getProductCode(), request.getAccountId()));
+			if (accountProductOptional.isPresent()){
+				accountProductOptional.get().setStatus(request.getStatus());
+				accountProductOptional.get().setUpdatedBy(request.getUpdatedBy());
+
+				//for auditing purpose for UPDATE
+				String entityId = "AcctId:" + accountProductOptional.get().getAccountId() + " prodCd:" + request.getProductCode();
+				accountProductOptional.get().setEntityId(entityId);
+				accountProductOptional.get().setRecordBefore(JsonConverter.objectToJson(accountProductOptional.get()));
+				accountProductOptional.get().setRequestDump(request);
+				
+				AccountProduct accountProduct = accountProductRepository.save(accountProductOptional.get());
+				BeanUtils.copyProperties(accountProduct, accountProductResponse);
+				accountProductResponseList.add(accountProductResponse);
+				accountProductRedisRepository.update(accountProduct);
+			}else{
+				throw new ResourceNotFoundException("Account Product not found for this id " + request.getAccountId() + " and code " +  request.getProductCode());
+			}
+		}
+
 		accountEntity.forEach(acctprod -> {
 			acctprod.setStatus(request.getStatus());
 			acctprod.setUpdatedBy(request.getUpdatedBy());
-			acctprod.setProductCode(request.getProductCode());
-			
 			//for auditing purpose for UPDATE
-			acctprod.setEntityId(null);
-			acctprod.setRecordBefore(null);
+			acctprod.setEntityId("AcctId:" + acctprod.getAccountId());
+			acctprod.setRecordBefore(JsonConverter.objectToJson(acctprod));
 			acctprod.setRequestDump(request);
 			
 			AccountProduct accountProduct = accountProductRepository.save(acctprod);
-			AccountProductResponse accountProductResponse = new AccountProductResponse();
+			accountProductRedisRepository.update(accountProduct);
 			BeanUtils.copyProperties(accountProduct, accountProductResponse);
 			accountProductResponseList.add(accountProductResponse);
 		});
-
-		accountProductRedisRepository.setHashOperations(redisTemplate);
-		accountEntity.forEach(acctprod -> {
-			acctprod.setStatus(request.getStatus());
-			acctprod.setUpdatedBy(request.getUpdatedBy());
-			acctprod.setProductCode(request.getProductCode());
-			AccountProduct accountProduct = accountProductRepository.save(acctprod);
-			accountProductRedisRepository.update(accountProduct);
-		});
-
 		return accountProductResponseList;
 	}
 	

@@ -30,7 +30,6 @@ import com.etz.fraudeagleeyemanager.dto.response.ModelResponse;
 import com.etz.fraudeagleeyemanager.dto.response.ProductDataSetResponse;
 import com.etz.fraudeagleeyemanager.dto.response.ProductResponse;
 import com.etz.fraudeagleeyemanager.entity.ProductDataSet;
-import com.etz.fraudeagleeyemanager.entity.ProductEntity;
 import com.etz.fraudeagleeyemanager.service.ProductService;
 
 @Validated
@@ -41,18 +40,16 @@ public class ProductController {
 	@Autowired
 	ProductService productService;
 
-	//private RestTemplateUtil restTemplateUtil;
-	
 	@PostMapping
-	public ResponseEntity<ModelResponse<ProductEntity>> createProduct(
+	public ResponseEntity<ModelResponse<ProductResponse>> createProduct(
 			@Valid @RequestBody  CreateProductRequest request){
-		ModelResponse<ProductEntity> response = new ModelResponse<>(productService.createProduct(request));
+		ModelResponse<ProductResponse> response = new ModelResponse<>(productService.createProduct(request));
 		response.setStatus(HttpStatus.CREATED.value());
 		return new ResponseEntity<>(response, HttpStatus.CREATED);
 	}
 		
 	@PutMapping
-	public ModelResponse<ProductEntity> updateProduct(@RequestBody @Valid UpdateProductRequest request){
+	public ModelResponse<ProductResponse> updateProduct(@RequestBody @Valid UpdateProductRequest request){
 		return new ModelResponse<>(productService.updateProduct(request));
 	}
 	
@@ -64,7 +61,6 @@ public class ProductController {
 	@GetMapping
 	public ResponseEntity<CollectionResponse<ProductResponse>> queryProduct(@RequestParam(name = "code", required = false)
 																	  String code){
-		//log.info(restTemplateUtil.getAllProducts();
 		List<ProductResponse> userResponseList = productService.getProduct(code);
 		CollectionResponse<ProductResponse> collectionResponse = new CollectionResponse<>(userResponseList);
 		collectionResponse.setMessage("All Product");
@@ -89,8 +85,8 @@ public class ProductController {
 	}
 	
 	@PutMapping(path = "/dataset")
-	public ModelResponse<ProductDataSet> updateProductDataset(@RequestBody UpdateDataSetRequest request){
-		return new ModelResponse<>(productService.updateProductDataset(request));
+	public ResponseEntity<CollectionResponse<ProductDataSetResponse>> updateProductDataset(@RequestBody UpdateDataSetRequest request){
+		return new ResponseEntity<>(new CollectionResponse<>(productService.updateProductDataset(request)), HttpStatus.OK);
 	}
 	
 	@DeleteMapping(path = "/dataset/{code}")

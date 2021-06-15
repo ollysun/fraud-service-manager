@@ -12,9 +12,6 @@ public class UpdateDataSetRequest implements Serializable {
 	@NotNull(message="Please enter the product Code")
     private String productCode;
 
-    @NotNull(message="Please enter the field name")
-    private String fieldName;
-
     @NotNull(message="Please enter the data Type")
     private String dataType;
 

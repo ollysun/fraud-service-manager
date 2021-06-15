@@ -11,7 +11,7 @@ public class UpdateCardProductRequest implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	@NotNull(message="Please enter the cardId")
-	private Integer cardId;
+	private Long cardId;
 	@NotNull(message="Please tell the status")
 	private Boolean status;
 	@NotNull(message="Please enter the name of the updatedBy")

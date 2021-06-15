@@ -8,6 +8,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 
+import java.time.LocalDate;
+import java.time.Month;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
@@ -82,9 +84,66 @@ public class AppUtil {
         return output;
     }
 
+    public static String checkCardType(String operatorRequest){
+        List<String> operators = Arrays.asList("CREDIT", "DEBIT", "ATM", "CHARGE");
+        String output = "";
+        if (operatorRequest != null) {
+            output = operators.stream()
+                    .filter(bl -> bl.toUpperCase().equalsIgnoreCase(operatorRequest))
+                    .findFirst()
+                    .orElseThrow(() ->
+                            new FraudEngineException("Not found this Card Type " + operatorRequest +
+                                    " can be any of " + operators.toString()));
+        }
+        return output;
+    }
+
+    public static String checkBrand(String operatorRequest){
+        List<String> operators = Arrays.asList("MasterCard", "Visa", "Verve");
+
+        String output = "";
+        if (operatorRequest != null) {
+            output = operators.stream()
+                    .filter(bl -> bl.toUpperCase().equalsIgnoreCase(operatorRequest))
+                    .findFirst()
+                    .orElseThrow(() ->
+                            new FraudEngineException("Not found this Card Brand " + operatorRequest +
+                                    " can be any of " + operators.toString()));
+        }
+        return output;
+    }
     public static <T> Page<T> listConvertToPage(List<T> list, Pageable pageable) {
         int start = (int) pageable.getOffset();
         int end = (start + pageable.getPageSize()) > list.size() ? list.size() : (start + pageable.getPageSize());
         return new PageImpl<>(list.subList(start, end), pageable, list.size());
     }
+
+    public static Integer getLength(Integer cvv){
+        return (int)(Math.log10(cvv)+1);
+    }
+
+    public static Boolean getDate(String strDate){
+        String[] arrOfStr = strDate.split("/", 2);
+        LocalDate currentDate = LocalDate.now();
+        //Getting the current month
+        Month currentMonth = currentDate.getMonth();
+        //getting the current year
+        int currentYear = currentDate.getYear() % 100;
+        return (Integer.parseInt(arrOfStr[0]) >= currentMonth.getValue()) &&
+                Integer.parseInt(arrOfStr[1]) >= currentYear;
+    }
+
+    public static boolean isNumeric(String strNum) {
+        if (strNum == null) {
+            return false;
+        }
+        try {
+            Long d = Long.parseLong(strNum);
+        } catch (NumberFormatException nfe) {
+            return false;
+        }
+        return true;
+    }
+
+
 }

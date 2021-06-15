@@ -3,6 +3,9 @@ package com.etz.fraudeagleeyemanager.controller;
 import java.util.List;
 
 import javax.validation.Valid;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Positive;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -75,13 +78,14 @@ public class RuleController {
 	}
 	
 	@PutMapping(path = "/product")
-	public ModelResponse<ProductRuleResponse> updateProductRule(@RequestBody @Valid UpdateMapRuleToProductRequest request){
-		return new ModelResponse<>(ruleService.updateProductRule(request));
+	public CollectionResponse<ProductRuleResponse> updateProductRule(@RequestBody @Valid UpdateMapRuleToProductRequest request){
+		return new CollectionResponse<>(ruleService.updateProductRule(request));
 	}
-	
-	@DeleteMapping(path = "/product/{productRuleId}")
-	public BooleanResponse deleteProductRule(@PathVariable(name = "productRuleId") Long productRuleId){
-		return new BooleanResponse(ruleService.deleteProductRule(productRuleId));
+
+	@DeleteMapping(path = "/product/{code}/ruleId/{ruleId}")
+	public BooleanResponse deleteProductRule(@NotNull @Positive @PathVariable(value = "ruleId") Long ruleId,
+											 @NotBlank @PathVariable(value = "code") String code){
+		return new BooleanResponse(ruleService.deleteProductRule(ruleId, code));
 	}
 
 	@GetMapping(path = "/product")
