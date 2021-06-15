@@ -273,7 +273,7 @@ public class RuleService {
 
 		// for auditing purpose for DELETE
 		prodRuleEntity.setEntityId(productRuleId.toString());
-		prodRuleEntity.setRecordBefore(JsonConverter.objectToJson(productRuleId));
+		prodRuleEntity.setRecordBefore(JsonConverter.objectToJson(prodRuleEntity));
 		prodRuleEntity.setRecordAfter(null);
 		prodRuleEntity.setRequestDump(productRuleId);
 

@@ -16,7 +16,6 @@ import org.hibernate.annotations.ResultCheckStyle;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.Where;
 
-import com.etz.fraudeagleeyemanager.constant.Status;
 import com.etz.fraudeagleeyemanager.constant.UserCategory;
 
 import lombok.Getter;
@@ -34,13 +33,14 @@ import lombok.ToString;
 @ToString
 @RequiredArgsConstructor
 public class OfacWatchlist extends BaseAuditEntity implements Serializable {
+	private static final long serialVersionUID = 1L;
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
 	@NotBlank(message = "Full name cannot be empty")
-	@Column(name = "full_name")
+	@Column(name = "fullname")
 	private String fullName;
 
 	@Column(name = "category")
@@ -51,12 +51,14 @@ public class OfacWatchlist extends BaseAuditEntity implements Serializable {
 	@Column(name = "comments")
 	private String comments;
 		
-	@Column(name = "status")
-	@Enumerated(EnumType.ORDINAL)
-	private Status status;
+    @Column(nullable = false, name = "status", columnDefinition = "TINYINT", length = 1)
+	private Boolean status;
 
-	@Column(name = "authorised")
+	@Column(name = "authorised", nullable = false, columnDefinition = "TINYINT", length = 1)
 	private Boolean authorised;
+	
+	@Column(name = "authoriser", nullable = true, length=100) //at creation authoriser will not be provided
+	private String authoriser;
 
 	@Override
 	public boolean equals(Object o) {

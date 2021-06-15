@@ -8,18 +8,19 @@ public class PageRequestUtil {
     private static String DEFAULT_PAGE_LIMIT = "50";
     private static String PAGE_LIMIT = "limit";
     private static String PAGE = "page";
-    private static String CREATEDAT = "createdAt";
+    //private static String CREATEDAT = "createdAt";
+    private static String UPDATEDAT = "updatedAt";
 
     public static PageRequest getPageRequest(int startPosition) {
-        return PageRequest.of(startPosition, getPageLimit(), Sort.Direction.DESC, CREATEDAT);
+        return PageRequest.of(startPosition, getPageLimit(), Sort.Direction.DESC, UPDATEDAT);
     }
 
     public static PageRequest getPageRequest() {
-        return PageRequest.of(getPage(), getPageLimit(), Sort.Direction.DESC, CREATEDAT);
+        return PageRequest.of(getPage(), getPageLimit(), Sort.Direction.DESC, UPDATEDAT);
     }
 
     public static PageRequest getPageRequest(Sort.Direction direction) {
-        return PageRequest.of(getPage(), getPageLimit(), direction, CREATEDAT);
+        return PageRequest.of(getPage(), getPageLimit(), direction, UPDATEDAT);
     }
 
     public static PageRequest getPageRequest(Sort.Direction direction, String columnName) {

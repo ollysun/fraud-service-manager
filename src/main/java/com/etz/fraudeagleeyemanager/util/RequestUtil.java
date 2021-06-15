@@ -1,6 +1,8 @@
 package com.etz.fraudeagleeyemanager.util;
 
 import static com.etz.fraudeagleeyemanager.constant.AppConstant.PAGE;
+import static com.etz.fraudeagleeyemanager.constant.AppConstant.PAGE_LIMIT;
+import static com.etz.fraudeagleeyemanager.constant.AppConstant.DEFAULT_PAGE_LIMIT;
 
 import java.util.Map;
 
@@ -28,9 +30,12 @@ public class RequestUtil {
         return message;
     }
 
+//    public static String perPage() {
+//        String pageSize = "50";
+//        return AppUtil.isBlank(getRequest().getParameter("page_size")) ? pageSize :getRequest().getParameter("page_size");
+//    }
     public static String perPage() {
-        String pageSize = "50";
-        return AppUtil.isBlank(getRequest().getParameter("page_size")) ? pageSize :getRequest().getParameter("page_size");
+    	return AppUtil.isBlank(getRequest().getParameter(PAGE_LIMIT)) ? DEFAULT_PAGE_LIMIT :getRequest().getParameter(PAGE_LIMIT);
     }
 
     public static int getPage(){

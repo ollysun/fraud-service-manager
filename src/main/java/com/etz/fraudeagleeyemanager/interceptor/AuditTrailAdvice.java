@@ -4,6 +4,8 @@ import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.jpa.repository.support.JpaEntityInformation;
+import org.springframework.data.jpa.repository.support.SimpleJpaRepository;
 import org.springframework.stereotype.Service;
 
 import com.etz.fraudeagleeyemanager.entity.BaseAuditEntity;
@@ -25,16 +27,18 @@ public class AuditTrailAdvice {
 		String eventType = CrudOperation.CREATE.getValue();
 		String eventDescription = "Created " + entity.getClass().getSimpleName();
 
+		System.out.println("JP source ==>" + jp.getSourceLocation());
+		System.out.println("JP target ==>" + jp.getTarget());
+		
 		return processintercept(jp, entity, eventType, eventDescription);
 	}
 	
-//	@Around("execution(* javax.persistence.EntityManager.persist(..))"
-//			+ " && execution(* org.springframework.data.repository.CrudRepository.save(..))"
+//	//execution(* com.etz.fraudeagleeyemanager.repository.*Repository.save*(..))
+//	@Around("execution(* org.springframework.data.jpa.repository.JpaRepository.save*(..))"
 //			+ " && args(entity,..) && !args(com.etz.fraudeagleeyemanager.entity.EventLogEntity)")
 //	public Object interceptCreate(ProceedingJoinPoint jp, Object entity) {
 //		String eventType = CrudOperation.CREATE.getValue();
 //		String eventDescription = "Created " + entity.getClass().getSimpleName();
-//		
 //		return processintercept(jp, entity, eventType, eventDescription);
 //	}
 

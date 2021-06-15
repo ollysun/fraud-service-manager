@@ -26,13 +26,13 @@ public class EventLogEntity implements Serializable {
 	@Column(name = "id")
 	private Long id;
 
-	@Column(name = "entity")
+	@Column(name = "entity", nullable = false, columnDefinition="VARCHAR(150)")
 	private String entity;
 	
-	@Column(name = "entity_id")
+	@Column(name = "entity_id", nullable = true, columnDefinition="VARCHAR(250)")
 	private String entityId;
 	
-	@Column(name = "event_desc")
+	@Column(name = "event_desc", columnDefinition="VARCHAR(250)")
 	private String eventDesc;
 
 	@Column(name = "record_before")
@@ -43,7 +43,7 @@ public class EventLogEntity implements Serializable {
 	@Type(type = "text")
 	private String recordAfter;
 	
-	@Column(name = "endpoint")
+	@Column(name = "endpoint", columnDefinition="VARCHAR(250)")
 	private String endpoint;
 	
 	@Column(name = "request_dump")
@@ -53,7 +53,7 @@ public class EventLogEntity implements Serializable {
 	@Column(name = "user_id", nullable = false)
 	private Long userId;
 
-	@Column(name = "event_type", nullable = false)
+	@Column(name = "event_type", nullable = false, columnDefinition="VARCHAR(100)")
 	private String eventType;
 
 	@Column(name = "event_time", nullable = false)

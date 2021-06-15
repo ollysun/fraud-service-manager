@@ -1,6 +1,5 @@
 package com.etz.fraudeagleeyemanager.service;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -237,10 +236,11 @@ public class ProductService {
 		productDatasetEntity.setRecordAfter(null);
 		productDatasetEntity.setRequestDump(productCode);
 		
+		String redisId = productDatasetEntity.getProductCode()+ ":"+ productDatasetEntity.getId();
 		//productDataSetRepository.deleteByProductCode(productCode);
 		productDataSetRepository.delete(productDatasetEntity);
 		productDatasetRedisRepository.setHashOperations(fraudEngineRedisTemplate);
-		productDatasetRedisRepository.delete(productDatasetEntity.getId());
+		productDatasetRedisRepository.delete(redisId);
 		return true;
 	}
 

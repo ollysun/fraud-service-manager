@@ -26,6 +26,8 @@ import com.etz.fraudeagleeyemanager.dto.response.BooleanResponse;
 import com.etz.fraudeagleeyemanager.dto.response.CollectionResponse;
 import com.etz.fraudeagleeyemanager.dto.response.ModelResponse;
 import com.etz.fraudeagleeyemanager.dto.response.PageResponse;
+import com.etz.fraudeagleeyemanager.dto.response.ProductRuleResponse;
+import com.etz.fraudeagleeyemanager.dto.response.RuleProductResponse;
 import com.etz.fraudeagleeyemanager.dto.response.RuleResponse;
 import com.etz.fraudeagleeyemanager.entity.ProductRule;
 import com.etz.fraudeagleeyemanager.entity.Rule;
