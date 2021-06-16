@@ -14,7 +14,6 @@ public class CustomJwtAccessTokenConverter extends DefaultAccessTokenConverter {
 		OAuth2Authentication authentication = super.extractAuthentication(map);
 		authentication.setDetails(map);
 		RequestUtil.setAccessTokenClaim(authentication);
-		//RequestUtil.getAccessTokenClaim("user_name");
 		return authentication;
 	}
 

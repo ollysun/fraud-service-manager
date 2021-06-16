@@ -4,8 +4,6 @@ import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.jpa.repository.support.JpaEntityInformation;
-import org.springframework.data.jpa.repository.support.SimpleJpaRepository;
 import org.springframework.stereotype.Service;
 
 import com.etz.fraudeagleeyemanager.entity.BaseAuditEntity;
@@ -26,22 +24,10 @@ public class AuditTrailAdvice {
 	public Object interceptCreate(ProceedingJoinPoint jp, Object entity) {
 		String eventType = CrudOperation.CREATE.getValue();
 		String eventDescription = "Created " + entity.getClass().getSimpleName();
-
-		System.out.println("JP source ==>" + jp.getSourceLocation());
-		System.out.println("JP target ==>" + jp.getTarget());
 		
 		return processintercept(jp, entity, eventType, eventDescription);
 	}
 	
-//	//execution(* com.etz.fraudeagleeyemanager.repository.*Repository.save*(..))
-//	@Around("execution(* org.springframework.data.jpa.repository.JpaRepository.save*(..))"
-//			+ " && args(entity,..) && !args(com.etz.fraudeagleeyemanager.entity.EventLogEntity)")
-//	public Object interceptCreate(ProceedingJoinPoint jp, Object entity) {
-//		String eventType = CrudOperation.CREATE.getValue();
-//		String eventDescription = "Created " + entity.getClass().getSimpleName();
-//		return processintercept(jp, entity, eventType, eventDescription);
-//	}
-
 	@Around("execution(* javax.persistence.EntityManager.merge(..))"
 			+ " && !execution(* javax.persistence.EntityManager.merge(com.etz.fraudeagleeyemanager.entity.EventLogEntity))"
 			+ " && args(entity,..)")
@@ -72,13 +58,14 @@ public class AuditTrailAdvice {
 		}
 		System.out.println("entity: " + entity);
 		System.out.println("response: " + response);
+		
 		// only entities that extend the BaseEntityModel class will be audited
 		if (entity instanceof BaseAuditEntity) {
 			BaseAuditEntity baseAuditEntity = (BaseAuditEntity) entity;
 			baseAuditEntity.setEntity(entity.getClass().getSimpleName());
 			baseAuditEntity.setEventDescription(eventDescription);
 			baseAuditEntity.setEndpoint(RequestUtil.getSourceURL());
-			baseAuditEntity.setUserId(0L);//Long.valueOf(RequestUtil.getAccessTokenClaim("user_id")));
+			baseAuditEntity.setUserId(RequestUtil.getAccessTokenClaim("user_name"));
 			baseAuditEntity.setEventType(eventType);
 
 			if (baseAuditEntity.getRecordAfter() != null) {

@@ -102,15 +102,11 @@ public class RequestUtil {
     }
 
     public static String getSourceURL() {
-    	//getRequest().getRequestURI();
     	return getRequest().getRequestURL().toString();
     }
 
     @SuppressWarnings("unchecked")
 	public static void setAccessTokenClaim(OAuth2Authentication authentication) {
-    	//OAuth2AuthenticationDetails oauthDetails = (OAuth2AuthenticationDetails)SecurityContextHolder.getContext().getAuthentication().getDetails();
-    	//OAuth2AuthenticationDetails oauthDetails = (OAuth2AuthenticationDetails) authentication.getDetails();
-    	//Map<String, Object> claims = (Map<String, Object>) oauthDetails.getDecodedDetails();
     	Map<String, Object> claims = (Map<String, Object>) authentication.getDetails();
     	getRequest().setAttribute("access_token_claim", claims);
     }
@@ -118,12 +114,10 @@ public class RequestUtil {
     @SuppressWarnings("unchecked")
 	public static String getAccessTokenClaim(String claim) {
     	Map<String, Object> claims = (Map<String, Object>)getRequest().getAttribute("access_token_claim");
-    	
     	String claimValue = "";
     	if (claims.containsKey(claim)) {
     		claimValue = (String) claims.get(claim);
     	}
-    	System.out.println("Username==========>" + claimValue);
     	return claimValue;
     }
     

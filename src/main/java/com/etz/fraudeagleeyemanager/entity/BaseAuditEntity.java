@@ -47,7 +47,7 @@ public class BaseAuditEntity extends BaseEntity implements Serializable {
 	
 	@JsonIgnore
     @Transient
-    private Long userId;
+    private String userId;
 
 	@JsonIgnore
     @Transient

@@ -42,7 +42,7 @@ public class ResourceServerConfig extends ResourceServerConfigurerAdapter {
                         "/webjars/**","/swagger.html")
                 .permitAll();
         http.authorizeRequests().antMatchers("/**")
-                .permitAll();//.authenticated();
+                .authenticated();
 
         //http.authorizeRequests().antMatchers("/api/v1/**").authenticated();
     }
@@ -50,6 +50,7 @@ public class ResourceServerConfig extends ResourceServerConfigurerAdapter {
     @Bean
     public JwtAccessTokenConverter accessTokenConverter(){
         JwtAccessTokenConverter conv = new  JwtAccessTokenConverter();
+        conv.setAccessTokenConverter(new CustomJwtAccessTokenConverter());
         conv.setSigningKey("AuthETransactNgView2021");
         return conv;
     }

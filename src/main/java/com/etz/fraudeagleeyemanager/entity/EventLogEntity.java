@@ -50,8 +50,11 @@ public class EventLogEntity implements Serializable {
 	@Type(type = "text")
 	private String requestDump;
 	
+//	@Column(name = "user_id", nullable = false)
+//	private Long userId;
+	
 	@Column(name = "user_id", nullable = false)
-	private Long userId;
+	private String userId;
 
 	@Column(name = "event_type", nullable = false, columnDefinition="VARCHAR(100)")
 	private String eventType;
