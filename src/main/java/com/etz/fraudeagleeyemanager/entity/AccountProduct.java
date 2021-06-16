@@ -27,10 +27,10 @@ import lombok.EqualsAndHashCode;
 @Entity
 @Table(name = "account_product", uniqueConstraints = @UniqueConstraint(name="UC_ACCOUNT_PRODUCT",
         columnNames = {"account_id"}))
-@SQLDelete(sql = "UPDATE account_product SET deleted = true, status=0 WHERE id = ?", check = ResultCheckStyle.COUNT)
+@SQLDelete(sql = "UPDATE account_product SET deleted = true, status=0 WHERE id = ? AND version = ?", check = ResultCheckStyle.COUNT)
 @Where(clause = "deleted = false")
 @IdClass(AccountProductId.class)
-public class AccountProduct extends BaseAuditEntity implements Serializable {
+public class AccountProduct extends BaseAuditVersionEntity implements Serializable {
 
     @Id
     @Column(name = "product_code", nullable = false, columnDefinition="VARCHAR(100)")

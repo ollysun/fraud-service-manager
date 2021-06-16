@@ -155,14 +155,13 @@ public class CardService {
 		if (request.getProductCode() != null) {
 			Optional<CardProduct> cardProductOptional = cardProductRepository.findById(new CardProductId(null,request.getProductCode(), request.getCardId()));
 			if (cardProductOptional.isPresent()){
-				cardProductOptional.get().setStatus(request.getStatus());
-				cardProductOptional.get().setUpdatedBy(request.getUpdatedBy());
-				
 				// for auditing purpose for UPDATE
 				cardProductOptional.get().setEntityId(request.getCardId().toString());
 				cardProductOptional.get().setRecordBefore(JsonConverter.objectToJson(cardProductOptional.get()));
 				cardProductOptional.get().setRequestDump(request);
 				
+				cardProductOptional.get().setStatus(request.getStatus());
+				cardProductOptional.get().setUpdatedBy(request.getUpdatedBy());
 				CardProduct cardProduct = cardProductRepository.save(cardProductOptional.get());
 				BeanUtils.copyProperties(cardProduct, cardProductResponse);
 				updatedCardProductResponseList.add(cardProductResponse);
@@ -172,14 +171,13 @@ public class CardService {
 			}
 		}
 		cardToProdEntityList.forEach(cardProductEntity -> {
-			cardProductEntity.setStatus(request.getStatus());
-			cardProductEntity.setUpdatedBy(request.getUpdatedBy());
-			
 			// for auditing purpose for UPDATE
 			cardProductEntity.setEntityId(request.getCardId().toString());
 			cardProductEntity.setRecordBefore(JsonConverter.objectToJson(cardProductEntity));
 			cardProductEntity.setRequestDump(request);
 			
+			cardProductEntity.setStatus(request.getStatus());
+			cardProductEntity.setUpdatedBy(request.getUpdatedBy());
 			CardProduct cardProduct = cardProductRepository.save(cardProductEntity);
 			BeanUtils.copyProperties(cardProduct, cardProductResponse);
 			cardProductRedisRepository.update(cardProduct);

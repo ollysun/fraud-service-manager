@@ -115,6 +115,11 @@ public class ProductService {
 		if (productEntity == null){
 			throw new ResourceNotFoundException("Product not found for Code " + request.getProductCode());
 		}
+		// for auditing purpose for UPDATE
+		productEntity.setEntityId(request.getProductCode());
+		productEntity.setRecordBefore(JsonConverter.objectToJson(productEntity));
+		productEntity.setRequestDump(request);
+				
 		productEntity.setName(request.getProductName());
 		productEntity.setDescription(request.getProductDesc());
 		productEntity.setUseCard(request.getUseCard());
@@ -122,11 +127,6 @@ public class ProductService {
 		productEntity.setCallbackURL(request.getCallback());
 		productEntity.setStatus(request.getStatus());
 		productEntity.setUpdatedBy(request.getUpdatedBy());
-		
-		// for auditing purpose for UPDATE
-		productEntity.setEntityId(request.getProductCode());
-		productEntity.setRecordBefore(JsonConverter.objectToJson(productEntity));
-		productEntity.setRequestDump(request);
 		
 		ProductEntity savedProduct = productEntityRepository.save(productEntity);
 		productRedisRepository.setHashOperations(fraudEngineRedisTemplate);
@@ -203,15 +203,15 @@ public class ProductService {
 		}
 
 		productDataSetList.forEach(productDataSet -> {
-			productDataSet.setDataType(request.getDataType());
-			productDataSet.setMandatory(request.getCompulsory());
-			productDataSet.setAuthorised(request.getAuthorised());
-			productDataSet.setUpdatedBy(request.getUpdatedBy());
-			
 			// for auditing purpose for UPDATE
 			productDataSet.setEntityId(request.getProductCode());
 			productDataSet.setRecordBefore(JsonConverter.objectToJson(productDataSet));
 			productDataSet.setRequestDump(request);
+						
+			productDataSet.setDataType(request.getDataType());
+			productDataSet.setMandatory(request.getCompulsory());
+			productDataSet.setAuthorised(request.getAuthorised());
+			productDataSet.setUpdatedBy(request.getUpdatedBy());
 			
 			ProductDataSet savedProductDataset = productDataSetRepository.save(productDataSet);
 			updatedDatasetList.add(savedProductDataset);

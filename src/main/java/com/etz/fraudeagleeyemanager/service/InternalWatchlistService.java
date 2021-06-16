@@ -55,17 +55,16 @@ public class InternalWatchlistService {
 	public InternalWatchlist updateInternalWatchlist(UpdateInternalWatchlistRequest request){
 		InternalWatchlist internalWatchlist = internalWatchlistRepository.findById(request.getWatchId())
 				.orElseThrow(() ->  new ResourceNotFoundException("BVN not found on internal watchlist for ID "+ request.getWatchId()));
-		
-		internalWatchlist.setBvn(request.getBvn());
-		internalWatchlist.setComments(request.getComments());
-		internalWatchlist.setStatus(request.getStatus());
-		internalWatchlist.setUpdatedBy(request.getUpdatedBy());
-		
+
 		// for auditing purpose for UPDATE
 		internalWatchlist.setEntityId(request.getWatchId().toString());
 		internalWatchlist.setRecordBefore(JsonConverter.objectToJson(internalWatchlist));
 		internalWatchlist.setRequestDump(request);
 		
+		internalWatchlist.setBvn(request.getBvn());
+		internalWatchlist.setComments(request.getComments());
+		internalWatchlist.setStatus(request.getStatus());
+		internalWatchlist.setUpdatedBy(request.getUpdatedBy());
 		InternalWatchlist savedInternalWatchlist = internalWatchlistRepository.save(internalWatchlist);
 		internalWatchlistRedisRepository.setHashOperations(redisTemplate);
 		internalWatchlistRedisRepository.update(savedInternalWatchlist);

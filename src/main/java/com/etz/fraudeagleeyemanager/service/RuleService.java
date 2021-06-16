@@ -120,13 +120,16 @@ public class RuleService {
 		return createdEntity;
 	}
 
-
-
-
 	public Rule updateRule(UpdateRuleRequest request) {
 
 		Rule ruleEntity = ruleRepository.findById(request.getRuleId())
 									.orElseThrow(() -> new ResourceNotFoundException("Rule Not found for Id " + request.getRuleId() ));
+
+		// for auditing purpose for UPDATE
+		ruleEntity.setEntityId(request.getRuleId().toString());
+		ruleEntity.setRecordBefore(JsonConverter.objectToJson(ruleEntity));
+		ruleEntity.setRequestDump(request);
+		
 		ruleEntity.setSourceValueOne(request.getFirstSourceVal());
 		// check for the list of Operator
 		ruleEntity.setOperatorOne(AppUtil.checkOperator(request.getFirstOperator()));
@@ -143,22 +146,14 @@ public class RuleService {
 		ruleEntity.setAuthorised(request.getAuthorised());
 		ruleEntity.setStatus(request.getStatus());
 		ruleEntity.setUpdatedBy(request.getUpdatedBy());
-		
-		// for auditing purpose for UPDATE
-		ruleEntity.setEntityId(request.getRuleId().toString());
-		ruleEntity.setRecordBefore(JsonConverter.objectToJson(ruleEntity));
-		ruleEntity.setRequestDump(request);
 
 		Rule updatedEntity = ruleRepository.save(ruleEntity);
-
 		//update redis
 		ruleRedisRepository.setHashOperations(fraudEngineRedisTemplate);
 		ruleRedisRepository.update(updatedEntity);
 		
 		return outputUpdatedRuleResponse(updatedEntity);
 	}
-
-
 
 	private UpdatedRuleResponse outputUpdatedRuleResponse(Rule rule){
 
@@ -195,8 +190,6 @@ public class RuleService {
 		return true;
 	}
 
-
-
 	public Page<RuleResponse> getRule(Long ruleId) {
 		List<RuleResponse> ruleResponseList;
 		if (ruleId == null) {
@@ -209,7 +202,6 @@ public class RuleService {
 
 		return AppUtil.listConvertToPage(ruleResponseList, PageRequestUtil.getPageRequest());
 	}
-
 
 	public ProductRule mapRuleToProduct(MapRuleToProductRequest request) {
 		ProductRule prodRuleEntity = new ProductRule();
@@ -258,18 +250,17 @@ public class RuleService {
 		}
 		
 		for (ProductRule prodRuleEntity:prodRuleEntityList) {
+			// for auditing purpose for UPDATE
+			prodRuleEntity.setEntityId(request.getProductRuleId().toString());
+			prodRuleEntity.setRecordBefore(JsonConverter.objectToJson(prodRuleEntity));
+			prodRuleEntity.setRequestDump(request);
+			
 			prodRuleEntity.setNotifyAdmin(request.getNotifyAdmin());
 			prodRuleEntity.setEmailGroupId(request.getEmailGroupId());
 			prodRuleEntity.setNotifyCustomer(request.getNotifyCustomer());
 			prodRuleEntity.setStatus(request.getStatus());
 			prodRuleEntity.setAuthorised(request.getAuthorised());
 			prodRuleEntity.setUpdatedBy(request.getUpdatedBy());
-			
-			// for auditing purpose for UPDATE
-			prodRuleEntity.setEntityId(request.getProductRuleId().toString());
-			prodRuleEntity.setRecordBefore(JsonConverter.objectToJson(prodRuleEntity));
-			prodRuleEntity.setRequestDump(request);
-			
 			ProductRule updatedEntity = productRuleRepository.save(prodRuleEntity);
 			updatedProductRuleEntity.add(updatedEntity);
 		}

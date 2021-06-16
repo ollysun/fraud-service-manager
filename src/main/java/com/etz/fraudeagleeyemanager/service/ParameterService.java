@@ -60,16 +60,17 @@ public class ParameterService {
 
 		Parameter parameterEntity = parameterRepository.findById(request.getParamId())
 														     .orElseThrow(() -> new ResourceNotFoundException("Parameter details not found for the ID " + request.getParamId()));
-		parameterEntity.setName(request.getName());
-		parameterEntity.setOperator(AppUtil.checkOperator(request.getOperator()));
-		parameterEntity.setRequireValue(request.getRequireValue());
-		parameterEntity.setAuthorised(request.getAuthorised());
-		parameterEntity.setUpdatedBy(request.getUpdatedBy());
 
 		// for auditing purpose for UPDATE
 		parameterEntity.setEntityId(request.getParamId().toString());
 		parameterEntity.setRecordBefore(JsonConverter.objectToJson(parameterEntity));
 		parameterEntity.setRequestDump(request);
+		
+		parameterEntity.setName(request.getName());
+		parameterEntity.setOperator(AppUtil.checkOperator(request.getOperator()));
+		parameterEntity.setRequireValue(request.getRequireValue());
+		parameterEntity.setAuthorised(request.getAuthorised());
+		parameterEntity.setUpdatedBy(request.getUpdatedBy());
 
 		Parameter updatedEntity = parameterRepository.save(parameterEntity);
 		parameterRedisRepository.setHashOperations(fraudEngineRedisTemplate);

@@ -11,7 +11,7 @@ import java.io.Serializable;
 
 @Entity
 @Table(name = "product_rule")
-@SQLDelete(sql = "UPDATE product_rule SET deleted = true WHERE rule_id = ?", check = ResultCheckStyle.COUNT)
+@SQLDelete(sql = "UPDATE product_rule SET deleted = true WHERE rule_id = ? AND version = ?", check = ResultCheckStyle.COUNT)
 @Where(clause = "deleted = false")
 @Getter
 @Setter
@@ -19,7 +19,7 @@ import java.io.Serializable;
 @RequiredArgsConstructor
 @ToString
 @IdClass(ProductRuleId.class)
-public class ProductRule extends BaseAuditEntity implements Serializable {
+public class ProductRule extends BaseAuditVersionEntity implements Serializable {
 
 	@Id
 	@Column(name = "rule_id")

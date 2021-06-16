@@ -161,15 +161,14 @@ public class AccountService {
 		if(request.getProductCode() != null){
 			Optional<AccountProduct> accountProductOptional = accountProductRepository.findById(new AccountProductId(request.getProductCode(), request.getAccountId()));
 			if (accountProductOptional.isPresent()){
-				accountProductOptional.get().setStatus(request.getStatus());
-				accountProductOptional.get().setUpdatedBy(request.getUpdatedBy());
-
 				//for auditing purpose for UPDATE
 				String entityId = "AcctId:" + accountProductOptional.get().getAccountId() + " prodCd:" + request.getProductCode();
 				accountProductOptional.get().setEntityId(entityId);
 				accountProductOptional.get().setRecordBefore(JsonConverter.objectToJson(accountProductOptional.get()));
 				accountProductOptional.get().setRequestDump(request);
 				
+				accountProductOptional.get().setStatus(request.getStatus());
+				accountProductOptional.get().setUpdatedBy(request.getUpdatedBy());
 				AccountProduct accountProduct = accountProductRepository.save(accountProductOptional.get());
 				BeanUtils.copyProperties(accountProduct, accountProductResponse);
 				accountProductResponseList.add(accountProductResponse);
@@ -180,13 +179,13 @@ public class AccountService {
 		}
 
 		accountEntity.forEach(acctprod -> {
-			acctprod.setStatus(request.getStatus());
-			acctprod.setUpdatedBy(request.getUpdatedBy());
 			//for auditing purpose for UPDATE
 			acctprod.setEntityId("AcctId:" + acctprod.getAccountId());
 			acctprod.setRecordBefore(JsonConverter.objectToJson(acctprod));
 			acctprod.setRequestDump(request);
 			
+			acctprod.setStatus(request.getStatus());
+			acctprod.setUpdatedBy(request.getUpdatedBy());
 			AccountProduct accountProduct = accountProductRepository.save(acctprod);
 			accountProductRedisRepository.update(accountProduct);
 			BeanUtils.copyProperties(accountProduct, accountProductResponse);

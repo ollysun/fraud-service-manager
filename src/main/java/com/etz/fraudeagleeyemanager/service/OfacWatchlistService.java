@@ -56,18 +56,17 @@ public class OfacWatchlistService {
 	public OfacWatchlist updateOfacWatchlist(UpdateOfacWatchlistRequest request){
 		OfacWatchlist ofacWatchlist = ofacWatchlistRepository.findById(request.getOfacId())
 				.orElseThrow(() ->  new ResourceNotFoundException("Person, with ID "+ request.getOfacId() +", not found on Ofac watchlist"));
+
+		// for auditing purpose for UPDATE
+		ofacWatchlist.setEntityId(request.getOfacId().toString());
+		ofacWatchlist.setRecordBefore(JsonConverter.objectToJson(ofacWatchlist));
+		ofacWatchlist.setRequestDump(request);
 		
 		ofacWatchlist.setFullName(request.getFullName());
 		ofacWatchlist.setCategory(request.getCategory());
 		ofacWatchlist.setComments(request.getComments());
 		ofacWatchlist.setStatus(request.getStatus());
 		ofacWatchlist.setUpdatedBy(request.getUpdatedBy());
-		
-		// for auditing purpose for UPDATE
-		ofacWatchlist.setEntityId(request.getOfacId().toString());
-		ofacWatchlist.setRecordBefore(JsonConverter.objectToJson(ofacWatchlist));
-		ofacWatchlist.setRequestDump(request);
-		
 		OfacWatchlist savedOfacWatchlist = ofacWatchlistRepository.save(ofacWatchlist);
 		ofacWatchlistRedisRepository.setHashOperations(redisTemplate);
 		ofacWatchlistRedisRepository.update(savedOfacWatchlist);

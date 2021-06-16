@@ -14,10 +14,10 @@ import java.io.Serializable;
 @Entity
 @Table(name = "card_product", uniqueConstraints = @UniqueConstraint(name="UC_CARD_PRODUCT",
         columnNames = {"card_id"}))
-@SQLDelete(sql = "UPDATE card_product SET deleted = true, status=0 WHERE id = ?", check = ResultCheckStyle.COUNT)
+@SQLDelete(sql = "UPDATE card_product SET deleted = true, status=0 WHERE id = ? AND version = ?", check = ResultCheckStyle.COUNT)
 @Where(clause = "deleted = false")
 @IdClass(CardProductId.class)
-public class CardProduct extends BaseAuditEntity implements Serializable {
+public class CardProduct extends BaseAuditVersionEntity implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)

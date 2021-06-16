@@ -30,7 +30,7 @@ import lombok.ToString;
 @Data
 @ToString(exclude = { "productEntity" })
 @IdClass(ProductDatasetId.class)
-public class ProductDataSet extends BaseAuditEntity implements Serializable {
+public class ProductDataSet extends BaseAuditVersionEntity implements Serializable {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)

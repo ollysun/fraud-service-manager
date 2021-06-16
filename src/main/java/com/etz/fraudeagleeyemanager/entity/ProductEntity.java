@@ -27,7 +27,7 @@ import lombok.ToString;
 @EqualsAndHashCode(callSuper = true)
 @Entity
 @Table(name = "product")
-@SQLDelete(sql = "UPDATE product SET deleted = true WHERE code = ?", check = ResultCheckStyle.COUNT)
+@SQLDelete(sql = "UPDATE product SET deleted = true WHERE code = ? AND version = ?", check = ResultCheckStyle.COUNT)
 @Where(clause = "deleted = false")
 @Getter
 @Setter

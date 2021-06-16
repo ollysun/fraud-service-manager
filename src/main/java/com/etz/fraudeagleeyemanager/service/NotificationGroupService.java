@@ -60,6 +60,11 @@ public class NotificationGroupService {
 		NotificationGroup notificationGroup = notificationGroupRepository.findById(request.getGroupId())
 				.orElseThrow(() ->  new ResourceNotFoundException("Notification group not found for group ID " + request.getGroupId()));
 		
+		// for auditing purpose for UPDATE
+		notificationGroup.setEntityId(request.getGroupId().toString());
+		notificationGroup.setRecordBefore(JsonConverter.objectToJson(notificationGroup));
+		notificationGroup.setRequestDump(request);
+				
 		notificationGroup.setGroupName(request.getName());
 		notificationGroup.setEmails(request.getEmails());
 		notificationGroup.setPhones(request.getPhoneNos());
@@ -67,12 +72,6 @@ public class NotificationGroupService {
 		notificationGroup.setSmsAlert(request.getSmsAlert());
 		notificationGroup.setStatus(request.getStatus());
 		notificationGroup.setUpdatedBy(request.getUpdatedBy());
-		
-		// for auditing purpose for UPDATE
-		notificationGroup.setEntityId(request.getGroupId().toString());
-		notificationGroup.setRecordBefore(JsonConverter.objectToJson(notificationGroup));
-		notificationGroup.setRequestDump(request);
-		
 		NotificationGroup savedNotificationGroup = notificationGroupRepository.save(notificationGroup);
 		notificationGroupRedisRepository.setHashOperations(redisTemplate);
 		notificationGroupRedisRepository.update(savedNotificationGroup);
