@@ -32,12 +32,13 @@ variables:
     SCA_TEAM: ""
     GITLAB_BLOCK_MERGE: "false"
     GITLAB_ERROR_MERGE: "false"
+    DEFAULT_BRANCH: "${CI_DEFAULT_BRANCH}"
     PARAMS: ""
 
 checkmarx-scan-security-dashboard:
   stage: test
   rules:
-    - if: '$CX_FLOW_BUG_TRACKER == "GitLabDashboard" && $CI_COMMIT_BRANCH == "master"'
+    - if: '$CX_FLOW_BUG_TRACKER == "GitLabDashboard" && $CI_COMMIT_BRANCH == "$DEFAULT_BRANCH"'
   image:
     name: checkmarx/${CHECKMARX_DOCKER_IMAGE}
     entrypoint: ['']
@@ -64,7 +65,7 @@ checkmarx-scan-security-dashboard:
 checkmarx-scan:
   stage: test
   rules:
-    - if: '$CX_FLOW_BUG_TRACKER != "GitLabDashboard" && $CI_COMMIT_BRANCH == "master"'
+    - if: '$CX_FLOW_BUG_TRACKER != "GitLabDashboard" && $CI_COMMIT_BRANCH == "$DEFAULT_BRANCH"'
   image:
     name: checkmarx/${CHECKMARX_DOCKER_IMAGE}
     entrypoint: ['']
