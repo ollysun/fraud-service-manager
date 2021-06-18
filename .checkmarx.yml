@@ -36,7 +36,7 @@ variables:
     PARAMS: ""
 
 checkmarx-scan-security-dashboard:
-  stage: test
+  stage: checkmarx-scan
   rules:
     - if: '$CX_FLOW_BUG_TRACKER == "GitLabDashboard" && $CI_COMMIT_BRANCH == "$DEFAULT_BRANCH"'
   image:
