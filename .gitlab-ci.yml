@@ -8,4 +8,3 @@ checkmarx_sast:
   only:
     - staging
     - merge_requests
-  extends: .checkmarx_sast
