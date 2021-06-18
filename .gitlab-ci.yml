@@ -1,1 +1,4 @@
 include: '.checkmarx.yml'
+
+stages:
+  - checkmarx-scan
