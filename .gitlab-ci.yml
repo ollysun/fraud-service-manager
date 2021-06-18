@@ -1,1 +1,11 @@
 include: '.checkmarx.yml'
+
+stages:
+  - checkmarx-scan
+
+checkmarx_sast:
+  stage: checkmarx-scan
+  only:
+    - staging
+    - merge_requests
+  extends: .checkmarx_sast
