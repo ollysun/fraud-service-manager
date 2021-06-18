@@ -86,7 +86,7 @@ checkmarx-scan:
           ${PARAMS}
 
 checkmarx-scan-mr:
-  stage: checkmarx-scan
+  stage: test
   rules:
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
   image:   
