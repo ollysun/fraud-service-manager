@@ -29,11 +29,11 @@ spring:
     name: fraud-eagle-eye-manager-service
 
   redis:
-    eagle-eye-manager:
-      host: 172.17.10.16
-      port: 6379
-      database: 0
-      password: visionsvisions
+    client-type: jedis
+    host: 172.17.10.16
+    port: 6379
+    database: 0
+    password: visionsvisions
 
   cloud:
     consul:
@@ -53,7 +53,6 @@ spring:
     url: jdbc:mysql://localhost:3306/eagle_eye?useLegacyDatetimeCode=false&serverTimezone=Africa/Lagos&createDatabaseIfNotExist=true
     driverClassName: com.mysql.cj.jdbc.Driver
     initialization-mode: always
-    data: classpath:data.sql
 
   jackson:
     default-property-inclusion: NON_NULL
@@ -69,7 +68,7 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: create
+      ddl-auto: update
     properties:
       hibernate:
         dialect: org.hibernate.dialect.MySQL55Dialect

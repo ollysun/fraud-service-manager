@@ -31,9 +31,10 @@ import lombok.ToString;
 @Where(clause = "deleted = false")
 @Getter
 @Setter
-public class ProductEntity extends BaseAuditVersionEntity implements Serializable {
+public class ProductEntity extends BaseAuditVersionEntity<String> implements Serializable {
+	private static final long serialVersionUID = 1L;
 
-    @Id
+	@Id
     @Column(name = "code", unique=true,columnDefinition="VARCHAR(100)")
     private String code;
 
@@ -80,4 +81,9 @@ public class ProductEntity extends BaseAuditVersionEntity implements Serializabl
     @OneToMany(mappedBy = "productEntity",fetch = FetchType.LAZY,
             cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<CardProduct> cardProducts;
+
+	@Override
+	public String getId() {
+		return code;
+	}
 }

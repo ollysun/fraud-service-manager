@@ -26,4 +26,11 @@ public class CollectionResponse<T> {
         setMessage(RequestUtil.getMessage());
         setData(result);
     }
+    
+    public CollectionResponse(Collection<T> result, String message) {
+    	setStatus(200);
+        setExecTime((System.nanoTime() - RequestUtil.getStartTime()) / 100000000);
+        setMessage(message);
+        setData(result);
+    }
 }

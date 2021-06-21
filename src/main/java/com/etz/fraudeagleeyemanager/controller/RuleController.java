@@ -1,24 +1,18 @@
 package com.etz.fraudeagleeyemanager.controller;
 
-import java.util.List;
-
 import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Positive;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.etz.fraudeagleeyemanager.dto.request.CreateRuleRequest;
@@ -36,22 +30,19 @@ import com.etz.fraudeagleeyemanager.entity.ProductRule;
 import com.etz.fraudeagleeyemanager.entity.Rule;
 import com.etz.fraudeagleeyemanager.service.RuleService;
 
-import lombok.extern.slf4j.Slf4j;
+import lombok.RequiredArgsConstructor;
 
-@Slf4j
-@Validated
 @RestController
+@RequiredArgsConstructor
 @RequestMapping("/v1/rule")
 public class RuleController {
 
-	@Autowired
-	private RuleService ruleService;
+	private final RuleService ruleService;
 	
 	@PostMapping
 	public ResponseEntity<ModelResponse<Rule>> createRule(@RequestBody @Valid CreateRuleRequest request){
-		ModelResponse<Rule> response = new ModelResponse<>(ruleService.createRule(request));
-		response.setStatus(HttpStatus.CREATED.value());
-		return new ResponseEntity<>(response, HttpStatus.CREATED);
+		ModelResponse<Rule> response = new ModelResponse<>(ruleService.createRule(request), HttpStatus.CREATED);
+		return ResponseEntity.status(HttpStatus.valueOf(response.getStatus())).body(response);
 	}
 	
 	@PutMapping
@@ -59,41 +50,35 @@ public class RuleController {
 		return new ModelResponse<>(ruleService.updateRule(request));
 	}
 	
-	@DeleteMapping(path = "/{ruleId}")
-	public BooleanResponse deleteRule(@PathVariable(name = "ruleId") Long ruleId){
+	@DeleteMapping("/{ruleId}")
+	public BooleanResponse deleteRule(Long ruleId){
 		return new BooleanResponse(ruleService.deleteRule(ruleId));
 	}
 	
 	@GetMapping
-	public PageResponse<RuleResponse> queryRule(@RequestParam(name = "ruleId", required = false) Long ruleId){
+	public PageResponse<RuleResponse> queryRule(Long ruleId){
 		return new PageResponse<>(ruleService.getRule(ruleId));
 	}
-		
 	
-	@PostMapping(path = "/product")
+	@PostMapping("/product")
 	public ResponseEntity<ModelResponse<ProductRule>> mapRuleToProduct(@RequestBody @Valid MapRuleToProductRequest request){
-		ModelResponse<ProductRule> response = new ModelResponse<>(ruleService.mapRuleToProduct(request));
-		response.setStatus(HttpStatus.CREATED.value());
-		return new ResponseEntity<>(response, HttpStatus.CREATED);
+		ModelResponse<ProductRule> response = new ModelResponse<>(ruleService.mapRuleToProduct(request), HttpStatus.CREATED);
+		return ResponseEntity.status(HttpStatus.valueOf(response.getStatus())).body(response);
 	}
 	
-	@PutMapping(path = "/product")
+	@PutMapping("/product")
 	public CollectionResponse<ProductRuleResponse> updateProductRule(@RequestBody @Valid UpdateMapRuleToProductRequest request){
 		return new CollectionResponse<>(ruleService.updateProductRule(request));
 	}
 
-	@DeleteMapping(path = "/product/{code}/ruleId/{ruleId}")
-	public BooleanResponse deleteProductRule(@NotNull @Positive @PathVariable(value = "ruleId") Long ruleId,
-											 @NotBlank @PathVariable(value = "code") String code){
+	@DeleteMapping("/product/{code}/ruleId/{ruleId}")
+	public BooleanResponse deleteProductRule(@NotNull @Positive Long ruleId, @NotBlank String code){
 		return new BooleanResponse(ruleService.deleteProductRule(ruleId, code));
 	}
 
-	@GetMapping(path = "/product")
-	public ResponseEntity<CollectionResponse<RuleProductResponse>> getRuleProduct(
-			@RequestParam(name = "code", required = true) String code){
-		List<RuleProductResponse> roleResponseList = ruleService.getRuleProduct(code);
-		CollectionResponse<RuleProductResponse> collectionResponse = new CollectionResponse<>(roleResponseList);
-		return new ResponseEntity<>(collectionResponse, HttpStatus.OK);
+	@GetMapping("/product")
+	public CollectionResponse<RuleProductResponse> getRuleProduct(String code){
+		return new CollectionResponse<>(ruleService.getRuleProduct(code));
 	}
 
 }

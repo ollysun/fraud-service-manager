@@ -56,16 +56,14 @@ public class AuditTrailAdvice {
 		} catch (Throwable throwable) {
 			throwable.printStackTrace();
 		}
-		System.out.println("entity: " + entity);
-		System.out.println("response: " + response);
-		
+
 		// only entities that extend the BaseEntityModel class will be audited
 		if (entity instanceof BaseAuditEntity) {
 			BaseAuditEntity baseAuditEntity = (BaseAuditEntity) entity;
 			baseAuditEntity.setEntity(entity.getClass().getSimpleName());
 			baseAuditEntity.setEventDescription(eventDescription);
 			baseAuditEntity.setEndpoint(RequestUtil.getSourceURL());
-			baseAuditEntity.setUserId(RequestUtil.getAccessTokenClaim("user_name"));
+			baseAuditEntity.setUserId(0L); // Long.valueOf(RequestUtil.getAccessTokenClaim("user_id")));
 			baseAuditEntity.setEventType(eventType);
 
 			if (baseAuditEntity.getRecordAfter() != null) {

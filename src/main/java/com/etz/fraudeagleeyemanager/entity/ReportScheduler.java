@@ -1,8 +1,10 @@
 package com.etz.fraudeagleeyemanager.entity;
 
-import com.etz.fraudeagleeyemanager.constant.IntervalType;
 import lombok.*;
 import javax.persistence.*;
+
+import com.etz.fraudeagleeyemanager.enums.IntervalType;
+
 import java.io.Serializable;
 
 @Entity
@@ -14,6 +16,7 @@ import java.io.Serializable;
 @ToString
 @RequiredArgsConstructor
 public class ReportScheduler extends BaseAuditEntity implements Serializable {
+	private static final long serialVersionUID = 1L;
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)

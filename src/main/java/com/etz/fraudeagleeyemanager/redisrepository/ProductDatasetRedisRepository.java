@@ -11,8 +11,8 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ScanOptions;
 import org.springframework.stereotype.Repository;
 
-import com.etz.fraudeagleeyemanager.constant.FraudRedisKey;
 import com.etz.fraudeagleeyemanager.entity.ProductDataSet;
+import com.etz.fraudeagleeyemanager.enums.FraudRedisKey;
 import com.etz.fraudeagleeyemanager.repository.RedisRepository;
 
 
@@ -20,11 +20,6 @@ import com.etz.fraudeagleeyemanager.repository.RedisRepository;
 public class ProductDatasetRedisRepository implements RedisRepository<ProductDataSet, String> {
 	
     private HashOperations<String, String, ProductDataSet> hashOperations;
-	
-//	//@Autowired
-//    public ProductDatasetRedisRepository(RedisTemplate<FraudRedisKey, Object> redisTemplate) {
-//        this.hashOperations = redisTemplate.opsForHash();
-//    }
 	
     public void setHashOperations(RedisTemplate<String, Object> redisTemplate){
         this.hashOperations = redisTemplate.opsForHash();
@@ -66,7 +61,6 @@ public class ProductDatasetRedisRepository implements RedisRepository<ProductDat
 		try {
 			cursor.close();
 		} catch (IOException e) {
-
 		}
 		return foundKeys;
 	}

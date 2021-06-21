@@ -30,9 +30,10 @@ import lombok.EqualsAndHashCode;
 @SQLDelete(sql = "UPDATE account_product SET deleted = true, status=0 WHERE id = ? AND version = ?", check = ResultCheckStyle.COUNT)
 @Where(clause = "deleted = false")
 @IdClass(AccountProductId.class)
-public class AccountProduct extends BaseAuditVersionEntity implements Serializable {
+public class AccountProduct extends BaseAuditVersionEntity<AccountProductId> implements Serializable {
+	private static final long serialVersionUID = 1L;
 
-    @Id
+	@Id
     @Column(name = "product_code", nullable = false, columnDefinition="VARCHAR(100)")
     private String productCode;
 
@@ -55,5 +56,11 @@ public class AccountProduct extends BaseAuditVersionEntity implements Serializab
     @MapsId("productCode")
     @JoinColumn(name = "product_code")
     private ProductEntity productEntity;
+
+
+	@Override
+	public AccountProductId getId() {
+		return new AccountProductId(getProductCode(), getAccountId());
+	}
 
 }

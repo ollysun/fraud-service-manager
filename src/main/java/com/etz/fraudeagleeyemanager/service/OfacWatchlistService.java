@@ -53,8 +53,8 @@ public class OfacWatchlistService {
 		}
 	}
 
-	public OfacWatchlist updateOfacWatchlist(UpdateOfacWatchlistRequest request){
-		OfacWatchlist ofacWatchlist = ofacWatchlistRepository.findById(request.getOfacId())
+	public OfacWatchlist updateOfacWatchlist(UpdateOfacWatchlistRequest request, Long ofacId){
+		OfacWatchlist ofacWatchlist = ofacWatchlistRepository.findById(ofacId)
 				.orElseThrow(() ->  new ResourceNotFoundException("Person, with ID "+ request.getOfacId() +", not found on Ofac watchlist"));
 
 		// for auditing purpose for UPDATE

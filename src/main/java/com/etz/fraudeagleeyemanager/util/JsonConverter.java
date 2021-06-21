@@ -5,17 +5,19 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 
 public class JsonConverter {
+	
+	private  JsonConverter() {}
     
 	@SuppressWarnings("unchecked")
 	public static <T> T jsonToObject(String jsonStr, Class<?> responseClassObject) {
 		ObjectMapper objMapper = new ObjectMapper();
-		T JavaObject = null;
+		T javaObject = null;
 		try {
-			JavaObject = (T) objMapper.readValue(jsonStr, responseClassObject);
+			javaObject = (T) objMapper.readValue(jsonStr, responseClassObject);
 		} catch (JsonProcessingException e) {
 			e.printStackTrace();
 		}
-		return JavaObject;
+		return javaObject;
 	}
 	
 	public static String objectToJson(Object object) {

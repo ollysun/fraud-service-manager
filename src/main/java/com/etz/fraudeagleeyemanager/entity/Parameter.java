@@ -26,7 +26,8 @@ uniqueConstraints = @UniqueConstraint(
 @Where(clause = "deleted = false")
 @Data
 public class Parameter extends BaseAuditEntity implements Serializable {
-		
+	private static final long serialVersionUID = 1L;
+
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;

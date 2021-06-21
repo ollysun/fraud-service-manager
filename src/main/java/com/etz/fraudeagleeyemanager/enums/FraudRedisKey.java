@@ -1,4 +1,4 @@
-package com.etz.fraudeagleeyemanager.constant;
+package com.etz.fraudeagleeyemanager.enums;
 
 public enum FraudRedisKey {
     POCKETMONI, MOBILEGATE, CORPORATEPAY, SWITCHIT, ACCOUNTPRODUCT, ACCOUNT, CARDPRODUCT,

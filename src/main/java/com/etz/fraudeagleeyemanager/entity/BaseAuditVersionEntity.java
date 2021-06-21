@@ -3,7 +3,11 @@ package com.etz.fraudeagleeyemanager.entity;
 import java.io.Serializable;
 
 import javax.persistence.MappedSuperclass;
-import javax.persistence.Version;
+import javax.persistence.PostLoad;
+import javax.persistence.PrePersist;
+import javax.persistence.Transient;
+
+import org.springframework.data.domain.Persistable;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
@@ -13,7 +17,7 @@ import lombok.EqualsAndHashCode;
 @MappedSuperclass
 @Data
 @EqualsAndHashCode(callSuper=true)
-public class BaseAuditVersionEntity extends BaseAuditEntity implements Serializable {
+public abstract class BaseAuditVersionEntity<ID> extends BaseAuditEntity implements Serializable, Persistable<ID> {
 
 	private static final long serialVersionUID = 1L;
 	
@@ -22,7 +26,18 @@ public class BaseAuditVersionEntity extends BaseAuditEntity implements Serializa
 	 * its primary key column.
 	 */
 	@JsonIgnore
-    @Version
-    private Long version;
+	@Transient
+	private boolean isNew = true; 
+	
+	@Override
+	public boolean isNew() {
+		return isNew;
+	}
+
+	@PrePersist
+	@PostLoad
+	void markNotNew() {
+		this.isNew = false;
+	}
 	
 }

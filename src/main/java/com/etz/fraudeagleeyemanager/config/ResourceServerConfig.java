@@ -20,17 +20,18 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.filter.CorsFilter;
 
+import com.etz.fraudeagleeyemanager.constant.AppConstant;
+
 @Configuration
 @EnableResourceServer
 @EnableWebSecurity
 @EnableGlobalMethodSecurity(prePostEnabled = true)
 public class ResourceServerConfig extends ResourceServerConfigurerAdapter {
 
-    private static final String RESOURCE_ID = "fraud-engine";
+	private static final String RESOURCE_ID = "fraud-engine";
 
     @Override
     public void configure(ResourceServerSecurityConfigurer resources) {
-       // resources.resourceId(RESOURCE_ID).tokenStore(tokenStore());
         resources.resourceId(RESOURCE_ID).tokenServices(tokenServices(tokenStore())).tokenStore(tokenStore());
     }
 
@@ -43,8 +44,6 @@ public class ResourceServerConfig extends ResourceServerConfigurerAdapter {
                 .permitAll();
         http.authorizeRequests().antMatchers("/**")
                 .authenticated();
-
-        //http.authorizeRequests().antMatchers("/api/v1/**").authenticated();
     }
 
     @Bean
@@ -73,9 +72,9 @@ public class ResourceServerConfig extends ResourceServerConfigurerAdapter {
 
         CorsConfiguration configAutenticacao = new CorsConfiguration();
         configAutenticacao.setAllowCredentials(true);
-        configAutenticacao.setAllowedOriginPatterns(Collections.singletonList("*"));
-        configAutenticacao.addAllowedHeader("*");
-        configAutenticacao.addAllowedMethod("*");
+        configAutenticacao.setAllowedOriginPatterns(Collections.singletonList(AppConstant.ALL));
+        configAutenticacao.addAllowedHeader(AppConstant.ALL);
+        configAutenticacao.addAllowedMethod(AppConstant.ALL);
         source.registerCorsConfiguration("/**", configAutenticacao); // Global for all paths
 
         FilterRegistrationBean<CorsFilter> bean = new FilterRegistrationBean<>(new CorsFilter(source));

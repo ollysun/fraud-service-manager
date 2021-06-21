@@ -18,7 +18,6 @@ import lombok.Data;
 @Table(name = "event_log")
 @Data
 public class EventLogEntity implements Serializable {
-	
 	private static final long serialVersionUID = 1L;
 	
 	@Id
@@ -50,11 +49,8 @@ public class EventLogEntity implements Serializable {
 	@Type(type = "text")
 	private String requestDump;
 	
-//	@Column(name = "user_id", nullable = false)
-//	private Long userId;
-	
 	@Column(name = "user_id", nullable = false)
-	private String userId;
+	private Long userId;
 
 	@Column(name = "event_type", nullable = false, columnDefinition="VARCHAR(100)")
 	private String eventType;

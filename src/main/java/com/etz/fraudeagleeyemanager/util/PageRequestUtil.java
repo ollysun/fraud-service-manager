@@ -3,24 +3,22 @@ package com.etz.fraudeagleeyemanager.util;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 
-public class PageRequestUtil {
+import com.etz.fraudeagleeyemanager.constant.AppConstant;
 
-    private static String DEFAULT_PAGE_LIMIT = "50";
-    private static String PAGE_LIMIT = "limit";
-    private static String PAGE = "page";
-    //private static String CREATEDAT = "createdAt";
-    private static String UPDATEDAT = "updatedAt";
+public class PageRequestUtil {
+	
+	private PageRequestUtil() {}
 
     public static PageRequest getPageRequest(int startPosition) {
-        return PageRequest.of(startPosition, getPageLimit(), Sort.Direction.DESC, UPDATEDAT);
+        return PageRequest.of(startPosition, getPageLimit(), Sort.Direction.DESC, AppConstant.UPDATEDAT);
     }
 
     public static PageRequest getPageRequest() {
-        return PageRequest.of(getPage(), getPageLimit(), Sort.Direction.DESC, UPDATEDAT);
+        return PageRequest.of(getPage(), getPageLimit(), Sort.Direction.DESC, AppConstant.UPDATEDAT);
     }
 
     public static PageRequest getPageRequest(Sort.Direction direction) {
-        return PageRequest.of(getPage(), getPageLimit(), direction, UPDATEDAT);
+        return PageRequest.of(getPage(), getPageLimit(), direction, AppConstant.UPDATEDAT);
     }
 
     public static PageRequest getPageRequest(Sort.Direction direction, String columnName) {
@@ -29,11 +27,11 @@ public class PageRequestUtil {
 
     private static int getPage(){
         /* Subtract one getFrom the value because PageRequest.of() first parameter starts getFrom 0 index */
-        return Integer.valueOf(RequestUtil.getRequest().getParameter(PAGE) != null ? RequestUtil.getRequest().getParameter(PAGE) : "1") - 1;
+        return Integer.valueOf(RequestUtil.getRequest().getParameter(AppConstant.PAGE) != null ? RequestUtil.getRequest().getParameter(AppConstant.PAGE) : "1") - 1;
     }
     
     private static int getPageLimit(){
-        return Integer.valueOf(RequestUtil.getRequest().getParameter(PAGE_LIMIT) != null ? RequestUtil.getRequest().getParameter(PAGE_LIMIT) : DEFAULT_PAGE_LIMIT);
+        return Integer.valueOf(RequestUtil.getRequest().getParameter(AppConstant.PAGE_LIMIT) != null ? RequestUtil.getRequest().getParameter(AppConstant.PAGE_LIMIT) : AppConstant.DEFAULT_PAGE_LIMIT);
     }
 }
 

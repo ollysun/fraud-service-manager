@@ -1,6 +1,8 @@
 package com.etz.fraudeagleeyemanager.service;
 
 
+import java.util.Objects;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.Page;
@@ -52,8 +54,8 @@ public class InternalWatchlistService {
 		}
 	}
 
-	public InternalWatchlist updateInternalWatchlist(UpdateInternalWatchlistRequest request){
-		InternalWatchlist internalWatchlist = internalWatchlistRepository.findById(request.getWatchId())
+	public InternalWatchlist updateInternalWatchlist(UpdateInternalWatchlistRequest request, Long watchId){
+		InternalWatchlist internalWatchlist = internalWatchlistRepository.findById(watchId)
 				.orElseThrow(() ->  new ResourceNotFoundException("BVN not found on internal watchlist for ID "+ request.getWatchId()));
 
 		// for auditing purpose for UPDATE
@@ -72,7 +74,7 @@ public class InternalWatchlistService {
 	}
 
 	public Page<InternalWatchlist> getInternalWatchlist(Long watchId){
-		if (watchId == null) {
+		if (Objects.isNull(watchId)) {
 			return internalWatchlistRepository.findAll(PageRequestUtil.getPageRequest());
 		}
 		InternalWatchlist internalWatchlist = new InternalWatchlist();
@@ -86,7 +88,7 @@ public class InternalWatchlistService {
 				.orElseThrow(() -> new ResourceNotFoundException("BVN not found on internal watchlist for ID "+ watchId));
 
 		// for auditing purpose for DELETE
-		internalWatchlist.setEntityId(watchId.toString());
+		internalWatchlist.setEntityId(String.valueOf(watchId));
 		internalWatchlist.setRecordBefore(JsonConverter.objectToJson(internalWatchlist));
 		internalWatchlist.setRecordAfter(null);
 		internalWatchlist.setRequestDump(watchId);

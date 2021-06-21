@@ -38,7 +38,6 @@ public class NotificationGroupService {
 			notificationGroup.setEmailAlert(request.getMailAlert());
 			notificationGroup.setSmsAlert(request.getSmsAlert());
 			notificationGroup.setAuthorised(false);
-			//notificationGroup.setAuthoriser(authoriser);
 			notificationGroup.setStatus(false);
 			notificationGroup.setCreatedBy(request.getCreatedBy());
 			
@@ -56,8 +55,8 @@ public class NotificationGroupService {
 		}
 	}
 
-	public NotificationGroup updateNotificationGroup(UpdateNotificationGroupRequest request){
-		NotificationGroup notificationGroup = notificationGroupRepository.findById(request.getGroupId())
+	public NotificationGroup updateNotificationGroup(UpdateNotificationGroupRequest request, Long groupId){
+		NotificationGroup notificationGroup = notificationGroupRepository.findById(groupId)
 				.orElseThrow(() ->  new ResourceNotFoundException("Notification group not found for group ID " + request.getGroupId()));
 		
 		// for auditing purpose for UPDATE
@@ -65,7 +64,6 @@ public class NotificationGroupService {
 		notificationGroup.setRecordBefore(JsonConverter.objectToJson(notificationGroup));
 		notificationGroup.setRequestDump(request);
 				
-		notificationGroup.setGroupName(request.getName());
 		notificationGroup.setEmails(request.getEmails());
 		notificationGroup.setPhones(request.getPhoneNos());
 		notificationGroup.setEmailAlert(request.getMailAlert());

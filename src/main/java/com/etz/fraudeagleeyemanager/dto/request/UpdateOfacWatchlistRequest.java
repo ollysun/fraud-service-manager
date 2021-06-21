@@ -5,7 +5,7 @@ import java.io.Serializable;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
-import com.etz.fraudeagleeyemanager.constant.UserCategory;
+import com.etz.fraudeagleeyemanager.enums.UserCategory;
 
 import lombok.Data;
 

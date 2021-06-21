@@ -3,7 +3,7 @@ package com.etz.fraudeagleeyemanager.service;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,7 +21,6 @@ import com.etz.fraudeagleeyemanager.dto.response.CardProductResponse;
 import com.etz.fraudeagleeyemanager.dto.response.CardResponse;
 import com.etz.fraudeagleeyemanager.entity.Card;
 import com.etz.fraudeagleeyemanager.entity.CardProduct;
-import com.etz.fraudeagleeyemanager.entity.CardProductId;
 import com.etz.fraudeagleeyemanager.entity.ProductEntity;
 import com.etz.fraudeagleeyemanager.exception.FraudEngineException;
 import com.etz.fraudeagleeyemanager.exception.ResourceNotFoundException;
@@ -99,7 +98,11 @@ public class CardService {
 		card.setSuspicionCount(updateCardRequestDto.getCount());
 		card.setBlockReason(updateCardRequestDto.getBlockReason());
 		card.setStatus(updateCardRequestDto.getStatus());
-		return card;
+		
+		Card savedCard = cardRepository.save(card);
+		cardRedisRepository.setHashOperations(fraudEngineRedisTemplate);
+		cardRedisRepository.update(savedCard);
+		return savedCard;
 	}
 
 	public Page<CardResponse> getCards(Long cardId) {
@@ -144,45 +147,39 @@ public class CardService {
 	}
 
 	public List<CardProductResponse> updateCardProduct(UpdateCardProductRequest request) {
-		List<CardProduct> cardToProdEntityList = cardProductRepository.findByCardId(request.getCardId());
-		List<CardProductResponse> updatedCardProductResponseList = new ArrayList<>();
-		CardProductResponse cardProductResponse = new CardProductResponse();
-		cardProductRedisRepository.setHashOperations(fraudEngineRedisTemplate);
-		if(cardToProdEntityList.isEmpty()){
+		List<CardProduct> cardProductList = cardProductRepository.findByCardId(request.getCardId());
+		if(cardProductList.isEmpty()){
 			throw new ResourceNotFoundException("CardProduct Not found for cardId " + request.getCardId());
 		}
 
+		List<CardProductResponse> updatedCardProductResponseList = new ArrayList<>();
+		CardProductResponse cardProductResponse = new CardProductResponse();
+		cardProductRedisRepository.setHashOperations(fraudEngineRedisTemplate);
+		String entityId = "CardId:" + request.getCardId();
+		
 		if (request.getProductCode() != null) {
-			Optional<CardProduct> cardProductOptional = cardProductRepository.findById(new CardProductId(null,request.getProductCode(), request.getCardId()));
-			if (cardProductOptional.isPresent()){
-				// for auditing purpose for UPDATE
-				cardProductOptional.get().setEntityId(request.getCardId().toString());
-				cardProductOptional.get().setRecordBefore(JsonConverter.objectToJson(cardProductOptional.get()));
-				cardProductOptional.get().setRequestDump(request);
-				
-				cardProductOptional.get().setStatus(request.getStatus());
-				cardProductOptional.get().setUpdatedBy(request.getUpdatedBy());
-				CardProduct cardProduct = cardProductRepository.save(cardProductOptional.get());
-				BeanUtils.copyProperties(cardProduct, cardProductResponse);
-				updatedCardProductResponseList.add(cardProductResponse);
-				cardProductRedisRepository.update(cardProduct);
-			}else{
+			cardProductList = cardProductList.stream().filter(entity -> entity.getProductCode().equals(request.getProductCode()))
+					.collect(Collectors.toList());
+			if(cardProductList.isEmpty()) {
 				throw new ResourceNotFoundException("Card Product not found for this id " + request.getCardId() + " and code " +  request.getProductCode());
 			}
+			entityId += " ProdCd:" + request.getProductCode();
 		}
-		cardToProdEntityList.forEach(cardProductEntity -> {
+		
+		for(CardProduct cardProductEntity : cardProductList) {
 			// for auditing purpose for UPDATE
-			cardProductEntity.setEntityId(request.getCardId().toString());
+			cardProductEntity.setEntityId(entityId);
 			cardProductEntity.setRecordBefore(JsonConverter.objectToJson(cardProductEntity));
 			cardProductEntity.setRequestDump(request);
 			
 			cardProductEntity.setStatus(request.getStatus());
 			cardProductEntity.setUpdatedBy(request.getUpdatedBy());
-			CardProduct cardProduct = cardProductRepository.save(cardProductEntity);
-			BeanUtils.copyProperties(cardProduct, cardProductResponse);
-			cardProductRedisRepository.update(cardProduct);
+			CardProduct cardProductSaved = cardProductRepository.save(cardProductEntity);
+			cardProductRedisRepository.update(cardProductSaved);
+			
+			BeanUtils.copyProperties(cardProductSaved, cardProductResponse);
 			updatedCardProductResponseList.add(cardProductResponse);
-		});
+		}
 
 		return updatedCardProductResponseList;
 	}

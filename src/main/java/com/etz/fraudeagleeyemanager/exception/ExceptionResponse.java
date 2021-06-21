@@ -1,11 +1,11 @@
 package com.etz.fraudeagleeyemanager.exception;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import org.springframework.http.HttpStatus;
-
 import java.util.Date;
 import java.util.List;
+
+import org.springframework.http.HttpStatus;
+
+import lombok.Data;
 
 @Data
 public class ExceptionResponse {

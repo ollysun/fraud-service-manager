@@ -43,9 +43,9 @@ public class MetaData<T>{
 
         setPerPage(Integer.parseInt(RequestUtil.perPage()));
 
-        int nextPage = RequestUtil.getPage() <= 0 ? 1 : RequestUtil.getPage() + 1;
+        int nexttPage = RequestUtil.getPage() <= 0 ? 1 : RequestUtil.getPage() + 1;
 
-        int prevPage = RequestUtil.getPage() <= 0 ? 0 : RequestUtil.getPage() - 1;
+        int prevvPage = RequestUtil.getPage() <= 0 ? 0 : RequestUtil.getPage() - 1;
 
         if(!result.getContent().isEmpty()){
             if(result.isFirst() && result.isLast()){
@@ -54,17 +54,17 @@ public class MetaData<T>{
                 setNextPageUrl(null);
                 setPrevPageUrl(null);
             }else if(!result.isFirst() && !result.isLast()){
-            	setPrevPage(Long.valueOf(prevPage));
-            	setNextPage(Long.valueOf(nextPage));
+            	setPrevPage(Long.valueOf(prevvPage));
+            	setNextPage(Long.valueOf(nexttPage));
                 setPrevPageUrl( RequestUtil.getRequest().getRequestURL().append("?").append(PAGE_LIMIT).append("=").append(getPerPage()).append("&").append(PAGE).append("=").append(prevPage).toString() );
                 setNextPageUrl( RequestUtil.getRequest().getRequestURL().append("?").append(PAGE_LIMIT).append("=").append(getPerPage()).append("&").append(PAGE).append("=").append(nextPage).toString() );
             }else if(result.isFirst() && !result.isLast()){
             	setPrevPage(null);
-            	setNextPage(Long.valueOf(nextPage));
+            	setNextPage(Long.valueOf(nexttPage));
                 setPrevPageUrl( null );
                 setNextPageUrl( RequestUtil.getRequest().getRequestURL().append("?").append(PAGE_LIMIT).append("=").append(getPerPage()).append("&").append(PAGE).append("=").append(nextPage).toString() );
 			} else if (!result.isFirst() && result.isLast()) {
-				setPrevPage(Long.valueOf(prevPage));
+				setPrevPage(Long.valueOf(prevvPage));
 				setNextPage(null);
 				setPrevPageUrl( RequestUtil.getRequest().getRequestURL().append("?").append(PAGE_LIMIT).append("=").append(getPerPage()).append("&").append(PAGE).append("=").append(prevPage).toString());
 				setNextPageUrl(null);

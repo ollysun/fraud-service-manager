@@ -2,24 +2,27 @@ package com.etz.fraudeagleeyemanager.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
 import org.springframework.data.redis.connection.jedis.JedisConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
 
+import lombok.RequiredArgsConstructor;
+
 @Configuration
+@RequiredArgsConstructor
 public class RedisConfig {
 
+	private final JedisConnectionFactory fraudEngineConnectionFactory;
 
-    @Bean(name = "fraudEngineConnectionFactory")
-    JedisConnectionFactory fraudEngineJedisConnectionFactory() {
-        RedisStandaloneConfiguration redisStandaloneConfiguration =
-                new RedisStandaloneConfiguration("127.0.0.1", 6379);
-        //		new RedisStandaloneConfiguration("172.17.10.16", 6379);
-        //redisStandaloneConfiguration.setPassword("visionsvisions");
-        redisStandaloneConfiguration.setDatabase(0);
-        return new JedisConnectionFactory(redisStandaloneConfiguration);
-    }
+//    @Bean(name = "fraudEngineConnectionFactory")
+//    JedisConnectionFactory fraudEngineJedisConnectionFactory() {
+//        RedisStandaloneConfiguration redisStandaloneConfiguration = new RedisStandaloneConfiguration();
+//        //		new RedisStandaloneConfiguration("127.0.0.1", 6379);
+//        //		new RedisStandaloneConfiguration("172.17.10.16", 6379);
+//        //redisStandaloneConfiguration.setPassword("visionsvisions");
+//        //redisStandaloneConfiguration.setDatabase(0);
+//        return new JedisConnectionFactory(redisStandaloneConfiguration);
+//    }
 
     /*
      *  Without this bean definition, the application throws an error looking for it.
@@ -29,21 +32,19 @@ public class RedisConfig {
     @Bean
     public RedisTemplate<String, Object> redisTemplate() {
     	RedisTemplate<String, Object> template = new RedisTemplate<>();
-        template.setConnectionFactory(fraudEngineJedisConnectionFactory());
+        template.setConnectionFactory(fraudEngineConnectionFactory);
         setSerializer(template);
         return template;
     }
 
 
     private void setSerializer(RedisTemplate<String, Object> template) {
-        //template.setKeySerializer(new StringRedisSerializer());
-        
-    	//template.setHashValueSerializer(new JdkSerializationRedisSerializer());
-        //template.setValueSerializer(new JdkSerializationRedisSerializer());
-        
-        template.setKeySerializer(new Jackson2JsonRedisSerializer<String>(String.class));
-        template.setHashValueSerializer(new Jackson2JsonRedisSerializer<Object>(Object.class));
-        template.setValueSerializer(new Jackson2JsonRedisSerializer<Object>(Object.class));
+    	template.setDefaultSerializer(new Jackson2JsonRedisSerializer<>(String.class));
+        template.setKeySerializer(new Jackson2JsonRedisSerializer<>(String.class));
+        template.setValueSerializer(new Jackson2JsonRedisSerializer<>(Object.class));
+        template.setStringSerializer(new Jackson2JsonRedisSerializer<>(String.class));
+    	template.setHashKeySerializer(new Jackson2JsonRedisSerializer<>(String.class));
+        template.setHashValueSerializer(new Jackson2JsonRedisSerializer<>(Object.class));
         template.setEnableTransactionSupport(true);
         template.afterPropertiesSet();
     }

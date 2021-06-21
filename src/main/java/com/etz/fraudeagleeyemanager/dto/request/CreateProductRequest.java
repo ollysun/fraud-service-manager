@@ -1,10 +1,12 @@
 package com.etz.fraudeagleeyemanager.dto.request;
 
 
-import com.etz.fraudeagleeyemanager.constant.Status;
 import lombok.Data;
 
 import javax.validation.constraints.NotNull;
+
+import com.etz.fraudeagleeyemanager.enums.Status;
+
 import java.io.Serializable;
 
 @Data

@@ -16,7 +16,7 @@ import org.hibernate.annotations.ResultCheckStyle;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.Where;
 
-import com.etz.fraudeagleeyemanager.constant.UserCategory;
+import com.etz.fraudeagleeyemanager.enums.UserCategory;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;

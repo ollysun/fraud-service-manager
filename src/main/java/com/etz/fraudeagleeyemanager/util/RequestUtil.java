@@ -1,9 +1,5 @@
 package com.etz.fraudeagleeyemanager.util;
 
-import static com.etz.fraudeagleeyemanager.constant.AppConstant.PAGE;
-import static com.etz.fraudeagleeyemanager.constant.AppConstant.PAGE_LIMIT;
-import static com.etz.fraudeagleeyemanager.constant.AppConstant.DEFAULT_PAGE_LIMIT;
-
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
@@ -11,6 +7,8 @@ import javax.servlet.http.HttpServletRequest;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
+
+import com.etz.fraudeagleeyemanager.constant.AppConstant;
 
 public class RequestUtil {
 
@@ -30,16 +28,12 @@ public class RequestUtil {
         return message;
     }
 
-//    public static String perPage() {
-//        String pageSize = "50";
-//        return AppUtil.isBlank(getRequest().getParameter("page_size")) ? pageSize :getRequest().getParameter("page_size");
-//    }
     public static String perPage() {
-    	return AppUtil.isBlank(getRequest().getParameter(PAGE_LIMIT)) ? DEFAULT_PAGE_LIMIT :getRequest().getParameter(PAGE_LIMIT);
+    	return AppUtil.isBlank(getRequest().getParameter(AppConstant.PAGE_LIMIT)) ? AppConstant.DEFAULT_PAGE_LIMIT :getRequest().getParameter(AppConstant.PAGE_LIMIT);
     }
 
     public static int getPage(){
-        return Integer.parseInt(getRequest().getParameter(PAGE) != null ? getRequest().getParameter(PAGE) : "1");
+        return Integer.parseInt(getRequest().getParameter(AppConstant.PAGE) != null ? getRequest().getParameter(AppConstant.PAGE) : "1");
     }
 
     public static String getIpAddress() {

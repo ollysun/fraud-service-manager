@@ -33,9 +33,10 @@ import lombok.ToString;
 				columnNames = {"account_no"}))
 @SQLDelete(sql = "UPDATE account SET deleted = true, status=0 WHERE id = ?", check = ResultCheckStyle.COUNT)
 @Where(clause = "deleted = false")
-@ToString(exclude = { "products" })
+@ToString//(exclude = { "products" })
 @Data
 public class Account extends BaseAuditEntity implements Serializable {
+	private static final long serialVersionUID = 1L;
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)

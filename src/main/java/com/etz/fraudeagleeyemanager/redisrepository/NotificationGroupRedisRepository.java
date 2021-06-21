@@ -6,8 +6,8 @@ import org.springframework.data.redis.core.HashOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Repository;
 
-import com.etz.fraudeagleeyemanager.constant.FraudRedisKey;
 import com.etz.fraudeagleeyemanager.entity.NotificationGroup;
+import com.etz.fraudeagleeyemanager.enums.FraudRedisKey;
 import com.etz.fraudeagleeyemanager.repository.RedisRepository;
 
 @Repository
@@ -15,10 +15,6 @@ public class NotificationGroupRedisRepository implements RedisRepository<Notific
 	
     private HashOperations<String, Long, NotificationGroup> hashOperations;
 	
-//	//@Autowired	
-//    public AccountRedisRepository(RedisTemplate<FraudRedisKey, Object> redisTemplate) {
-//        this.hashOperations = redisTemplate.opsForHash();
-//    }
     public void setHashOperations(RedisTemplate<String, Object> redisTemplate){
         this.hashOperations = redisTemplate.opsForHash();
     }

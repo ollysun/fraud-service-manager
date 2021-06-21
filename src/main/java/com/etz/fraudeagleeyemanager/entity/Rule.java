@@ -33,6 +33,7 @@ import lombok.Setter;
 @Setter
 @EqualsAndHashCode(exclude = {"productRule"}, callSuper = false)
 public class Rule extends BaseAuditEntity implements Serializable {
+	private static final long serialVersionUID = 1L;
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
