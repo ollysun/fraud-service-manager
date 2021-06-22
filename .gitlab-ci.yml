@@ -1,4 +1,17 @@
-include: '.checkmarx.yml'
 
 stages:
   - test
+  - build
+
+build:
+    stage: build
+    script:
+        - echo "Building"
+        - mkdir build
+        - touch build/codeoptimus.txt
+        
+test:
+   stage: test
+   script:
+       - echo "Testing"
+       - test -f "build/codeoptimus.txt"
