@@ -47,8 +47,8 @@ spring:
       type: web
 
   datasource:
-    username: eagleeye_user
-    password: T@w!d2021
+    username: root
+    password: root
     url: jdbc:mysql://172.17.10.83:3306/eagle_eye?useLegacyDatetimeCode=false&serverTimezone=Africa/Lagos&createDatabaseIfNotExist=true
     driverClassName: com.mysql.cj.jdbc.Driver
     initialization-mode: always
