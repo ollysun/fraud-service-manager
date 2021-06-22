@@ -1,6 +1,19 @@
 package com.etz.fraudeagleeyemanager.service;
 
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
+import org.springframework.beans.BeanUtils;
+import org.springframework.data.domain.Example;
+import org.springframework.data.domain.Page;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.stereotype.Service;
+
+import com.etz.fraudeagleeyemanager.constant.AppConstant;
 import com.etz.fraudeagleeyemanager.dto.request.AccountToProductRequest;
 import com.etz.fraudeagleeyemanager.dto.request.AddAccountRequest;
 import com.etz.fraudeagleeyemanager.dto.request.UpdateAccountProductRequest;
@@ -8,8 +21,6 @@ import com.etz.fraudeagleeyemanager.dto.request.UpdateAccountRequestDto;
 import com.etz.fraudeagleeyemanager.dto.response.AccountProductResponse;
 import com.etz.fraudeagleeyemanager.entity.Account;
 import com.etz.fraudeagleeyemanager.entity.AccountProduct;
-import com.etz.fraudeagleeyemanager.entity.AccountProductId;
-import com.etz.fraudeagleeyemanager.entity.ProductEntity;
 import com.etz.fraudeagleeyemanager.exception.FraudEngineException;
 import com.etz.fraudeagleeyemanager.exception.ResourceNotFoundException;
 import com.etz.fraudeagleeyemanager.redisrepository.AccountProductRedisRepository;
@@ -17,50 +28,26 @@ import com.etz.fraudeagleeyemanager.redisrepository.AccountRedisRepository;
 import com.etz.fraudeagleeyemanager.repository.AccountProductRepository;
 import com.etz.fraudeagleeyemanager.repository.AccountRepository;
 import com.etz.fraudeagleeyemanager.repository.ProductEntityRepository;
+import com.etz.fraudeagleeyemanager.util.JsonConverter;
 import com.etz.fraudeagleeyemanager.util.PageRequestUtil;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Example;
-import org.springframework.data.domain.Page;
-import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class AccountService {
-	@Autowired
+	
 	private final RedisTemplate<String, Object> redisTemplate;
-
-	@Autowired
-	AccountRepository accountRepository;
-
-	@Autowired
-	ProductEntityRepository productRepository;
-		
-	@Autowired
-	AccountProductRepository accountProductRepository;
-
-	@Autowired
-	AccountRedisRepository accountRedisRepository;
-
-	@Autowired
-	AccountProductRedisRepository accountProductRedisRepository;
-
-	public AccountService(RedisTemplate<String, Object> redisTemplate) {
-		this.redisTemplate = redisTemplate;
-	}
-
+	private final AccountRepository accountRepository;
+	private final ProductEntityRepository productRepository;
+	private final AccountProductRepository accountProductRepository;
+	private final AccountRedisRepository accountRedisRepository;
+	private final AccountProductRedisRepository accountProductRedisRepository;
 
 	public Account createAccount(AddAccountRequest request){
 		Account accountEntity = new Account();
-
-
 		try {
 			// check for account number digits
 			accountEntity.setAccountName(request.getAccountName());
@@ -71,31 +58,66 @@ public class AccountService {
 			accountEntity.setSuspicionCount(request.getSuspicionCount());
 			accountEntity.setAccountNo(request.getAccountNo());
 			accountEntity.setBlockReason(request.getBlockReason());
-// saving to database
-			Account account = accountRepository.save(accountEntity);
-			// redis saving
-			accountRedisRepository.setHashOperations(redisTemplate);
-			accountRedisRepository.create(account);
-			return account;
+			
+			// for auditing purpose for CREATE
+			accountEntity.setEntityId(null);
+			accountEntity.setRecordBefore(null);
+			accountEntity.setRequestDump(request);
 		} catch(Exception ex){
-			throw new FraudEngineException(ex.getLocalizedMessage());
+			log.error("Error occurred while creating account entity object", ex);
+			throw new FraudEngineException(AppConstant.ERROR_SETTING_PROPERTY);
 		}
+		return saveAccountEntityToDatabase(accountEntity);
 	}
-
-
 
 	// update account to increment suspicious count
 	public Account updateAccount(UpdateAccountRequestDto updateAccountRequestDto){
-		Account account = accountRepository.findByAccountNo(updateAccountRequestDto.getAccountNumber())
-				.orElseThrow(() ->  new ResourceNotFoundException("Account details not found for account number " + updateAccountRequestDto.getAccountNumber()));
-		account.setSuspicionCount(updateAccountRequestDto.getCount());
-		account.setBlockReason(updateAccountRequestDto.getBlockReason());
-		account.setStatus(updateAccountRequestDto.getStatus());
-		return account;
+		Optional<Account> accountOptional = accountRepository.findByAccountNo(updateAccountRequestDto.getAccountNumber());
+		if(!accountOptional.isPresent()) {
+			throw new ResourceNotFoundException("Account details not found for account number " + updateAccountRequestDto.getAccountNumber());
+		}
+		
+		Account account = accountOptional.get();
+		try {
+			// for auditing purpose for UPDATE
+			account.setEntityId(String.valueOf(account.getId()));
+			account.setRecordBefore(JsonConverter.objectToJson(account));
+			account.setRequestDump(updateAccountRequestDto);
+			
+			account.setSuspicionCount(updateAccountRequestDto.getCount());
+			account.setBlockReason(updateAccountRequestDto.getBlockReason());
+			account.setStatus(updateAccountRequestDto.getStatus());
+		} catch(Exception ex){
+			log.error("Error occurred while creating account entity object", ex);
+			throw new FraudEngineException(AppConstant.ERROR_SETTING_PROPERTY);
+		}
+		return saveAccountEntityToDatabase(account);
 	}
-
+	
+	private Account saveAccountEntityToDatabase(Account accountEntity) {
+		Account persistedAccountEntity;
+		try {
+			persistedAccountEntity = accountRepository.save(accountEntity);
+		} catch(Exception ex){
+			log.error("Error occurred while saving account entity to database" , ex);
+			throw new FraudEngineException(AppConstant.ERROR_SAVING_TO_DATABASE);
+		}
+		saveAccountEntityToRedis(persistedAccountEntity);
+		return persistedAccountEntity;
+	}
+	
+	private void saveAccountEntityToRedis(Account alreadyPersistedAccountEntity) {
+		try {
+			accountRedisRepository.setHashOperations(redisTemplate);
+			accountRedisRepository.update(alreadyPersistedAccountEntity);
+		} catch(Exception ex){
+			//TODO actually delete already saved entity from the database (NOT SOFT DELETE)
+			log.error("Error occurred while saving account entity to Redis" , ex);
+			throw new FraudEngineException(AppConstant.ERROR_SAVING_TO_REDIS);
+		}
+	}
+	
 	public Page<Account> getAccount(Long accountId){
-				
 		if (Objects.isNull(accountId)) {
 			return accountRepository.findAll(PageRequestUtil.getPageRequest());
 		}
@@ -105,66 +127,93 @@ public class AccountService {
 	}
 	
 	public AccountProduct mapAccountProduct(AccountToProductRequest request) {
+		
+		if(!productRepository.findByCode(request.getProductCode()).isPresent()){
+			throw new ResourceNotFoundException("Product not found for this code " + request.getProductCode());
+		}
+
+		if(!accountRepository.findById(request.getAccountId()).isPresent()){
+			throw new ResourceNotFoundException("Account Not found " + request.getAccountId());
+		}
+		
 		AccountProduct accountProductEntity = new AccountProduct();
-
 		try {
-
-			ProductEntity productEntity = productRepository.findByCode(request.getProductCode());
-			if(productEntity == null){
-				throw new ResourceNotFoundException("Product not found for this code " + request.getProductCode());
-			}
-
-			accountRepository.findById(request.getAccountId()).orElseThrow(
-					() -> new ResourceNotFoundException("Account Not found " + request.getAccountId()));
-
-
 			accountProductEntity.setAccountId(request.getAccountId());
 			accountProductEntity.setProductCode(request.getProductCode());
 			accountProductEntity.setStatus(Boolean.TRUE);
 			accountProductEntity.setCreatedBy(request.getCreatedBy());
-			AccountProduct accountProduct = accountProductRepository.save(accountProductEntity);
-
-			accountProductRedisRepository.setHashOperations(redisTemplate);
-			accountProductRedisRepository.create(accountProduct);
-			return accountProduct;
-		}catch(Exception ex){
-			throw new FraudEngineException(ex.getLocalizedMessage());
+			
+			// for auditing purpose for CREATE
+			accountProductEntity.setEntityId(null);
+			accountProductEntity.setRecordBefore(null);
+			accountProductEntity.setRequestDump(request);
+		} catch(Exception ex){
+			log.error("Error occurred while creating account product entity object", ex);
+			throw new FraudEngineException(AppConstant.ERROR_SETTING_PROPERTY);
 		}
+		return saveAccountProductEntityToDatabase(accountProductEntity);
 	}
-	
+		
 	public List<AccountProductResponse> updateAccountProduct(UpdateAccountProductRequest request) {
-		List<AccountProduct> accountEntity = accountProductRepository.findByAccountId(request.getAccountId());
-		if (accountEntity.isEmpty()){
+		List<AccountProduct> accountProdLst = accountProductRepository.findByAccountId(request.getAccountId());
+		if (accountProdLst.isEmpty()){
 			throw new ResourceNotFoundException("Account Product not found for this ID " +  request.getAccountId());
 		}
+		
+		String entityId = "AcctId:" + request.getAccountId();
+		if(!Objects.isNull(request.getProductCode())){
+			accountProdLst = accountProdLst.stream().filter(entity -> entity.getProductCode().equals(request.getProductCode()))
+					.collect(Collectors.toList());
+			if(accountProdLst.isEmpty()) {
+				throw new ResourceNotFoundException("Account Product not found for this id " + request.getAccountId() + " and code " +  request.getProductCode());
+			}
+			entityId += " ProdCd:" + request.getProductCode();
+		}
+
 		List<AccountProductResponse> accountProductResponseList = new ArrayList<>();
 		AccountProductResponse accountProductResponse = new AccountProductResponse();
 		accountProductRedisRepository.setHashOperations(redisTemplate);
+		
+		for(AccountProduct accountProduct : accountProdLst) {
+			try {
+				// for auditing purpose for UPDATE
+				accountProduct.setEntityId(entityId);
+				accountProduct.setRecordBefore(JsonConverter.objectToJson(accountProduct));
+				accountProduct.setRequestDump(request);
 
-		// if productCode is not null, disable/enable
-		if(request.getProductCode() != null){
-			Optional<AccountProduct> accountProductOptional = accountProductRepository.findById(new AccountProductId(request.getProductCode(), request.getAccountId()));
-			if (accountProductOptional.isPresent()){
-				accountProductOptional.get().setStatus(request.getStatus());
-				accountProductOptional.get().setUpdatedBy(request.getUpdatedBy());
-				AccountProduct accountProduct = accountProductRepository.save(accountProductOptional.get());
-				BeanUtils.copyProperties(accountProduct, accountProductResponse);
-				accountProductResponseList.add(accountProductResponse);
-				accountProductRedisRepository.update(accountProduct);
-			}else{
-				throw new ResourceNotFoundException("Account Product not found for this id " + request.getAccountId() + " and code " +  request.getProductCode());
+				accountProduct.setStatus(request.getStatus());
+				accountProduct.setUpdatedBy(request.getUpdatedBy());
+			} catch (Exception ex) {
+				log.error("Error occurred while creating account product entity object", ex);
+				throw new FraudEngineException(AppConstant.ERROR_SETTING_PROPERTY);
 			}
-		}
-
-		accountEntity.forEach(acctprod -> {
-			acctprod.setStatus(request.getStatus());
-			acctprod.setUpdatedBy(request.getUpdatedBy());
-			AccountProduct accountProduct = accountProductRepository.save(acctprod);
-			accountProductRedisRepository.update(accountProduct);
-			BeanUtils.copyProperties(accountProduct, accountProductResponse);
+			BeanUtils.copyProperties(saveAccountProductEntityToDatabase(accountProduct), accountProductResponse);
 			accountProductResponseList.add(accountProductResponse);
-		});
+		}
 		return accountProductResponseList;
+	}
+	
+	private AccountProduct saveAccountProductEntityToDatabase(AccountProduct accountProductEntity) {
+		AccountProduct persistedAccountProductEntity;
+		try {
+			persistedAccountProductEntity = accountProductRepository.save(accountProductEntity);
+		} catch(Exception ex){
+			log.error("Error occurred while saving account product entity to database" , ex);
+			throw new FraudEngineException(AppConstant.ERROR_SAVING_TO_DATABASE);
+		}
+		saveAccountProductEntityToRedis(persistedAccountProductEntity);
+		return persistedAccountProductEntity;
+	}
+	
+	private void saveAccountProductEntityToRedis(AccountProduct alreadyPersistedAccountProductEntity) {
+		try {
+			accountProductRedisRepository.setHashOperations(redisTemplate);
+			accountProductRedisRepository.update(alreadyPersistedAccountProductEntity);
+		} catch(Exception ex){
+			//TODO actually delete already saved entity from the database (NOT SOFT DELETE)
+			log.error("Error occurred while saving account product entity to Redis" , ex);
+			throw new FraudEngineException(AppConstant.ERROR_SAVING_TO_REDIS);
+		}
 	}
 	
 }

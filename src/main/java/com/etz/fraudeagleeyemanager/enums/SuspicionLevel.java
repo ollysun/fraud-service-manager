@@ -1,4 +1,4 @@
-package com.etz.fraudeagleeyemanager.constant;
+package com.etz.fraudeagleeyemanager.enums;
 
 public enum SuspicionLevel {
     NOTHING(1), HOLD(2),

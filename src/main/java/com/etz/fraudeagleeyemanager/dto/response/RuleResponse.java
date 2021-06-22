@@ -10,5 +10,6 @@ import lombok.EqualsAndHashCode;
 @Data
 @JsonIgnoreProperties({ "productRule"})
 public class RuleResponse extends Rule {
+	private static final long serialVersionUID = 1L;
 
 }

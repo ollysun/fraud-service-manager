@@ -9,4 +9,5 @@ import lombok.EqualsAndHashCode;
 @Data
 @JsonIgnoreProperties({ "cards", "products"})
 public class CardResponse extends Card {
+	private static final long serialVersionUID = 1L;
 }

@@ -1,4 +1,4 @@
-package com.etz.fraudeagleeyemanager.constant;
+package com.etz.fraudeagleeyemanager.enums;
 
 public enum Status {
     DISABLED, ENABLED, DELETED;

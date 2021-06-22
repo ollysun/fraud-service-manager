@@ -5,6 +5,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
+import com.etz.fraudeagleeyemanager.constant.AppConstant;
+
 import javax.validation.constraints.NotNull;
 
 @Configuration
@@ -15,10 +17,10 @@ public class WebCorsConfig {
         return new WebMvcConfigurer() {
             @Override
             public void addCorsMappings(@NotNull CorsRegistry registry) {
-                registry.addMapping("/**")
-                        .allowedOrigins("*")
+                registry.addMapping(AppConstant.ALL_LINKS)
+                        .allowedOrigins(AppConstant.ALL)
                         .allowedMethods("HEAD", "OPTIONS", "GET", "POST", "PUT", "PATCH", "DELETE")
-                        .allowedHeaders("*");
+                        .allowedHeaders(AppConstant.ALL);
             }
         };
 

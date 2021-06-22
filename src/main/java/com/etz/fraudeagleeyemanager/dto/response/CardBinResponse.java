@@ -11,6 +11,7 @@ import java.io.Serializable;
 @Setter
 @ToString
 public class CardBinResponse implements Serializable {
+	private static final long serialVersionUID = 1L;
     @JsonProperty("bank_name")
     private String bankName;
     private String bin;

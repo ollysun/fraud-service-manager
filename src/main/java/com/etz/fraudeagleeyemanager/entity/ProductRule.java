@@ -19,7 +19,8 @@ import java.io.Serializable;
 @RequiredArgsConstructor
 @ToString
 @IdClass(ProductRuleId.class)
-public class ProductRule extends BaseEntity implements Serializable {
+public class ProductRule extends BaseAuditVersionEntity<ProductRuleId> implements Serializable {
+	private static final long serialVersionUID = 1L;
 
 	@Id
 	@Column(name = "rule_id")
@@ -64,6 +65,12 @@ public class ProductRule extends BaseEntity implements Serializable {
 	@MapsId("productCode")
 	@JoinColumn(name = "product_code")
 	private ProductEntity productEntity;
+
+
+	@Override
+	public ProductRuleId getId() {
+		return new ProductRuleId(ruleId, productCode);
+	}
 
 
 }

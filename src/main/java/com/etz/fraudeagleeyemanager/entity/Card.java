@@ -20,7 +20,8 @@ import java.util.Set;
 @Setter
 @ToString(exclude = { "cardProducts" })
 @RequiredArgsConstructor
-public class Card extends BaseEntity implements Serializable {
+public class Card extends BaseAuditEntity implements Serializable {
+	private static final long serialVersionUID = 1L;
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)

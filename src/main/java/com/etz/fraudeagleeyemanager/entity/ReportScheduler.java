@@ -1,8 +1,10 @@
 package com.etz.fraudeagleeyemanager.entity;
 
-import com.etz.fraudeagleeyemanager.constant.IntervalType;
 import lombok.*;
 import javax.persistence.*;
+
+import com.etz.fraudeagleeyemanager.enums.IntervalType;
+
 import java.io.Serializable;
 
 @Entity
@@ -13,7 +15,8 @@ import java.io.Serializable;
 @Setter
 @ToString
 @RequiredArgsConstructor
-public class ReportScheduler extends BaseEntity implements Serializable {
+public class ReportScheduler extends BaseAuditEntity implements Serializable {
+	private static final long serialVersionUID = 1L;
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -22,7 +25,7 @@ public class ReportScheduler extends BaseEntity implements Serializable {
 	@Column(name = "interval_value")
 	private Integer intervalValue;
 	
-	@Column(name = "interval_type", nullable = false,  columnDefinition = "VARCHAR", length = 20)
+	@Column(name = "interval_type", nullable = false,  columnDefinition = "VARCHAR(45)", length = 20)
 	@Enumerated(EnumType.STRING)
 	private IntervalType intervalType;
 	

@@ -1,17 +1,27 @@
 package com.etz.fraudeagleeyemanager.entity;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
-import lombok.*;
+import java.io.Serializable;
+import java.util.List;
+import java.util.Set;
+
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.Id;
+import javax.persistence.OneToMany;
+import javax.persistence.Table;
+
 import org.hibernate.annotations.ResultCheckStyle;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.Where;
 
-import javax.persistence.*;
-import javax.validation.constraints.NotBlank;
-import java.io.Serializable;
-import java.util.List;
-import java.util.Set;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
 
 
 @EqualsAndHashCode(callSuper = true)
@@ -21,9 +31,10 @@ import java.util.Set;
 @Where(clause = "deleted = false")
 @Getter
 @Setter
-public class ProductEntity extends BaseEntity implements Serializable {
+public class ProductEntity extends BaseAuditVersionEntity<String> implements Serializable {
+	private static final long serialVersionUID = 1L;
 
-    @Id
+	@Id
     @Column(name = "code", unique=true,columnDefinition="VARCHAR(100)")
     private String code;
 
@@ -70,4 +81,9 @@ public class ProductEntity extends BaseEntity implements Serializable {
     @OneToMany(mappedBy = "productEntity",fetch = FetchType.LAZY,
             cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<CardProduct> cardProducts;
+
+	@Override
+	public String getId() {
+		return code;
+	}
 }

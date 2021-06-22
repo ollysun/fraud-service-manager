@@ -1,16 +1,27 @@
 package com.etz.fraudeagleeyemanager.entity;
 
-import com.etz.fraudeagleeyemanager.constant.BooleanStatus;
-import com.etz.fraudeagleeyemanager.constant.Status;
-import com.etz.fraudeagleeyemanager.constant.UserCategory;
-import lombok.*;
+import java.io.Serializable;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.Table;
+import javax.validation.constraints.NotBlank;
+
 import org.hibernate.annotations.ResultCheckStyle;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.Where;
 
-import javax.persistence.*;
-import javax.validation.constraints.NotBlank;
-import java.io.Serializable;
+import com.etz.fraudeagleeyemanager.enums.UserCategory;
+
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 
 
 @Entity
@@ -21,14 +32,15 @@ import java.io.Serializable;
 @Setter
 @ToString
 @RequiredArgsConstructor
-public class OfacWatchlist extends BaseEntity implements Serializable {
+public class OfacWatchlist extends BaseAuditEntity implements Serializable {
+	private static final long serialVersionUID = 1L;
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
 	@NotBlank(message = "Full name cannot be empty")
-	@Column(name = "full_name")
+	@Column(name = "fullname")
 	private String fullName;
 
 	@Column(name = "category")
@@ -39,12 +51,14 @@ public class OfacWatchlist extends BaseEntity implements Serializable {
 	@Column(name = "comments")
 	private String comments;
 		
-	@Column(name = "status")
-	@Enumerated(EnumType.ORDINAL)
-	private Status status;
+    @Column(nullable = false, name = "status", columnDefinition = "TINYINT", length = 1)
+	private Boolean status;
 
-	@Column(name = "authorised")
+	@Column(name = "authorised", nullable = false, columnDefinition = "TINYINT", length = 1)
 	private Boolean authorised;
+	
+	@Column(name = "authoriser", nullable = true, length=100) //at creation authoriser will not be provided
+	private String authoriser;
 
 	@Override
 	public boolean equals(Object o) {

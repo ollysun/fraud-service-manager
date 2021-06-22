@@ -1,7 +1,8 @@
 package com.etz.fraudeagleeyemanager.dto.request;
 
-import com.etz.fraudeagleeyemanager.constant.BooleanStatus;
-import com.etz.fraudeagleeyemanager.constant.Status;
+import com.etz.fraudeagleeyemanager.enums.BooleanStatus;
+import com.etz.fraudeagleeyemanager.enums.Status;
+
 import lombok.Data;
 
 @Data

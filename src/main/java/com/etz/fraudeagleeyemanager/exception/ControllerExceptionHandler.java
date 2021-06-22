@@ -71,6 +71,7 @@ public class ControllerExceptionHandler extends ResponseEntityExceptionHandler {
     public ResponseEntity<Object> handleAllException(Exception ex, WebRequest request) {
         List<String> details = new ArrayList<>();
         details.add(ex.getLocalizedMessage());
+        ex.printStackTrace();
         final ExceptionResponse exceptionResponse = new ExceptionResponse(
                 new Date(), "Something went wrong while trying to process your request",
                 HttpStatus.INTERNAL_SERVER_ERROR,

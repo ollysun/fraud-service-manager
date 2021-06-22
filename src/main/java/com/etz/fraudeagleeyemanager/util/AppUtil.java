@@ -18,6 +18,8 @@ import java.util.Set;
 @Slf4j
 public class AppUtil {
 
+	private AppUtil() {}
+	
     public static boolean isBlank(String text) {
         return text == null || text.trim().length() == 0;
     }
@@ -138,7 +140,7 @@ public class AppUtil {
             return false;
         }
         try {
-            Long d = Long.parseLong(strNum);
+            Long.parseLong(strNum);
         } catch (NumberFormatException nfe) {
             return false;
         }

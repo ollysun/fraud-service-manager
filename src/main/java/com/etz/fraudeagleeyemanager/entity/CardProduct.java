@@ -17,15 +17,18 @@ import java.io.Serializable;
 @SQLDelete(sql = "UPDATE card_product SET deleted = true, status=0 WHERE id = ?", check = ResultCheckStyle.COUNT)
 @Where(clause = "deleted = false")
 @IdClass(CardProductId.class)
-public class CardProduct extends BaseEntity implements Serializable {
+public class CardProduct extends BaseAuditVersionEntity<CardProductId> implements Serializable {
+	private static final long serialVersionUID = 1L;
 
-    @Id
+	@Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
+	@Id
     @Column(name = "product_code", nullable = false, columnDefinition="VARCHAR(100)")
     private String productCode;
 
+    @Id
     @Column(name = "card_id", nullable = false,  columnDefinition = "bigint")
     private Long cardId;
 
@@ -44,4 +47,9 @@ public class CardProduct extends BaseEntity implements Serializable {
     @JoinColumn(name = "product_code")
     private ProductEntity productEntity;
 
+
+	@Override
+	public CardProductId getId() {
+		return new CardProductId(id, productCode, cardId);
+	}
 }

@@ -1,67 +1,67 @@
 package com.etz.fraudeagleeyemanager.controller;
 
 
-import com.etz.fraudeagleeyemanager.dto.request.*;
-import com.etz.fraudeagleeyemanager.dto.response.*;
-import com.etz.fraudeagleeyemanager.entity.Account;
-import com.etz.fraudeagleeyemanager.entity.AccountProduct;
-import com.etz.fraudeagleeyemanager.entity.Card;
-import com.etz.fraudeagleeyemanager.service.AccountService;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.validation.Valid;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
-import javax.validation.Valid;
-import java.util.List;
+import com.etz.fraudeagleeyemanager.dto.request.AccountToProductRequest;
+import com.etz.fraudeagleeyemanager.dto.request.AddAccountRequest;
+import com.etz.fraudeagleeyemanager.dto.request.UpdateAccountProductRequest;
+import com.etz.fraudeagleeyemanager.dto.request.UpdateAccountRequestDto;
+import com.etz.fraudeagleeyemanager.dto.response.AccountProductResponse;
+import com.etz.fraudeagleeyemanager.dto.response.CollectionResponse;
+import com.etz.fraudeagleeyemanager.dto.response.ModelResponse;
+import com.etz.fraudeagleeyemanager.dto.response.PageResponse;
+import com.etz.fraudeagleeyemanager.entity.Account;
+import com.etz.fraudeagleeyemanager.entity.AccountProduct;
+import com.etz.fraudeagleeyemanager.service.AccountService;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-@Validated
 @RestController
+@RequiredArgsConstructor
 @RequestMapping("/v1/account")
 public class AccountController {
 
-	@Autowired
-	AccountService accountService;
-
- // todo set preauthorise permission
+	private final AccountService accountService;
+	
+	//TODO set pre-authorize permission
 	@PostMapping
 	public ResponseEntity<ModelResponse<Account>> createAccount(@RequestBody @Valid AddAccountRequest request) {
-		ModelResponse<Account> response = new ModelResponse<>(accountService.createAccount(request));
-		response.setStatus(HttpStatus.CREATED.value());
-
-		return new ResponseEntity<>(response, HttpStatus.CREATED);
+		ModelResponse<Account> response = new ModelResponse<>(accountService.createAccount(request), HttpStatus.CREATED);
+		return ResponseEntity.status(HttpStatus.valueOf(response.getStatus())).body(response);
 	}
 
 	@GetMapping
-	public PageResponse<Account> queryAccount(
-			@RequestParam(name = "accountId", required = false) Long accountId) {
+	public PageResponse<Account> queryAccount(Long accountId) {
 		return new PageResponse<>(accountService.getAccount(accountId));
 	}
-
-	@PostMapping(path = "/product")
-	public ResponseEntity<ModelResponse<AccountProduct>> mapAccountToProduct(
-			@RequestBody @Valid AccountToProductRequest request) {
-		log.info(request.toString());
-		ModelResponse<AccountProduct> response = new ModelResponse<>(
-				accountService.mapAccountProduct(request));
-		response.setStatus(HttpStatus.CREATED.value());
-		return new ResponseEntity<>(response, HttpStatus.CREATED);
-	}
-
-	@PutMapping(path = "/product")
-	public ResponseEntity<CollectionResponse<AccountProductResponse>> updateAccountProduct(@RequestBody @Valid UpdateAccountProductRequest request) {
-		List<AccountProductResponse> userResponseList = accountService.updateAccountProduct(request);
-		CollectionResponse<AccountProductResponse> collectionResponse = new CollectionResponse<>(userResponseList);
-		collectionResponse.setMessage("All Updated AccountProduct");
-		return new ResponseEntity<>(collectionResponse, HttpStatus.OK);
-	}
-
+	
 	@PutMapping
 	public ModelResponse<Account> updateAccount(@RequestBody UpdateAccountRequestDto request){
 		return new ModelResponse<>(accountService.updateAccount(request));
+	}
+
+	@PostMapping("/product")
+	public ResponseEntity<ModelResponse<AccountProduct>> mapAccountToProduct(@RequestBody @Valid AccountToProductRequest request) {
+		log.info(request.toString());
+		ModelResponse<AccountProduct> response = new ModelResponse<>(accountService.mapAccountProduct(request), HttpStatus.CREATED);
+		return ResponseEntity.status(HttpStatus.valueOf(response.getStatus())).body(response);
+	}
+
+	@PutMapping("/product")
+	public CollectionResponse<AccountProductResponse> updateAccountProduct(@RequestBody @Valid UpdateAccountProductRequest request) {
+		return new CollectionResponse<>(accountService.updateAccountProduct(request), "All Updated AccountProduct");
 	}
 
 }

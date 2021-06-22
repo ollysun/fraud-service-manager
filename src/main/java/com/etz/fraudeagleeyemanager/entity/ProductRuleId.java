@@ -11,8 +11,9 @@ import java.io.Serializable;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ProductRuleId implements Serializable {
+	private static final long serialVersionUID = 1L;
 
-    private Long ruleId;
+	private Long ruleId;
 
     private String productCode;
 }

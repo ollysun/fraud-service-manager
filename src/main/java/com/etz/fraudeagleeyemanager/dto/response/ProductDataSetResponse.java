@@ -5,4 +5,5 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties({ "productEntity" })
 public class ProductDataSetResponse extends ProductDataSet {
+	private static final long serialVersionUID = 1L;
 }

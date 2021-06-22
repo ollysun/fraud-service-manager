@@ -1,7 +1,7 @@
 package com.etz.fraudeagleeyemanager.redisrepository;
 
-import com.etz.fraudeagleeyemanager.constant.FraudRedisKey;
 import com.etz.fraudeagleeyemanager.entity.ProductRule;
+import com.etz.fraudeagleeyemanager.enums.FraudRedisKey;
 import com.etz.fraudeagleeyemanager.repository.RedisRepository;
 import org.springframework.data.redis.core.Cursor;
 import org.springframework.data.redis.core.HashOperations;
@@ -19,11 +19,6 @@ import java.util.Set;
 public class ProductRuleRedisRepository implements RedisRepository<ProductRule, String> {
 	
     private HashOperations<String, String, ProductRule> hashOperations;
-	
-//	//@Autowired
-//    public ProductRuleRedisRepository(RedisTemplate<FraudRedisKey, Object> redisTemplate) {
-//        this.hashOperations = redisTemplate.opsForHash();
-//    }
 	
     public void setHashOperations(RedisTemplate<String, Object> redisTemplate){
         this.hashOperations = redisTemplate.opsForHash();
@@ -65,7 +60,6 @@ public class ProductRuleRedisRepository implements RedisRepository<ProductRule, 
 		try {
 			cursor.close();
 		} catch (IOException e) {
-
 		}
 		return foundKeys;
 	}

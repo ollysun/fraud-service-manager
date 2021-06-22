@@ -1,13 +1,26 @@
 package com.etz.fraudeagleeyemanager.entity;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
-import lombok.*;
+import java.io.Serializable;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.Id;
+import javax.persistence.IdClass;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.MapsId;
+import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
+
 import org.hibernate.annotations.ResultCheckStyle;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.Where;
 
-import javax.persistence.*;
-import java.io.Serializable;
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
+import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 @EqualsAndHashCode(callSuper = true)
 @Data
@@ -17,9 +30,10 @@ import java.io.Serializable;
 @SQLDelete(sql = "UPDATE account_product SET deleted = true, status=0 WHERE id = ?", check = ResultCheckStyle.COUNT)
 @Where(clause = "deleted = false")
 @IdClass(AccountProductId.class)
-public class AccountProduct extends BaseEntity implements Serializable {
+public class AccountProduct extends BaseAuditVersionEntity<AccountProductId> implements Serializable {
+	private static final long serialVersionUID = 1L;
 
-    @Id
+	@Id
     @Column(name = "product_code", nullable = false, columnDefinition="VARCHAR(100)")
     private String productCode;
 
@@ -42,5 +56,11 @@ public class AccountProduct extends BaseEntity implements Serializable {
     @MapsId("productCode")
     @JoinColumn(name = "product_code")
     private ProductEntity productEntity;
+
+
+	@Override
+	public AccountProductId getId() {
+		return new AccountProductId(getProductCode(), getAccountId());
+	}
 
 }

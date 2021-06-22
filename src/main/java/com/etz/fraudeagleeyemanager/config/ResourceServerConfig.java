@@ -1,5 +1,7 @@
 package com.etz.fraudeagleeyemanager.config;
 
+import java.util.Collections;
+
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -15,12 +17,10 @@ import org.springframework.security.oauth2.provider.token.TokenStore;
 import org.springframework.security.oauth2.provider.token.store.JwtAccessTokenConverter;
 import org.springframework.security.oauth2.provider.token.store.JwtTokenStore;
 import org.springframework.web.cors.CorsConfiguration;
-import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.filter.CorsFilter;
 
-import java.util.Arrays;
-import java.util.Collections;
+import com.etz.fraudeagleeyemanager.constant.AppConstant;
 
 @Configuration
 @EnableResourceServer
@@ -28,11 +28,10 @@ import java.util.Collections;
 @EnableGlobalMethodSecurity(prePostEnabled = true)
 public class ResourceServerConfig extends ResourceServerConfigurerAdapter {
 
-    private static final String RESOURCE_ID = "fraud-engine";
+	private static final String RESOURCE_ID = "fraud-engine";
 
     @Override
     public void configure(ResourceServerSecurityConfigurer resources) {
-       // resources.resourceId(RESOURCE_ID).tokenStore(tokenStore());
         resources.resourceId(RESOURCE_ID).tokenServices(tokenServices(tokenStore())).tokenStore(tokenStore());
     }
 
@@ -45,14 +44,12 @@ public class ResourceServerConfig extends ResourceServerConfigurerAdapter {
                 .permitAll();
         http.authorizeRequests().antMatchers("/**")
                 .authenticated();
-
-        //http.authorizeRequests().antMatchers("/api/v1/**").authenticated();
     }
-
 
     @Bean
     public JwtAccessTokenConverter accessTokenConverter(){
         JwtAccessTokenConverter conv = new  JwtAccessTokenConverter();
+        conv.setAccessTokenConverter(new CustomJwtAccessTokenConverter());
         conv.setSigningKey("AuthETransactNgView2021");
         return conv;
     }
@@ -75,13 +72,14 @@ public class ResourceServerConfig extends ResourceServerConfigurerAdapter {
 
         CorsConfiguration configAutenticacao = new CorsConfiguration();
         configAutenticacao.setAllowCredentials(true);
-        configAutenticacao.setAllowedOriginPatterns(Collections.singletonList("*"));
-        configAutenticacao.addAllowedHeader("*");
-        configAutenticacao.addAllowedMethod("*");
+        configAutenticacao.setAllowedOriginPatterns(Collections.singletonList(AppConstant.ALL));
+        configAutenticacao.addAllowedHeader(AppConstant.ALL);
+        configAutenticacao.addAllowedMethod(AppConstant.ALL);
         source.registerCorsConfiguration("/**", configAutenticacao); // Global for all paths
 
         FilterRegistrationBean<CorsFilter> bean = new FilterRegistrationBean<>(new CorsFilter(source));
         bean.setOrder(Ordered.HIGHEST_PRECEDENCE);
         return bean;
     }
+    
 }

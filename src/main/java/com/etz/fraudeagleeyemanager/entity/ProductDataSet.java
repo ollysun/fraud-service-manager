@@ -1,13 +1,26 @@
 package com.etz.fraudeagleeyemanager.entity;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
-import lombok.*;
-import org.hibernate.annotations.ResultCheckStyle;
-import org.hibernate.annotations.SQLDelete;
+import java.io.Serializable;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.ForeignKey;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.IdClass;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.MapsId;
+import javax.persistence.Table;
+
 import org.hibernate.annotations.Where;
 
-import javax.persistence.*;
-import java.io.Serializable;
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
 
 
 @Entity
@@ -17,7 +30,8 @@ import java.io.Serializable;
 @Data
 @ToString(exclude = { "productEntity" })
 @IdClass(ProductDatasetId.class)
-public class ProductDataSet extends BaseEntity implements Serializable {
+public class ProductDataSet extends BaseAuditVersionEntity<ProductDatasetId> implements Serializable {
+	private static final long serialVersionUID = 1L;
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
@@ -46,4 +60,8 @@ public class ProductDataSet extends BaseEntity implements Serializable {
 	@JoinColumn(foreignKey = @ForeignKey(name = "FK_PRODUCT_CODE"), name = "product_code")
 	private ProductEntity productEntity;
 
+	@Override
+	public ProductDatasetId getId() {
+		return new ProductDatasetId(id, productCode, fieldName);
+	}
 }

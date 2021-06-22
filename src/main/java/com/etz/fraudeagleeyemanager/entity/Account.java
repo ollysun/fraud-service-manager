@@ -1,18 +1,29 @@
 package com.etz.fraudeagleeyemanager.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
-import lombok.*;
+import java.io.Serializable;
+import java.util.Set;
+
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.OneToMany;
+import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
+import javax.validation.constraints.NotBlank;
+
 import org.hibernate.annotations.ResultCheckStyle;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.Where;
 
-import javax.persistence.*;
-import javax.validation.constraints.NotBlank;
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
 
 
 @EqualsAndHashCode(callSuper = true)
@@ -22,9 +33,10 @@ import java.util.Set;
 				columnNames = {"account_no"}))
 @SQLDelete(sql = "UPDATE account SET deleted = true, status=0 WHERE id = ?", check = ResultCheckStyle.COUNT)
 @Where(clause = "deleted = false")
+@ToString//(exclude = { "products" })
 @Data
-@ToString(exclude = { "products" })
-public class Account extends BaseEntity implements Serializable {
+public class Account extends BaseAuditEntity implements Serializable {
+	private static final long serialVersionUID = 1L;
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -39,7 +51,7 @@ public class Account extends BaseEntity implements Serializable {
 	private String accountName;
 
 	@NotBlank(message = "Bank code cannot be empty")
-	@Column(name = "bank_code", unique = true, length=200)
+	@Column(name = "bank_code", length=200)
 	private String bankCode;
 
 	@NotBlank(message = "Bank name cannot be empty")

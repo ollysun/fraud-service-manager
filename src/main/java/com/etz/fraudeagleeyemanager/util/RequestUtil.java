@@ -1,12 +1,14 @@
 package com.etz.fraudeagleeyemanager.util;
 
+import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
+
+import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
-import javax.servlet.http.HttpServletRequest;
-import static com.etz.fraudeagleeyemanager.constant.AppConstant.PAGE;
-
-
+import com.etz.fraudeagleeyemanager.constant.AppConstant;
 
 public class RequestUtil {
 
@@ -27,12 +29,11 @@ public class RequestUtil {
     }
 
     public static String perPage() {
-        String pageSize = "50";
-        return AppUtil.isBlank(getRequest().getParameter("page_size")) ? pageSize :getRequest().getParameter("page_size");
+    	return AppUtil.isBlank(getRequest().getParameter(AppConstant.PAGE_LIMIT)) ? AppConstant.DEFAULT_PAGE_LIMIT :getRequest().getParameter(AppConstant.PAGE_LIMIT);
     }
 
     public static int getPage(){
-        return Integer.parseInt(getRequest().getParameter(PAGE) != null ? getRequest().getParameter(PAGE) : "1");
+        return Integer.parseInt(getRequest().getParameter(AppConstant.PAGE) != null ? getRequest().getParameter(AppConstant.PAGE) : "1");
     }
 
     public static String getIpAddress() {
@@ -94,4 +95,24 @@ public class RequestUtil {
         return (Long) getRequest().getAttribute("start_time");
     }
 
+    public static String getSourceURL() {
+    	return getRequest().getRequestURL().toString();
+    }
+
+    @SuppressWarnings("unchecked")
+	public static void setAccessTokenClaim(OAuth2Authentication authentication) {
+    	Map<String, Object> claims = (Map<String, Object>) authentication.getDetails();
+    	getRequest().setAttribute("access_token_claim", claims);
+    }
+    
+    @SuppressWarnings("unchecked")
+	public static String getAccessTokenClaim(String claim) {
+    	Map<String, Object> claims = (Map<String, Object>)getRequest().getAttribute("access_token_claim");
+    	String claimValue = "";
+    	if (claims.containsKey(claim)) {
+    		claimValue = (String) claims.get(claim);
+    	}
+    	return claimValue;
+    }
+    
 }

@@ -1,13 +1,15 @@
 package com.etz.fraudeagleeyemanager.dto.request;
 
-import com.etz.fraudeagleeyemanager.constant.Status;
-import lombok.Data;
-import javax.validation.constraints.NotNull;
 import java.io.Serializable;
+
+import javax.validation.constraints.NotNull;
+
+import lombok.Data;
 
 @Data
 public class UpdateProductRequest implements Serializable {
-	
+	private static final long serialVersionUID = 1L;
+
 	@NotNull(message="Please enter the product Code")
 	private String productCode;
 

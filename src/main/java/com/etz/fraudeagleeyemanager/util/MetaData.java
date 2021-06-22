@@ -5,26 +5,33 @@ import lombok.Data;
 import org.springframework.data.domain.Page;
 
 import static com.etz.fraudeagleeyemanager.constant.AppConstant.PAGE;
+import static com.etz.fraudeagleeyemanager.constant.AppConstant.PAGE_LIMIT;;
 
 @Data
 public class MetaData<T>{
 
-    @JsonProperty("total_page")
+    @JsonProperty("total_record")
     private Long total;
 
-    @JsonProperty("per_page")
+    @JsonProperty("limit")
     private int perPage;
 
     @JsonProperty("current_page")
     private int currentPage;
 
-    @JsonProperty("last_page")
-    private int lastPage;
+    @JsonProperty("total_page")
+    private int totalPage;
 
-    @JsonProperty("next_page")//("next_page_url")
+    @JsonProperty("next_page")
+    private Long nextPage;
+    
+    @JsonProperty("prev_page")
+    private Long prevPage;
+    
+    @JsonProperty("next_page_url")
     private String nextPageUrl;
 
-    @JsonProperty("prev_page")//("prev_page_url")
+    @JsonProperty("prev_page_url")
     private String prevPageUrl;
 
     private Long from;
@@ -36,23 +43,34 @@ public class MetaData<T>{
 
         setPerPage(Integer.parseInt(RequestUtil.perPage()));
 
-        int nextPage = RequestUtil.getPage() <= 0 ? 1 : RequestUtil.getPage() + 1;
+        int nexttPage = RequestUtil.getPage() <= 0 ? 1 : RequestUtil.getPage() + 1;
 
-        int prevPage = RequestUtil.getPage() <= 0 ? 0 : RequestUtil.getPage() - 1;
+        int prevvPage = RequestUtil.getPage() <= 0 ? 0 : RequestUtil.getPage() - 1;
 
         if(!result.getContent().isEmpty()){
             if(result.isFirst() && result.isLast()){
+            	setPrevPage(null);
+            	setNextPage(null);
                 setNextPageUrl(null);
                 setPrevPageUrl(null);
             }else if(!result.isFirst() && !result.isLast()){
-                setPrevPageUrl( RequestUtil.getRequest().getRequestURL().append("?").append(PAGE).append("=").append(prevPage).toString() );
-                setNextPageUrl( RequestUtil.getRequest().getRequestURL().append("?").append(PAGE).append("=").append(nextPage).toString() );
+            	setPrevPage(Long.valueOf(prevvPage));
+            	setNextPage(Long.valueOf(nexttPage));
+                setPrevPageUrl( RequestUtil.getRequest().getRequestURL().append("?").append(PAGE_LIMIT).append("=").append(getPerPage()).append("&").append(PAGE).append("=").append(prevPage).toString() );
+                setNextPageUrl( RequestUtil.getRequest().getRequestURL().append("?").append(PAGE_LIMIT).append("=").append(getPerPage()).append("&").append(PAGE).append("=").append(nextPage).toString() );
             }else if(result.isFirst() && !result.isLast()){
+            	setPrevPage(null);
+            	setNextPage(Long.valueOf(nexttPage));
                 setPrevPageUrl( null );
-                setNextPageUrl( RequestUtil.getRequest().getRequestURL().append("?").append(PAGE).append("=").append(nextPage).toString() );
+                setNextPageUrl( RequestUtil.getRequest().getRequestURL().append("?").append(PAGE_LIMIT).append("=").append(getPerPage()).append("&").append(PAGE).append("=").append(nextPage).toString() );
+			} else if (!result.isFirst() && result.isLast()) {
+				setPrevPage(Long.valueOf(prevvPage));
+				setNextPage(null);
+				setPrevPageUrl( RequestUtil.getRequest().getRequestURL().append("?").append(PAGE_LIMIT).append("=").append(getPerPage()).append("&").append(PAGE).append("=").append(prevPage).toString());
+				setNextPageUrl(null);
             }
 
-            setLastPage(result.getTotalPages());
+            setTotalPage(result.getTotalPages());
             setCurrentPage(RequestUtil.getPage());
             int $from = ((RequestUtil.getPage() - 1) * getPerPage()) + 1;
             int $to = ((RequestUtil.getPage() - 1) * getPerPage()) + result.getContent().size();

@@ -1,13 +1,15 @@
 package com.etz.fraudeagleeyemanager.dto.request;
 
 import lombok.Data;
-import org.slf4j.Logger;
+
+import java.io.Serializable;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
 @Data
-public class CardToProductRequest {
+public class CardToProductRequest implements Serializable {
+	private static final long serialVersionUID = 1L;
 	@NotBlank(message = "please enter the productCode")
 	private String productCode;
 	@NotNull(message="Please enter the cardId")

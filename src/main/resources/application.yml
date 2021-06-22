@@ -17,17 +17,23 @@ kafka:
   switchit:
     topic: fraud-switchit
 
+security:
+  oauth2:
+    resource:
+      jwt:
+        key-value: -----BEGIN PUBLIC KEY-----MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAhYcaMfySijW5QEGsJwVtiQrU2EIqcGWShtOow7WR9Y8XB+gHcvMs3/oLieyRYXaEUuwtSGSPzUG5vW5q5BVYNjnM6u+ZAhRHxTYoBiwOGXf/jOB39wraZRk4Vuz2GErHXknlLCkMMMmDDxneN5DSuPlkaHHuZIy7UYOaiAIt6fSFEvY7rcoIpL7rM9pAZjgjdfaKXKw/cNygOz91lKByJvJCHqfMhENP+03Bbib9YH0ThI7SLTU0Vc61hW+ioRulYkKQ8OyY/vB8cWlHHRL3Tb/jyhmz/J/GTUl/colEPW/erJVBIa7AqNNgWIUprAs4QQ3RBBp5pREMJPlt1cLuAwIDAQAB-----END PUBLIC KEY-----
+      id: fraud-engine
 
 spring:
   application:
     name: fraud-eagle-eye-manager-service
 
   redis:
-    eagle-eye-manager:
-      host: 172.17.10.16
-      port: 6379
-      database: 0
-      password: visionsvisions
+    client-type: jedis
+    host: 172.17.10.16
+    port: 6379
+    database: 0
+    password: visionsvisions
 
   cloud:
     consul:
@@ -47,7 +53,6 @@ spring:
     url: jdbc:mysql://localhost:3306/eagle_eye?useLegacyDatetimeCode=false&serverTimezone=Africa/Lagos&createDatabaseIfNotExist=true
     driverClassName: com.mysql.cj.jdbc.Driver
     initialization-mode: always
-    data: classpath:data.sql
 
   jackson:
     default-property-inclusion: NON_NULL
@@ -63,7 +68,7 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: create
+      ddl-auto: update
     properties:
       hibernate:
         dialect: org.hibernate.dialect.MySQL55Dialect
