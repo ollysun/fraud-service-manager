@@ -1,0 +1,4 @@
+include: '.checkmarx.yml'
+
+stages:
+  - test
