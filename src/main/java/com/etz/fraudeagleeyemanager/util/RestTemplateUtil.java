@@ -1,11 +1,7 @@
 package com.etz.fraudeagleeyemanager.util;
 
-import java.util.Collections;
-
 //import org.apache.http.conn.ssl.NoopHostnameVerifier;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
 
 
 public class RestTemplateUtil {
@@ -13,12 +9,12 @@ public class RestTemplateUtil {
     @Value("${apikey}")
     private String apiKey;
 
-    private HttpHeaders getBinHttpHeaders(){
-        HttpHeaders httpHeaders = new HttpHeaders();
-        httpHeaders.add("apikey", apiKey);
-        httpHeaders.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
-        return httpHeaders;
-    }
+//    private HttpHeaders getBinHttpHeaders(){
+//        HttpHeaders httpHeaders = new HttpHeaders();
+//        httpHeaders.add("apikey", apiKey);
+//        httpHeaders.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
+//        return httpHeaders;
+//    }
 
 //    private HttpComponentsClientHttpRequestFactory getBinCodeHttpClientFactory(){
 //        CloseableHttpClient httpClient

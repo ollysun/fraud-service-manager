@@ -8,6 +8,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -37,8 +38,8 @@ public class OfacWatchlistController {
 		return ResponseEntity.status(HttpStatus.valueOf(response.getStatus())).body(response);
 	}
 		
-	@PutMapping("/{ofacID}")
-	public ModelResponse<OfacWatchlist> updateOfac(Long ofacId, @RequestBody @Valid UpdateOfacWatchlistRequest request){
+	@PutMapping("/{ofacId}")
+	public ModelResponse<OfacWatchlist> updateOfac(@PathVariable Long ofacId, @RequestBody @Valid UpdateOfacWatchlistRequest request){
 		return new ModelResponse<>(ofacWatchlistService.updateOfacWatchlist(request, ofacId));
 	}
 	
@@ -47,8 +48,8 @@ public class OfacWatchlistController {
 		return new PageResponse<>(ofacWatchlistService.getOfacWatchlist(ofacId));
 	}
 	
-	@DeleteMapping("/{ofacID}")
-	public BooleanResponse deleteOfac(Long ofacId){
+	@DeleteMapping("/{ofacId}")
+	public BooleanResponse deleteOfac(@PathVariable Long ofacId){
 		return new BooleanResponse(ofacWatchlistService.deleteOfacWatchlist(ofacId));
 	}
 }

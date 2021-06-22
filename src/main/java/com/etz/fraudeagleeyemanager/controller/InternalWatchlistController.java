@@ -8,6 +8,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -37,8 +38,8 @@ public class InternalWatchlistController {
 		return ResponseEntity.status(HttpStatus.valueOf(response.getStatus())).body(response);
 	}
 		
-	@PutMapping("/{watchID}")
-	public ModelResponse<InternalWatchlist> updateOfac(Long watchId,
+	@PutMapping("/{watchId}")
+	public ModelResponse<InternalWatchlist> updateOfac(@PathVariable Long watchId,
 			@RequestBody @Valid UpdateInternalWatchlistRequest request){
 		return new ModelResponse<>(internalWatchlistService.updateInternalWatchlist(request, watchId));
 	}
@@ -48,8 +49,8 @@ public class InternalWatchlistController {
 		return new PageResponse<>(internalWatchlistService.getInternalWatchlist(watchId));
 	}
 	
-	@DeleteMapping("/{watchID}")
-	public BooleanResponse deleteOfac(Long watchId){
+	@DeleteMapping("/{watchId}")
+	public BooleanResponse deleteOfac(@PathVariable Long watchId){
 		return new BooleanResponse(internalWatchlistService.deleteInternalWatchlist(watchId));
 	}
 }

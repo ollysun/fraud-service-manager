@@ -9,6 +9,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -51,7 +52,7 @@ public class RuleController {
 	}
 	
 	@DeleteMapping("/{ruleId}")
-	public BooleanResponse deleteRule(Long ruleId){
+	public BooleanResponse deleteRule(@PathVariable Long ruleId){
 		return new BooleanResponse(ruleService.deleteRule(ruleId));
 	}
 	
@@ -72,7 +73,7 @@ public class RuleController {
 	}
 
 	@DeleteMapping("/product/{code}/ruleId/{ruleId}")
-	public BooleanResponse deleteProductRule(@NotNull @Positive Long ruleId, @NotBlank String code){
+	public BooleanResponse deleteProductRule(@PathVariable @NotNull @Positive Long ruleId, @PathVariable @NotBlank String code){
 		return new BooleanResponse(ruleService.deleteProductRule(ruleId, code));
 	}
 

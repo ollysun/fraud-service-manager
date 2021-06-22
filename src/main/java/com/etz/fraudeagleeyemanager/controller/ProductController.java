@@ -8,6 +8,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -47,7 +48,7 @@ public class ProductController {
 	}
 	
 	@DeleteMapping("/{code}")
-	public BooleanResponse deleteProduct(String code){
+	public BooleanResponse deleteProduct(@PathVariable String code){
 		return new BooleanResponse(productService.deleteProduct(code));
 	}
 	
@@ -73,7 +74,7 @@ public class ProductController {
 	}
 	
 	@DeleteMapping("/dataset/{code}")
-	public BooleanResponse deleteProductDataset(String code){
+	public BooleanResponse deleteProductDataset(@PathVariable String code){
 		return new BooleanResponse(productService.deleteProductDataset(code));
 	}
 	

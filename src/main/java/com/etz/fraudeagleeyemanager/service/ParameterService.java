@@ -4,12 +4,12 @@ package com.etz.fraudeagleeyemanager.service;
 import java.util.Objects;
 import java.util.Optional;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.Page;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
+import com.etz.fraudeagleeyemanager.constant.AppConstant;
 import com.etz.fraudeagleeyemanager.dto.request.CreateParameterRequest;
 import com.etz.fraudeagleeyemanager.dto.request.UpdateParameterRequest;
 import com.etz.fraudeagleeyemanager.entity.Parameter;
@@ -17,66 +17,61 @@ import com.etz.fraudeagleeyemanager.exception.FraudEngineException;
 import com.etz.fraudeagleeyemanager.exception.ResourceNotFoundException;
 import com.etz.fraudeagleeyemanager.redisrepository.ParameterRedisRepository;
 import com.etz.fraudeagleeyemanager.repository.ParameterRepository;
-import com.etz.fraudeagleeyemanager.util.JsonConverter;
 import com.etz.fraudeagleeyemanager.util.AppUtil;
+import com.etz.fraudeagleeyemanager.util.JsonConverter;
 import com.etz.fraudeagleeyemanager.util.PageRequestUtil;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class ParameterService {
 
-	@Autowired
-	private RedisTemplate<String, Object> fraudEngineRedisTemplate;
-	
-	@Autowired
-	ParameterRedisRepository parameterRedisRepository;
-	
-	@Autowired
-	ParameterRepository parameterRepository;
+	private final RedisTemplate<String, Object> redisTemplate;
+	private final ParameterRedisRepository parameterRedisRepository;
+	private final ParameterRepository parameterRepository;
 	
 
 	public Parameter createParameter(CreateParameterRequest request) {
 		Parameter parameterEntity = new Parameter();
-		parameterEntity.setName(request.getName());
-		parameterEntity.setOperator(AppUtil.checkOperator(request.getOperator()));
-		parameterEntity.setAuthorised(request.getAuthorised());
-		parameterEntity.setRequireValue(request.getRequireValue());
-		parameterEntity.setCreatedBy(request.getCreatedBy());
-		// for auditing purpose for CREATE
-		parameterEntity.setEntityId(null);
-		parameterEntity.setRecordBefore(null);
-		parameterEntity.setRequestDump(request);
-
-		Parameter createdEntity = parameterRepository.save(parameterEntity);
-		parameterRedisRepository.setHashOperations(fraudEngineRedisTemplate);
-		parameterRedisRepository.create(createdEntity);
-		
-		return createdEntity;
+		try {
+			parameterEntity.setName(request.getName());
+			parameterEntity.setOperator(AppUtil.checkOperator(request.getOperator()));
+			parameterEntity.setAuthorised(request.getAuthorised());
+			parameterEntity.setRequireValue(request.getRequireValue());
+			parameterEntity.setCreatedBy(request.getCreatedBy());
+			
+			// for auditing purpose for CREATE
+			parameterEntity.setEntityId(null);
+			parameterEntity.setRecordBefore(null);
+			parameterEntity.setRequestDump(request);
+		} catch (Exception ex) {
+			log.error("Error occurred while creating Parameter entity object", ex);
+			throw new FraudEngineException(AppConstant.ERROR_SETTING_PROPERTY);
+		}
+		return saveInternalWatchlistEntityToDatabase(parameterEntity);
 	}
 
 	public Parameter updateParameter(UpdateParameterRequest request) {
+		Parameter parameterEntity = findById(request.getParamId()).get();
+		try {
+			// for auditing purpose for UPDATE
+			parameterEntity.setEntityId(request.getParamId().toString());
+			parameterEntity.setRecordBefore(JsonConverter.objectToJson(parameterEntity));
+			parameterEntity.setRequestDump(request);
 
-		Parameter parameterEntity = parameterRepository.findById(request.getParamId())
-														     .orElseThrow(() -> new ResourceNotFoundException("Parameter details not found for the ID " + request.getParamId()));
-
-		// for auditing purpose for UPDATE
-		parameterEntity.setEntityId(request.getParamId().toString());
-		parameterEntity.setRecordBefore(JsonConverter.objectToJson(parameterEntity));
-		parameterEntity.setRequestDump(request);
-		
-		parameterEntity.setName(request.getName());
-		parameterEntity.setOperator(AppUtil.checkOperator(request.getOperator()));
-		parameterEntity.setRequireValue(request.getRequireValue());
-		parameterEntity.setAuthorised(request.getAuthorised());
-		parameterEntity.setUpdatedBy(request.getUpdatedBy());
-
-		Parameter updatedEntity = parameterRepository.save(parameterEntity);
-		parameterRedisRepository.setHashOperations(fraudEngineRedisTemplate);
-		parameterRedisRepository.update(updatedEntity);
-		
-		return updatedEntity;
+			parameterEntity.setName(request.getName());
+			parameterEntity.setOperator(AppUtil.checkOperator(request.getOperator()));
+			parameterEntity.setRequireValue(request.getRequireValue());
+			parameterEntity.setAuthorised(request.getAuthorised());
+			parameterEntity.setUpdatedBy(request.getUpdatedBy());
+		} catch (Exception ex) {
+			log.error("Error occurred while creating Parameter entity object", ex);
+			throw new FraudEngineException(AppConstant.ERROR_SETTING_PROPERTY);
+		}
+		return saveInternalWatchlistEntityToDatabase(parameterEntity);
 	}
 
 	// todo disable parameter
@@ -86,36 +81,68 @@ public class ParameterService {
 			throw new FraudEngineException("parameterId cannot be null");
 		}
 
-		Optional<Parameter> parameterEntity  = parameterRepository.findById(parameterId);
-		if (parameterEntity.isPresent()) {
+		Parameter parameter = findById(parameterId).get();
+		// for auditing purpose for DELETE
+		parameter.setEntityId(String.valueOf(parameterId));
+		parameter.setRecordBefore(JsonConverter.objectToJson(parameter));
+		parameter.setRecordAfter(null);
+		parameter.setRequestDump(parameterId);
 
-			Parameter parameter = parameterEntity.get();
-			// for auditing purpose for DELETE
-			parameter.setEntityId(parameterId.toString());
-			parameter.setRecordBefore(JsonConverter.objectToJson(parameter));
-			parameter.setRecordAfter(null);
-			parameter.setRequestDump(parameterId);
-			
-			//parameterRepository.deleteById(parameterId);
+		try {
 			parameterRepository.delete(parameter);
-			parameterRedisRepository.setHashOperations(fraudEngineRedisTemplate);
+		} catch (Exception ex) {
+			log.error("Error occurred while deleting Parameter entity from the database", ex);
+			throw new FraudEngineException(AppConstant.ERROR_DELETING_FROM_DATABASE);
+		}
+		try {
+			parameterRedisRepository.setHashOperations(redisTemplate);
 			parameterRedisRepository.delete(parameterId);
-		}else{
-			throw new ResourceNotFoundException("Parameter Not found " + parameterId);
+		} catch (Exception ex) {
+			log.error("Error occurred while deleting Parameter entity from Redis", ex);
+			throw new FraudEngineException(AppConstant.ERROR_DELETING_FROM_REDIS);
 		}
 		log.info("Parameter ID deleted: INFO >>>>>>>>>>> {}", parameterId);
-		return true;
+		return Boolean.TRUE;
 	}
 
 	public Page<Parameter> getParameter(Long paramId) {
 		log.info("Query parameter ID: INFO >>>>>>>>>>>>>> {}", paramId);
-		if (paramId == null) {
+		if (Objects.isNull(paramId)) {
 			return parameterRepository.findAll(PageRequestUtil.getPageRequest());
 		}
-		Parameter parameterEntity  = parameterRepository.findById(paramId)
-				                     .orElseThrow(() -> new ResourceNotFoundException("Parameter Not found " + paramId));
-		parameterEntity.setId(paramId);
-		return parameterRepository.findAll(Example.of(parameterEntity), PageRequestUtil.getPageRequest());
+		Optional<Parameter> parameterEntityOptional  = findById(paramId);
+		return parameterRepository.findAll(Example.of(parameterEntityOptional.get()), PageRequestUtil.getPageRequest());
+	}
+	
+	private Optional<Parameter> findById(Long paramId) {
+		Optional<Parameter> parameterEntityOptional = parameterRepository.findById(paramId);
+		if(!parameterEntityOptional.isPresent()) {
+			throw new ResourceNotFoundException("Parameter Not found for ID " + paramId);
+		}
+		return parameterEntityOptional;
+	}
+	
+	private Parameter saveInternalWatchlistEntityToDatabase(Parameter parameterEntity) {
+		Parameter persistedParameterEntity;
+		try {
+			persistedParameterEntity = parameterRepository.save(parameterEntity);
+		} catch(Exception ex){
+			log.error("Error occurred while saving Internal Watchlist entity to database" , ex);
+			throw new FraudEngineException(AppConstant.ERROR_SAVING_TO_DATABASE);
+		}
+		saveParameterEntityToRedis(persistedParameterEntity);
+		return persistedParameterEntity;
+	}
+	
+	private void saveParameterEntityToRedis(Parameter alreadyPersistedParameterEntity) {
+		try {
+			parameterRedisRepository.setHashOperations(redisTemplate);
+			parameterRedisRepository.update(alreadyPersistedParameterEntity);
+		} catch(Exception ex){
+			//TODO actually delete already saved entity from the database (NOT SOFT DELETE)
+			log.error("Error occurred while saving Internal Watchlist entity to Redis" , ex);
+			throw new FraudEngineException(AppConstant.ERROR_SAVING_TO_REDIS);
+		}
 	}
 
 }

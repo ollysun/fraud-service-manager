@@ -11,7 +11,7 @@ import java.io.Serializable;
 
 @Entity
 @Table(name = "product_rule")
-@SQLDelete(sql = "UPDATE product_rule SET deleted = true WHERE rule_id = ? AND version = ?", check = ResultCheckStyle.COUNT)
+@SQLDelete(sql = "UPDATE product_rule SET deleted = true WHERE rule_id = ?", check = ResultCheckStyle.COUNT)
 @Where(clause = "deleted = false")
 @Getter
 @Setter

@@ -16,8 +16,11 @@ public final class AppConstant {
 	public static final String ALL = "*";
 	public static final String ALL_LINKS = "/**";
 	
-	public static final String ERROR_SET_PROPERTY = "Error while setting property";
+	public static final String ERROR_SETTING_PROPERTY = "Error while setting entity properties";
 	public static final String ERROR_SAVING_TO_DATABASE = "Error while saving to the database";
+	public static final String ERROR_SAVING_TO_REDIS = "Error while saving to Redis";
+	public static final String ERROR_DELETING_FROM_DATABASE = "Error while saving to the database";
+	public static final String ERROR_DELETING_FROM_REDIS = "Error while deleting from Redis";
 
 	
 	

@@ -1,14 +1,10 @@
 package com.etz.fraudeagleeyemanager.dto.response;
 
-import com.etz.fraudeagleeyemanager.entity.ProductEntity;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import lombok.Data;
-import org.hibernate.annotations.UpdateTimestamp;
-import org.springframework.data.annotation.LastModifiedDate;
-
-import javax.persistence.Column;
-import javax.validation.constraints.NotBlank;
 import java.time.LocalDateTime;
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
+import lombok.Data;
 
 @Data
 @JsonIgnoreProperties({ "productDataset", "productRules", "products", "productLists" })

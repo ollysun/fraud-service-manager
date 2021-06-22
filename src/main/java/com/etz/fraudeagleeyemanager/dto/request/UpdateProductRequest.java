@@ -1,11 +1,10 @@
 package com.etz.fraudeagleeyemanager.dto.request;
 
-import lombok.Data;
+import java.io.Serializable;
+
 import javax.validation.constraints.NotNull;
 
-import com.etz.fraudeagleeyemanager.enums.Status;
-
-import java.io.Serializable;
+import lombok.Data;
 
 @Data
 public class UpdateProductRequest implements Serializable {

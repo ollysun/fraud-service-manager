@@ -14,29 +14,13 @@ public class RedisConfig {
 
 	private final JedisConnectionFactory fraudEngineConnectionFactory;
 
-//    @Bean(name = "fraudEngineConnectionFactory")
-//    JedisConnectionFactory fraudEngineJedisConnectionFactory() {
-//        RedisStandaloneConfiguration redisStandaloneConfiguration = new RedisStandaloneConfiguration();
-//        //		new RedisStandaloneConfiguration("127.0.0.1", 6379);
-//        //		new RedisStandaloneConfiguration("172.17.10.16", 6379);
-//        //redisStandaloneConfiguration.setPassword("visionsvisions");
-//        //redisStandaloneConfiguration.setDatabase(0);
-//        return new JedisConnectionFactory(redisStandaloneConfiguration);
-//    }
-
-    /*
-     *  Without this bean definition, the application throws an error looking for it.
-     *  This is a default bean that MUST be defined with the name "redisTemplate"
-     *  It is not used explicitly within the application
-     *  */
-    @Bean
+	@Bean
     public RedisTemplate<String, Object> redisTemplate() {
     	RedisTemplate<String, Object> template = new RedisTemplate<>();
         template.setConnectionFactory(fraudEngineConnectionFactory);
         setSerializer(template);
         return template;
     }
-
 
     private void setSerializer(RedisTemplate<String, Object> template) {
     	template.setDefaultSerializer(new Jackson2JsonRedisSerializer<>(String.class));
@@ -48,6 +32,5 @@ public class RedisConfig {
         template.setEnableTransactionSupport(true);
         template.afterPropertiesSet();
     }
-
 
 }
