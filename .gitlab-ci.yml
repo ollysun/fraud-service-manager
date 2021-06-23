@@ -1,4 +1,3 @@
-
 stages:
   - test
   - build
@@ -8,10 +7,10 @@ build:
     script:
         - echo "Building"
         - mkdir build
-        - touch build/codeoptimus.txt
+        - touch build/codeoptimus1.txt
         
 test:
    stage: test
    script:
        - echo "Testing"
-       - test -f "build/codeoptimus.txt"
+       - test -f "build/codeoptimus1.txt"
