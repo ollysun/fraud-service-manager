@@ -97,7 +97,7 @@ checkmarx-scan-mr:
   script:
     - ${CX_FLOW_EXE}
           --scan 
-          --bug-tracker="GITLABMERGE"
+        #   --bug-tracker="GITLABMERGE"
           --app="${CI_PROJECT_NAME}" 
           --namespace="${CI_PROJECT_NAMESPACE}"
           --repo-name="${CI_PROJECT_NAME}"
