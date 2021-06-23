@@ -16,4 +16,4 @@ test:
    stage: test
    script:
        - echo "Testing"
-       - test -f "build/codeoptimus1.txt"
+       - IF EXIST "build/codeoptimus1.txt" echo "It exists!"
