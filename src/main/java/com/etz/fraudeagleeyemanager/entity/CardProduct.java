@@ -2,20 +2,21 @@ package com.etz.fraudeagleeyemanager.entity;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import lombok.*;
+import org.hibernate.Hibernate;
 import org.hibernate.annotations.ResultCheckStyle;
 import org.hibernate.annotations.SQLDelete;
-import org.hibernate.annotations.Where;
-
 import javax.persistence.*;
 import java.io.Serializable;
+import java.util.Objects;
 
-@EqualsAndHashCode(callSuper = true)
-@Data
+@Getter
+@Setter
+@ToString
+@RequiredArgsConstructor
 @Entity
 @Table(name = "card_product", uniqueConstraints = @UniqueConstraint(name="UC_CARD_PRODUCT",
         columnNames = {"card_id"}))
 @SQLDelete(sql = "UPDATE card_product SET deleted = true, status=0 WHERE id = ?", check = ResultCheckStyle.COUNT)
-@Where(clause = "deleted = false")
 @IdClass(CardProductId.class)
 public class CardProduct extends BaseAuditVersionEntity<CardProductId> implements Serializable {
 	private static final long serialVersionUID = 1L;
@@ -39,12 +40,14 @@ public class CardProduct extends BaseAuditVersionEntity<CardProductId> implement
     @ManyToOne(fetch = FetchType.LAZY)
     @MapsId("cardId")
     @JoinColumn(name = "card_id")
+    @ToString.Exclude
     private Card card;
 
     @JsonBackReference
     @ManyToOne(fetch = FetchType.LAZY)
     @MapsId("productCode")
     @JoinColumn(name = "product_code")
+    @ToString.Exclude
     private ProductEntity productEntity;
 
 
@@ -52,4 +55,23 @@ public class CardProduct extends BaseAuditVersionEntity<CardProductId> implement
 	public CardProductId getId() {
 		return new CardProductId(id, productCode, cardId);
 	}
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
+        CardProduct that = (CardProduct) o;
+
+        if (!Objects.equals(id, that.id)) return false;
+        if (!Objects.equals(productCode, that.productCode)) return false;
+        return Objects.equals(cardId, that.cardId);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = Objects.hashCode(id);
+        result = 31 * result + (Objects.hashCode(productCode));
+        result = 31 * result + (Objects.hashCode(cardId));
+        return result;
+    }
 }

@@ -1,22 +1,23 @@
 package com.etz.fraudeagleeyemanager.entity;
 
-import java.io.Serializable;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
+import org.springframework.data.domain.Persistable;
 
 import javax.persistence.MappedSuperclass;
 import javax.persistence.PostLoad;
 import javax.persistence.PrePersist;
 import javax.persistence.Transient;
-
-import org.springframework.data.domain.Persistable;
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
-
-import lombok.Data;
-import lombok.EqualsAndHashCode;
+import java.io.Serializable;
 
 @MappedSuperclass
-@Data
-@EqualsAndHashCode(callSuper=true)
+@Getter
+@Setter
+@ToString
+@RequiredArgsConstructor
 public abstract class BaseAuditVersionEntity<ID> extends BaseAuditEntity implements Serializable, Persistable<ID> {
 
 	private static final long serialVersionUID = 1L;

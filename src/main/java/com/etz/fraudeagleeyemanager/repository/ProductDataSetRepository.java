@@ -21,6 +21,6 @@ public interface ProductDataSetRepository extends JpaRepository<ProductDataSet, 
 	@Query("update #{#entityName} e set e.deleted=true where e.id=?1")
 	@Modifying
 	@Transactional
-	public void delete(@Param("id")Long id);
+	void delete(@Param("id")Long id);
 
 }

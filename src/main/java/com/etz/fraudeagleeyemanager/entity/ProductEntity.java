@@ -1,33 +1,24 @@
 package com.etz.fraudeagleeyemanager.entity;
 
-import java.io.Serializable;
-import java.util.List;
-import java.util.Set;
-
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.Id;
-import javax.persistence.OneToMany;
-import javax.persistence.Table;
-
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
+import org.hibernate.Hibernate;
 import org.hibernate.annotations.ResultCheckStyle;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.Where;
 
-import com.fasterxml.jackson.annotation.JsonManagedReference;
+import javax.persistence.*;
+import java.io.Serializable;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
 
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
 
-
-@EqualsAndHashCode(callSuper = true)
 @Entity
 @Table(name = "product")
-@SQLDelete(sql = "UPDATE product SET deleted = true WHERE code = ?", check = ResultCheckStyle.COUNT)
+@SQLDelete(sql = "UPDATE product SET deleted = true, status=0 WHERE code = ?", check = ResultCheckStyle.COUNT)
 @Where(clause = "deleted = false")
 @Getter
 @Setter
@@ -82,8 +73,28 @@ public class ProductEntity extends BaseAuditVersionEntity<String> implements Ser
             cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<CardProduct> cardProducts;
 
+    @JsonManagedReference
+    @ToString.Exclude
+    @OneToMany(mappedBy = "productEntity", fetch = FetchType.LAZY,
+            cascade = CascadeType.ALL)
+    private Set<ProductServiceEntity> productServiceEntities;
+
 	@Override
 	public String getId() {
 		return code;
 	}
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
+        ProductEntity that = (ProductEntity) o;
+
+        return Objects.equals(code, that.code);
+    }
+
+    @Override
+    public int hashCode() {
+        return 335418294;
+    }
 }

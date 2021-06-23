@@ -69,6 +69,7 @@ public class Card extends BaseAuditEntity implements Serializable {
 	@JsonManagedReference
 	@OneToMany(mappedBy = "card",fetch = FetchType.LAZY,
 			cascade = CascadeType.ALL, orphanRemoval = true)
+	@ToString.Exclude
 	private Set<CardProduct> cardProducts;
 
 }
