@@ -1,19 +1,13 @@
 stages:
   - build
-  - test
 
 build:
     stage: build
     script:
         - echo "Building"
+        - echo "$CHECKMARX_USERNAME"
         - mkdir build
         - echo build/codeoptimus1.txt
     artifacts:
         paths:
             - build/
-        
-test:
-   stage: test
-   script:
-       - echo "Testing"
-       - if exist build\codeoptimus1.txt ( echo "File exists") 
