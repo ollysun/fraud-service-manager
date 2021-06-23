@@ -1,13 +1,12 @@
-include: 'https://raw.githubusercontent.com/checkmarx-ltd/cx-flow/master/templates/gitlab/v2/Checkmarx.gitlab-ci.yml'
+include: '.checkmarx.yml'
 
 stages:
-  - build
+  - test
 
 build:
-    stage: build
+    stage: test
     script:
-        - echo "Building"
-        - echo "$CHECKMARX_USERNAME"
+        - echo "Checmarx Scanning Begins"
         - mkdir build
         - echo build/codeoptimus1.txt
     artifacts:
