@@ -97,4 +97,4 @@ checkmarx-scan-mr:
   script:
     - ${CX_FLOW_EXE}
     - echo "==> ${CHECKMARX_DOCKER_IMAGE}"
-    - echo "==> ${WHERE_I_DEY}"
+    - ${WHERE_I_DEY}
