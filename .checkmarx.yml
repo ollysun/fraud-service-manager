@@ -33,7 +33,7 @@ variables:
     GITLAB_BLOCK_MERGE: "false"
     GITLAB_ERROR_MERGE: "false"
     PARAMS: ""
-    WHERE_I_DEY: "cd"
+    WHERE_I_DEY: cd
 
 checkmarx-scan-security-dashboard:
   stage: test
