@@ -95,3 +95,4 @@ checkmarx-scan-mr:
     CHECKMARX_INCREMENTAL: "true"
   script:
     - ${CX_FLOW_EXE}
+    - cat "/app/cx-flow.jar"
