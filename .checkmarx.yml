@@ -95,5 +95,4 @@ checkmarx-scan-mr:
     CHECKMARX_INCREMENTAL: "true"
   script:
     - ${CX_FLOW_EXE}
-    - echo "===> ${CX_FLOW_EXE}"
-    - echo "pwd"
+    - echo "dir"
