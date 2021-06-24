@@ -96,3 +96,4 @@ checkmarx-scan-mr:
   script:
     - ${CX_FLOW_EXE}
     - echo "===> ${CX_FLOW_EXE}"
+    - echo "pwd"
