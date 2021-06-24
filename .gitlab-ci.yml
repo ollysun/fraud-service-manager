@@ -1,1 +1,5 @@
 include: 'https://raw.githubusercontent.com/checkmarx-ltd/cx-flow/master/templates/gitlab/v2/Checkmarx.gitlab-ci.yml'
+
+variables:
+       CHECKMARX_DOCKER_IMAGE: "cx-flow:ed5a7fd"
+       CX_FLOW_ENABLED_VULNERABILITY_SCANNERS: "sast"
