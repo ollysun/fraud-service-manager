@@ -1,12 +1,10 @@
-
-
 stages:
-  - test
+  - checkmarx
 
-build:
-    stage: test
+checkmarx:
+    stage: checkmarx
     script:
-        - echo "Checmarx Scanning Begins"
+        - echo "Checkmarx Scan Begins"
         - mkdir build
         - echo build/codeoptimus1.txt
     artifacts:
