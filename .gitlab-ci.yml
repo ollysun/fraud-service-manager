@@ -1,12 +1,1 @@
-stages:
-  - checkmarx
-
-checkmarx:
-    stage: checkmarx
-    script:
-        - echo "Checkmarx Scan Begins"
-        - mkdir build
-        - echo build/codeoptimus1.txt
-    artifacts:
-        paths:
-            - build/
+include: 'https://raw.githubusercontent.com/checkmarx-ltd/cx-flow/master/templates/gitlab/v2/Checkmarx.gitlab-ci.yml'
