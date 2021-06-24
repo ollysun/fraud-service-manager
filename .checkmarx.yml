@@ -95,7 +95,7 @@ checkmarx-scan-mr:
     CHECKMARX_INCREMENTAL: "true"
   script:
     - ${CX_FLOW_EXE}
-          --scan 
+          --parse 
           --bug-tracker="GITLABMERGE"
           --app="${CI_PROJECT_NAME}" 
           --namespace="${CI_PROJECT_NAMESPACE}"
