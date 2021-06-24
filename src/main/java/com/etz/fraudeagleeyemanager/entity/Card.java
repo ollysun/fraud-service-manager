@@ -18,7 +18,6 @@ import java.util.Set;
 @Where(clause = "deleted = false")
 @Getter
 @Setter
-@ToString(exclude = { "cardProducts" })
 @RequiredArgsConstructor
 public class Card extends BaseAuditEntity implements Serializable {
 	private static final long serialVersionUID = 1L;
@@ -66,10 +65,10 @@ public class Card extends BaseAuditEntity implements Serializable {
 	@Column(nullable = false, name = "status", columnDefinition = "TINYINT", length = 1)
 	private Boolean status;
 
-	@JsonManagedReference
+	@ToString.Exclude
 	@OneToMany(mappedBy = "card",fetch = FetchType.LAZY,
 			cascade = CascadeType.ALL, orphanRemoval = true)
-	@ToString.Exclude
+	@JsonManagedReference
 	private Set<CardProduct> cardProducts;
 
 }

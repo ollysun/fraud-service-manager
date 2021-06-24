@@ -2,7 +2,9 @@ package com.etz.fraudeagleeyemanager.dto.request;
 
 import java.io.Serializable;
 
+import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.PositiveOrZero;
 
 import lombok.Data;
 
@@ -10,19 +12,23 @@ import lombok.Data;
 public class DatasetProductRequest implements Serializable {
 	private static final long serialVersionUID = 1L;
 
-	@NotNull(message="Please enter the product Code")
+	@NotBlank(message="Please enter the product Code")
 	private String productCode;
 
-	@NotNull(message="Please enter the field name")
+	@NotNull(message="Please enter the service Id")
+	@PositiveOrZero(message = "Please enter only Numeric number")
+	private Long serviceId;
+
+	@NotBlank(message="Please enter the field name")
 	private String fieldName;
 
-	@NotNull(message="Please enter the data Type")
+	@NotBlank(message="Please enter the data Type")
 	private String dataType;
 
 	@NotNull(message="Please tell the compulsory status")
 	private Boolean compulsory;
 
-	@NotNull(message="Please enter the created by name")
+	@NotBlank(message="Please enter the created by name")
 	private String createdBy;
 
 	@NotNull(message="Please state the status of the authorization")

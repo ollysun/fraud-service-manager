@@ -18,9 +18,9 @@ public interface ProductDataSetRepository extends JpaRepository<ProductDataSet, 
 	List<ProductDataSet> findByProductCode(String productCode);
 
 	//@Override
-	@Query("update #{#entityName} e set e.deleted=true where e.id=?1")
+	@Query("update #{#entityName} e set e.deleted=true where e.productCode=?1")
 	@Modifying
 	@Transactional
-	void delete(@Param("id")Long id);
+	void delete(@Param("code")String code);
 
 }
