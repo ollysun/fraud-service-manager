@@ -94,8 +94,8 @@ checkmarx-scan-mr:
   variables:
     CHECKMARX_INCREMENTAL: "true"
   script:
-    - ${CX_FLOW_EXE}
-          -scan 
+    - '${CX_FLOW_EXE}
+          --scan 
           --bug-tracker="GITLABMERGE"
           --app="${CI_PROJECT_NAME}" 
           --namespace="${CI_PROJECT_NAMESPACE}"
@@ -108,4 +108,4 @@ checkmarx-scan-mr:
           --merge-id="${CI_MERGE_REQUEST_IID}" 
           --spring.profiles.active="${CX_FLOW_ENABLED_VULNERABILITY_SCANNERS}" 
           --f=. 
-          ${PARAMS}
+          ${PARAMS}'
