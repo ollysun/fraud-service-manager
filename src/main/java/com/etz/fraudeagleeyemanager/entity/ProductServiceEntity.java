@@ -30,6 +30,9 @@ public class ProductServiceEntity extends BaseAuditEntity implements Serializabl
     @Column(name = "service_name", nullable = false, columnDefinition="VARCHAR(200)")
     private String serviceName;
 
+    @Column(name = "product_code", nullable = false, columnDefinition="VARCHAR(100)")
+    private String productCode;
+
     private String description;
 
     @Column(name = "callback_url", columnDefinition="VARCHAR(200)")
@@ -40,7 +43,7 @@ public class ProductServiceEntity extends BaseAuditEntity implements Serializabl
 
     @ToString.Exclude
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(foreignKey = @ForeignKey(name = "FK_PRODUCT_CODE"), name = "product_code")
+    @JoinColumn(name = "product_code",foreignKey = @ForeignKey(name = "FK_PRODUCT_CODE"), insertable = false, updatable = false)
     @JsonBackReference
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private ProductEntity productEntity;

@@ -123,6 +123,7 @@ public class ProductService {
 		return productResponseList;
 	}
 
+	@Transactional
 	public ProductResponse updateProduct(UpdateProductRequest request) {
 		Optional<ProductEntity> productEntityOptional = findByCode(request.getProductCode());
 		ProductEntity productEntity = productEntityOptional.get();
@@ -154,6 +155,7 @@ public class ProductService {
 		return productResponse;
 	}
 
+	@Transactional
 	public Boolean deleteProduct(String productCode) {
 		Optional<ProductEntity> productEntityOptional = findByCode(productCode);
 		ProductEntity productEntity = productEntityOptional.get();
@@ -188,6 +190,7 @@ public class ProductService {
 		return productEntityOptional;
 	}
 
+	@Transactional(propagation = Propagation.REQUIRES_NEW)
 	public ProductDataSet createProductDataset(DatasetProductRequest request) {
 		//check for the code before creating the dataset
 		findByCode(request.getProductCode());
@@ -218,7 +221,7 @@ public class ProductService {
 		BeanUtils.copyProperties(productEntity, productResponse, "productEntity");
 		return productResponse;
 	}
-
+	@Transactional(readOnly = true)
 	public List<ProductDataSetResponse> getProductDataset(String productCode) {
 		if (Objects.isNull(productCode)) {
 			return outputProductDatasetEntity(productDataSetRepository.findAll());
@@ -228,6 +231,7 @@ public class ProductService {
 		return outputProductDatasetEntity(productDatasetList);
 	}
 
+	@Transactional(propagation = Propagation.REQUIRES_NEW)
 	public List<ProductDataSetResponse> updateProductDataset(UpdateDataSetRequest request) {
 		List<ProductDataSet> productDataSetList = productDataSetRepository.findByProductCode(request.getProductCode());
 		if (productDataSetList.isEmpty()) {
@@ -265,6 +269,7 @@ public class ProductService {
 		return updatedProductDatasetResponseList;
 	}
 
+	@Transactional
 	public boolean deleteProductDataset(String productCode) {
 		List<ProductDataSet> productDatasetEntityList = productDataSetRepository.findByProductCode(productCode);
 		if (productDatasetEntityList.isEmpty()) {
@@ -341,13 +346,13 @@ public class ProductService {
 			productService.setStatus(Boolean.TRUE);
 			productService.setCallbackUrl(request.getCallback());
 			productService.setCreatedBy(request.getCreatedBy());
-			productService.setProductEntity(productEntityOptional.get());
+			//productService.setProductEntity(productEntityOptional.get());
 			return productServiceRepository.save(productService);
 		} catch (Exception ex) {
 			throw new FraudEngineException(AppConstant.ERROR_SAVING_TO_REDIS);
 		}
 	}
-
+	@Transactional(propagation = Propagation.REQUIRES_NEW)
 	public ProductServiceEntity updateProductService(UpdateProductServiceDto request) {
 		Optional<ProductEntity> productEntityOptional = findByCode(request.getProductCode());
 		return	productServiceRepository.findById(request.getServiceId()).map(productServiceEntity -> {
@@ -356,11 +361,12 @@ public class ProductService {
 				productServiceEntity.setDescription(request.getDescription());
 				productServiceEntity.setUpdatedBy(request.getUpdatedBy());
 				productServiceEntity.setCallbackUrl(request.getCallback());
-				productServiceEntity.setProductEntity(productEntityOptional.get());
+				//productServiceEntity.setProductEntity(productEntityOptional.get());
 				return productServiceRepository.save(productServiceEntity);
 			}).orElseThrow(()  -> new ResourceNotFoundException("Product service not found for this id " + request.getServiceId()));
 	}
 
+	@Transactional
 	public Boolean deactivateProductService(Long serviceId){
 		Optional<ProductServiceEntity> productServiceEntity = productServiceRepository.findById(serviceId);
 		if (!productServiceEntity.isPresent()) {
@@ -369,7 +375,7 @@ public class ProductService {
 		productServiceRepository.deleteById(serviceId);
 		return true;
 	}
-
+	@Transactional(readOnly = true)
 	public Page<ProductServiceEntity> queryAllProductService(String productCode, Boolean statusVal){
 		Page<ProductServiceEntity> productServiceEntityPage;
 		if (!Objects.isNull(productCode)) {

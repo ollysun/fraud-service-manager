@@ -15,6 +15,7 @@
 	<description>Fraud eagle eye manager service</description>
 	<properties>
 		<java.version>8</java.version>
+		<spring-boot-starter-cache.version>2.5.0</spring-boot-starter-cache.version>
 	</properties>
 	<dependencies>
 		<dependency>
@@ -88,6 +89,11 @@
 			<groupId>io.jsonwebtoken</groupId>
 			<artifactId>jjwt</artifactId>
 			<version>0.7.0</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-cache</artifactId>
+			<version>${spring-boot-starter-cache.version}</version>
 		</dependency>
 	</dependencies>
 
