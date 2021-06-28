@@ -1,13 +1,10 @@
 package com.etz.fraudeagleeyemanager.entity;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 import org.hibernate.Hibernate;
 import org.hibernate.annotations.ResultCheckStyle;
 import org.hibernate.annotations.SQLDelete;
-import org.hibernate.annotations.Where;
 
 import javax.persistence.*;
 import java.io.Serializable;
@@ -23,6 +20,8 @@ import java.util.Set;
 @SQLDelete(sql = "UPDATE product SET deleted = true, status=0 WHERE code = ?", check = ResultCheckStyle.COUNT)
 @Getter
 @Setter
+@AllArgsConstructor
+@NoArgsConstructor
 public class ProductEntity extends BaseAuditVersionEntity<String> implements Serializable {
 	private static final long serialVersionUID = 1L;
 
@@ -62,7 +61,7 @@ public class ProductEntity extends BaseAuditVersionEntity<String> implements Ser
     @ToString.Exclude
     @OneToMany(mappedBy = "productEntity", fetch = FetchType.LAZY,
             cascade = {CascadeType.PERSIST,CascadeType.MERGE}, orphanRemoval = true)
-    private Set<ProductRule> productRules;
+    private Set<ServiceRule> serviceRules;
 
     @JsonManagedReference
     @OneToMany(mappedBy = "productEntity",fetch = FetchType.LAZY,

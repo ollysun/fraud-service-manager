@@ -1,14 +1,10 @@
 package com.etz.fraudeagleeyemanager.entity;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 import org.hibernate.Hibernate;
 import org.hibernate.annotations.ResultCheckStyle;
 import org.hibernate.annotations.SQLDelete;
-import org.hibernate.annotations.Where;
 
 import javax.persistence.*;
 import java.io.Serializable;
@@ -17,13 +13,13 @@ import java.util.Objects;
 @Getter
 @Setter
 @ToString
-@RequiredArgsConstructor
+@AllArgsConstructor
 @Entity
 @Table(name = "account_product", uniqueConstraints = @UniqueConstraint(name="UC_ACCOUNT_PRODUCT",
         columnNames = {"account_id"}))
 @SQLDelete(sql = "UPDATE account_product SET deleted = true, status=0 WHERE id = ?", check = ResultCheckStyle.COUNT)
-@Where(clause = "deleted = false")
 @IdClass(AccountProductId.class)
+@NoArgsConstructor
 public class AccountProduct extends BaseAuditVersionEntity<AccountProductId> implements Serializable {
 	private static final long serialVersionUID = 1L;
 

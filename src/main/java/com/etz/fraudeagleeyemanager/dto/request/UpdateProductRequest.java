@@ -4,6 +4,7 @@ import java.io.Serializable;
 
 import javax.validation.constraints.NotNull;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 
 @Data
@@ -29,6 +30,6 @@ public class UpdateProductRequest implements Serializable {
 	@NotNull(message = "Please let know the status ")
 	private Boolean status;
 
-	@NotNull(message = "UpdatedBy cannot be empty")
+	@JsonIgnore
 	private String updatedBy;
 }

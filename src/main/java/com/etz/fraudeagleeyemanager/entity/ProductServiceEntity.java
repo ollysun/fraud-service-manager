@@ -43,14 +43,15 @@ public class ProductServiceEntity extends BaseAuditEntity implements Serializabl
 
     @ToString.Exclude
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "product_code",foreignKey = @ForeignKey(name = "FK_PRODUCT_CODE"), insertable = false, updatable = false)
+    @MapsId("productCode")
+    @JoinColumn(name = "product_code",foreignKey = @ForeignKey(name = "FK_PRODUCT_CODE"))
     @JsonBackReference
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private ProductEntity productEntity;
 
     @ToString.Exclude
     @OneToMany(mappedBy = "productServiceEntity", fetch = FetchType.LAZY,
-            cascade = CascadeType.ALL, orphanRemoval = true)
+            cascade = {CascadeType.MERGE,CascadeType.PERSIST}, orphanRemoval = true)
     @JsonManagedReference
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private Set<ProductDataSet> productDataset;

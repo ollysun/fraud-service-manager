@@ -1,10 +1,7 @@
 package com.etz.fraudeagleeyemanager.entity;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 import org.hibernate.Hibernate;
 import javax.persistence.*;
 import java.io.Serializable;
@@ -15,9 +12,10 @@ import java.util.Objects;
 @Table(name = "product_dataset")
 @Getter
 @Setter
-@RequiredArgsConstructor
+@AllArgsConstructor
 @ToString(exclude = { "productEntity" })
 @IdClass(ProductDatasetId.class)
+@NoArgsConstructor
 public class ProductDataSet extends BaseAuditVersionEntity<ProductDatasetId> implements Serializable {
 	private static final long serialVersionUID = 1L;
 

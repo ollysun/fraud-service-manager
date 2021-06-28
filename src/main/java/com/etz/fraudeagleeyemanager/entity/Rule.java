@@ -1,13 +1,14 @@
 package com.etz.fraudeagleeyemanager.entity;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.Hibernate;
 import org.hibernate.annotations.ResultCheckStyle;
 import org.hibernate.annotations.SQLDelete;
-import org.hibernate.annotations.Where;
-
 import javax.persistence.*;
 import java.io.Serializable;
 import java.util.Objects;
@@ -16,10 +17,11 @@ import java.util.Set;
 @Entity
 @Table(name = "rule",uniqueConstraints = @UniqueConstraint(name="UQ_RULE",
 		columnNames = {"rule_name"}))
-@SQLDelete(sql = "UPDATE rule SET deleted = true WHERE id = ?", check = ResultCheckStyle.COUNT)
-@Where(clause = "deleted = false")
+@SQLDelete(sql = "UPDATE rule SET deleted = true, status=0 WHERE id = ?", check = ResultCheckStyle.COUNT)
 @Getter
 @Setter
+@AllArgsConstructor
+@NoArgsConstructor
 public class Rule extends BaseAuditEntity implements Serializable {
 	private static final long serialVersionUID = 1L;
 
@@ -32,6 +34,9 @@ public class Rule extends BaseAuditEntity implements Serializable {
 	
 	@Column(name = "source_value_1", nullable=false)
 	private String sourceValueOne;
+
+	@Column(name = "value_1_data_type", nullable=false)
+	private String valueOneDataType;
 
 	@Column(name = "operator_1", nullable=false)
 	private String operatorOne;
@@ -47,6 +52,9 @@ public class Rule extends BaseAuditEntity implements Serializable {
 
 	@Column(name = "source_value_2")
 	private String sourceValueTwo;
+
+	@Column(name = "value_2_data_type", nullable=false)
+	private String valueTwoDataType;
 
 	@Column(name = "operator_2")
 	private String operatorTwo;
@@ -68,10 +76,11 @@ public class Rule extends BaseAuditEntity implements Serializable {
 	@Column(name = "authorised")
 	private Boolean authorised;
 
-	@JsonManagedReference
 	@OneToMany(mappedBy = "rule",fetch = FetchType.LAZY,
 			cascade = CascadeType.ALL, orphanRemoval = true)
-	private Set<ProductRule> productRule;
+	@JsonManagedReference
+	@JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+	private Set<ServiceRule> serviceRule;
 
 	@Override
 	public boolean equals(Object o) {

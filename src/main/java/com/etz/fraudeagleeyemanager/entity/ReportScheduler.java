@@ -14,7 +14,8 @@ import java.io.Serializable;
 @Getter
 @Setter
 @ToString
-@RequiredArgsConstructor
+@AllArgsConstructor
+@NoArgsConstructor
 public class ReportScheduler extends BaseAuditEntity implements Serializable {
 	private static final long serialVersionUID = 1L;
 
@@ -41,8 +42,8 @@ public class ReportScheduler extends BaseAuditEntity implements Serializable {
 	private Report report;
 
 	@ToString.Exclude
-	@ManyToOne(fetch = FetchType.LAZY, optional = false)
-	@JoinColumn(name = "email_group", referencedColumnName="id", nullable = false)
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "email_group", nullable = false)
 	private EmailGroup emailGroup;
 
 	@Override

@@ -2,16 +2,10 @@ package com.etz.fraudeagleeyemanager.controller;
 
 import javax.validation.Valid;
 
+import com.etz.fraudeagleeyemanager.constant.AppConstant;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import com.etz.fraudeagleeyemanager.dto.request.CreateParameterRequest;
 import com.etz.fraudeagleeyemanager.dto.request.UpdateParameterRequest;
@@ -22,6 +16,7 @@ import com.etz.fraudeagleeyemanager.entity.Parameter;
 import com.etz.fraudeagleeyemanager.service.ParameterService;
 
 import lombok.RequiredArgsConstructor;
+import springfox.documentation.annotations.ApiIgnore;
 
 @RestController
 @RequiredArgsConstructor
@@ -31,7 +26,8 @@ public class ParameterController {
 	private final ParameterService parameterService;
 	
 	@PostMapping
-	public ResponseEntity<ModelResponse<Parameter>> createParameter(@RequestBody @Valid CreateParameterRequest request){
+	public ResponseEntity<ModelResponse<Parameter>> createParameter(@RequestBody @Valid CreateParameterRequest request,@ApiIgnore @RequestAttribute(AppConstant.USERNAME) String username){
+		request.setCreatedBy(username);
 		ModelResponse<Parameter> response = new ModelResponse<>(parameterService.createParameter(request), HttpStatus.CREATED);
 		return ResponseEntity.status(HttpStatus.valueOf(response.getStatus())).body(response);
 	}

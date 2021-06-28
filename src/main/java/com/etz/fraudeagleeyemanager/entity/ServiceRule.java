@@ -2,24 +2,23 @@ package com.etz.fraudeagleeyemanager.entity;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import lombok.*;
+import org.hibernate.Hibernate;
 import org.hibernate.annotations.ResultCheckStyle;
 import org.hibernate.annotations.SQLDelete;
-import org.hibernate.annotations.Where;
-
 import javax.persistence.*;
 import java.io.Serializable;
+import java.util.Objects;
 
 @Entity
-@Table(name = "product_rule")
-@SQLDelete(sql = "UPDATE product_rule SET deleted = true WHERE rule_id = ?", check = ResultCheckStyle.COUNT)
-@Where(clause = "deleted = false")
+@Table(name = "service_rule")
+@SQLDelete(sql = "UPDATE service_rule SET deleted = true, status=0 WHERE rule_id = ?", check = ResultCheckStyle.COUNT)
 @Getter
 @Setter
-@EqualsAndHashCode(exclude = {"productEntity", "emailGroup", "rule"}, callSuper = false)
-@RequiredArgsConstructor
+@AllArgsConstructor
 @ToString
 @IdClass(ProductRuleId.class)
-public class ProductRule extends BaseAuditVersionEntity<ProductRuleId> implements Serializable {
+@NoArgsConstructor
+public class ServiceRule extends BaseAuditVersionEntity<ProductRuleId> implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	@Id
@@ -27,8 +26,8 @@ public class ProductRule extends BaseAuditVersionEntity<ProductRuleId> implement
 	private Long ruleId;
 
 	@Id
-	@Column(name = "product_code",  columnDefinition="VARCHAR(100)")
-	private String productCode;
+	@Column(name = "service_id")
+	private Long serviceId;
 
 	@Column(name = "email_group_id")
 	private Long emailGroupId;
@@ -48,8 +47,9 @@ public class ProductRule extends BaseAuditVersionEntity<ProductRuleId> implement
 
 	@JsonBackReference
 	@OneToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "email_group_id", foreignKey = @ForeignKey(name = "FK_PRODUCT_RULE_EMAIL_GROUP_ID"),
-			 insertable = false, updatable = false)
+	@MapsId("emailGroupId")
+	@JoinColumn(name = "email_group_id", foreignKey = @ForeignKey(name = "FK_PRODUCT_RULE_EMAIL_GROUP_ID"))
+	@ToString.Exclude
 	private EmailGroup emailGroup;
 
 
@@ -57,6 +57,7 @@ public class ProductRule extends BaseAuditVersionEntity<ProductRuleId> implement
 	@ManyToOne(fetch = FetchType.LAZY)
 	@MapsId("ruleId")
 	@JoinColumn(name = "rule_id")
+	@ToString.Exclude
 	private Rule rule;
 
 
@@ -64,13 +65,29 @@ public class ProductRule extends BaseAuditVersionEntity<ProductRuleId> implement
 	@ManyToOne(fetch = FetchType.LAZY)
 	@MapsId("productCode")
 	@JoinColumn(name = "product_code")
+	@ToString.Exclude
 	private ProductEntity productEntity;
 
 
 	@Override
 	public ProductRuleId getId() {
-		return new ProductRuleId(ruleId, productCode);
+		return new ProductRuleId(ruleId, serviceId);
 	}
 
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) return true;
+		if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
+		ServiceRule that = (ServiceRule) o;
 
+		if (!Objects.equals(ruleId, that.ruleId)) return false;
+		return Objects.equals(serviceId, that.serviceId);
+	}
+
+	@Override
+	public int hashCode() {
+		int result = Objects.hashCode(ruleId);
+		result = 31 * result + (Objects.hashCode(serviceId));
+		return result;
+	}
 }

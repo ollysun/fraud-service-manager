@@ -6,10 +6,12 @@ import java.util.Objects;
 import java.util.Optional;
 
 import com.etz.fraudeagleeyemanager.dto.request.*;
+import com.etz.fraudeagleeyemanager.dto.response.ProductServiceResponse;
 import com.etz.fraudeagleeyemanager.entity.ProductServiceEntity;
 import com.etz.fraudeagleeyemanager.repository.ProductServiceRepository;
 import com.etz.fraudeagleeyemanager.util.PageRequestUtil;
 import org.springframework.beans.BeanUtils;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.data.domain.Page;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
@@ -46,8 +48,12 @@ public class ProductService {
 	private final ProductServiceRepository productServiceRepository;
 
 	@Transactional(propagation = Propagation.REQUIRES_NEW)
+	@CacheEvict(value = "product", allEntries=true)
 	public ProductResponse createProduct(CreateProductRequest request) {
 		ProductEntity productEntity = new ProductEntity();
+		if (productEntityRepository.findCountByCode(request.getProductCode()) > 0){
+			throw new FraudEngineException("Similar record already exist for code " + request.getProductCode());
+		}
 		try {
 			productEntity.setCode(request.getProductCode());
 			productEntity.setName(request.getProductName());
@@ -63,6 +69,8 @@ public class ProductService {
 			productEntity.setEntityId(null);
 			productEntity.setRecordBefore(null);
 			productEntity.setRequestDump(request);
+
+
 		} catch (Exception ex) {
 			log.error("Error occurred while creating product entity object", ex);
 			throw new FraudEngineException(AppConstant.ERROR_SETTING_PROPERTY);
@@ -100,11 +108,11 @@ public class ProductService {
 		return productResponse;
 	}
 
-	@Cacheable("product")
 	@Transactional(readOnly=true)
+	@Cacheable(value="product")
 	public List<ProductResponse> getProduct(String productCode) {
 		if (Objects.isNull(productCode)) {
-			return outputCreateProduct(productEntityRepository.findAll());
+			return outputCreateProduct(productEntityRepository.findAllByDeletedFalse());
 		}
 		Optional<ProductEntity> productEntityOptional = findByCode(productCode);
 		List<ProductEntity> productList = new ArrayList<>();
@@ -124,6 +132,7 @@ public class ProductService {
 	}
 
 	@Transactional
+	@CacheEvict(value = "product", allEntries=true)
 	public ProductResponse updateProduct(UpdateProductRequest request) {
 		Optional<ProductEntity> productEntityOptional = findByCode(request.getProductCode());
 		ProductEntity productEntity = productEntityOptional.get();
@@ -156,6 +165,7 @@ public class ProductService {
 	}
 
 	@Transactional
+	@CacheEvict(value = "product")
 	public Boolean deleteProduct(String productCode) {
 		Optional<ProductEntity> productEntityOptional = findByCode(productCode);
 		ProductEntity productEntity = productEntityOptional.get();
@@ -183,7 +193,7 @@ public class ProductService {
 	}
 
 	private Optional<ProductEntity> findByCode(String productCode) {
-		Optional<ProductEntity> productEntityOptional = productEntityRepository.findByCode(productCode);
+		Optional<ProductEntity> productEntityOptional = productEntityRepository.findByCodeAndDeletedFalse(productCode);
 		if (!productEntityOptional.isPresent()) {
 			throw new ResourceNotFoundException("Product not found for Product Code " + productCode);
 		}
@@ -335,34 +345,44 @@ public class ProductService {
 	}
 
 	@Transactional(propagation = Propagation.REQUIRES_NEW)
-	public ProductServiceEntity createProductService(CreateProductServiceDto request) {
-		Optional<ProductEntity> productEntityOptional = productEntityRepository.findByCode(request.getProductCode());
+	public ProductServiceResponse createProductService(CreateProductServiceDto request) {
+		Optional<ProductEntity> productEntityOptional = productEntityRepository.findByCodeAndDeletedFalse(request.getProductCode());
 		if (!productEntityOptional.isPresent()) {
 			throw new ResourceNotFoundException("Product not found for Code " + request.getProductCode());
 		}
+
+		if (productServiceRepository.countByProductCodeAndServiceName(request.getProductCode(), request.getServiceName()) > 0){
+			throw new FraudEngineException("Similar record already exist for code " + request.getProductCode()
+					+ " and service name " + request.getServiceName());
+		}
+
 		try {
 			ProductServiceEntity productService = new ProductServiceEntity();
 			productService.setServiceName(request.getServiceName());
 			productService.setStatus(Boolean.TRUE);
 			productService.setCallbackUrl(request.getCallback());
+			productService.setProductCode(request.getProductCode());
 			productService.setCreatedBy(request.getCreatedBy());
-			//productService.setProductEntity(productEntityOptional.get());
-			return productServiceRepository.save(productService);
+			productService.setProductEntity(productEntityOptional.get());
+			return outputCreatedProductService(productServiceRepository.save(productService));
 		} catch (Exception ex) {
 			throw new FraudEngineException(AppConstant.ERROR_SAVING_TO_REDIS);
 		}
 	}
 	@Transactional(propagation = Propagation.REQUIRES_NEW)
-	public ProductServiceEntity updateProductService(UpdateProductServiceDto request) {
-		Optional<ProductEntity> productEntityOptional = findByCode(request.getProductCode());
+	public ProductServiceResponse updateProductService(UpdateProductServiceDto request) {
+		Optional<ProductEntity> productEntityOptional = productEntityRepository.findByCodeAndDeletedFalse(request.getProductCode());
+		if (!productEntityOptional.isPresent()) {
+			throw new ResourceNotFoundException("Product not found for Code " + request.getProductCode());
+		}
 		return	productServiceRepository.findById(request.getServiceId()).map(productServiceEntity -> {
 				productServiceEntity.setServiceName(request.getServiceName());
 				productServiceEntity.setStatus(request.getStatus());
 				productServiceEntity.setDescription(request.getDescription());
 				productServiceEntity.setUpdatedBy(request.getUpdatedBy());
 				productServiceEntity.setCallbackUrl(request.getCallback());
-				//productServiceEntity.setProductEntity(productEntityOptional.get());
-				return productServiceRepository.save(productServiceEntity);
+				productServiceEntity.setProductEntity(productEntityOptional.get());
+			return outputCreatedProductService(productServiceRepository.save(productServiceEntity));
 			}).orElseThrow(()  -> new ResourceNotFoundException("Product service not found for this id " + request.getServiceId()));
 	}
 
@@ -376,16 +396,20 @@ public class ProductService {
 		return true;
 	}
 	@Transactional(readOnly = true)
-	public Page<ProductServiceEntity> queryAllProductService(String productCode, Boolean statusVal){
+	public Page<ProductServiceEntity> queryAllProductService(String productCode){
 		Page<ProductServiceEntity> productServiceEntityPage;
 		if (!Objects.isNull(productCode)) {
-			productServiceEntityPage = productServiceRepository.findByProductCode(productCode, PageRequestUtil.getPageRequest());
-		}else if(statusVal.equals(Boolean.FALSE)){
-			productServiceEntityPage = productServiceRepository.findByDeleted(Boolean.FALSE, PageRequestUtil.getPageRequest());
+			productServiceEntityPage = productServiceRepository.findAllByProductCode(productCode, PageRequestUtil.getPageRequest());
 		}else{
-			productServiceEntityPage = productServiceRepository.findAll(PageRequestUtil.getPageRequest());
+			productServiceEntityPage = productServiceRepository.findAllByDeletedFalse(PageRequestUtil.getPageRequest());
 		}
 		return productServiceEntityPage;
+	}
+
+	private ProductServiceResponse outputCreatedProductService(ProductServiceEntity productEntityService) {
+		ProductServiceResponse productResponse = new ProductServiceResponse();
+		BeanUtils.copyProperties(productEntityService, productResponse, "productEntity", "productDataset");
+		return productResponse;
 	}
 
 	@Transactional

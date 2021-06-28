@@ -145,7 +145,7 @@ public class CardService {
 	}
 
 	public CardProduct cardToProduct(CardToProductRequest request) {
-		if (!productEntityRepository.findByCode(request.getProductCode()).isPresent()){
+		if (!productEntityRepository.findByCodeAndDeletedFalse(request.getProductCode()).isPresent()){
 			throw new ResourceNotFoundException("Product Entity not found for productCode " + request.getProductCode());
 		}
 		if (!cardRepository.findById(request.getCardId()).isPresent()){

@@ -10,28 +10,21 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
-import javax.validation.constraints.NotBlank;
 
+import lombok.*;
 import org.hibernate.annotations.ResultCheckStyle;
 import org.hibernate.annotations.SQLDelete;
-import org.hibernate.annotations.Where;
-
 import com.etz.fraudeagleeyemanager.enums.UserCategory;
-
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
 
 
 @Entity
 @Table(name = "ofac_watchlist")
-@SQLDelete(sql = "UPDATE ofac_watchlist SET deleted = true WHERE id = ?", check = ResultCheckStyle.COUNT)
-@Where(clause = "deleted = false")
+@SQLDelete(sql = "UPDATE ofac_watchlist SET deleted = true, status=0 WHERE id = ?", check = ResultCheckStyle.COUNT)
 @Getter
 @Setter
 @ToString
-@RequiredArgsConstructor
+@AllArgsConstructor
+@NoArgsConstructor
 public class OfacWatchlist extends BaseAuditEntity implements Serializable {
 	private static final long serialVersionUID = 1L;
 
@@ -39,15 +32,13 @@ public class OfacWatchlist extends BaseAuditEntity implements Serializable {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
-	@NotBlank(message = "Full name cannot be empty")
-	@Column(name = "fullname")
+	@Column(name = "full_name")
 	private String fullName;
 
 	@Column(name = "category")
 	@Enumerated(EnumType.STRING)
 	private UserCategory category;
 
-	@NotBlank(message = "Comments cannot be empty")
 	@Column(name = "comments")
 	private String comments;
 		
@@ -57,7 +48,7 @@ public class OfacWatchlist extends BaseAuditEntity implements Serializable {
 	@Column(name = "authorised", nullable = false, columnDefinition = "TINYINT", length = 1)
 	private Boolean authorised;
 	
-	@Column(name = "authoriser", nullable = true, length=100) //at creation authoriser will not be provided
+	@Column(name = "authoriser", nullable = true, length=100)
 	private String authoriser;
 
 	@Override

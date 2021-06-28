@@ -1,39 +1,24 @@
 package com.etz.fraudeagleeyemanager.entity;
 
 import java.io.Serializable;
+import java.util.Set;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.OneToOne;
-import javax.persistence.Table;
+import javax.persistence.*;
 
+import lombok.*;
 import org.hibernate.annotations.ResultCheckStyle;
 import org.hibernate.annotations.SQLDelete;
-import org.hibernate.annotations.Where;
 
-import com.etz.fraudeagleeyemanager.enums.Status;
-
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
 
 
 @Getter
 @Setter
 @ToString
-@RequiredArgsConstructor
+@AllArgsConstructor
 @Entity
 @Table(name="email_group")
-@SQLDelete(sql = "UPDATE email_group SET deleted = true WHERE id = ?", check = ResultCheckStyle.COUNT)
-@Where(clause = "deleted = false")
+@SQLDelete(sql = "UPDATE email_group SET deleted = true, status=0 WHERE id = ?", check = ResultCheckStyle.COUNT)
+@NoArgsConstructor
 public class EmailGroup extends BaseAuditEntity implements Serializable {
 	private static final long serialVersionUID = 1L;
 
@@ -48,18 +33,17 @@ public class EmailGroup extends BaseAuditEntity implements Serializable {
 	private String email;
 	
 	@Column(nullable = false, name = "status", columnDefinition = "TINYINT", length = 1)
-	@Enumerated(EnumType.ORDINAL)
-	private Status status;
+	private Boolean status;
 
 	@ToString.Exclude
 	@OneToOne(mappedBy = "emailGroup", fetch = FetchType.LAZY,
 			cascade = CascadeType.ALL)
-	private ProductRule productRule;
+	private ServiceRule serviceRule;
 
-//	@ToString.Exclude
-//	@OneToMany(mappedBy = "emailGroup", fetch = FetchType.EAGER,
-//			cascade = CascadeType.ALL, orphanRemoval = true)
-//	private Set<ReportScheduler> reportSchedulers = new HashSet<>();
+	@OneToMany(mappedBy = "emailGroup", fetch = FetchType.LAZY,
+			cascade = {CascadeType.MERGE,CascadeType.PERSIST}, orphanRemoval = true)
+	@ToString.Exclude
+	private Set<ReportScheduler> reportSchedulers;
 
 	@Override
 	public boolean equals(Object o) {

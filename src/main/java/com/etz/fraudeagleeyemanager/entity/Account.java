@@ -1,10 +1,7 @@
 package com.etz.fraudeagleeyemanager.entity;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 import org.hibernate.Hibernate;
 import org.hibernate.annotations.ResultCheckStyle;
 import org.hibernate.annotations.SQLDelete;
@@ -20,10 +17,11 @@ import java.util.Set;
 		uniqueConstraints = @UniqueConstraint(name="UC_ACCOUNT",
 				columnNames = {"account_no"}))
 @SQLDelete(sql = "UPDATE account SET deleted = true, status=0 WHERE id = ?", check = ResultCheckStyle.COUNT)
-@ToString//(exclude = { "products" })
+@ToString
 @Getter
 @Setter
-@RequiredArgsConstructor
+@NoArgsConstructor
+@AllArgsConstructor
 public class Account extends BaseAuditEntity implements Serializable {
 	private static final long serialVersionUID = 1L;
 

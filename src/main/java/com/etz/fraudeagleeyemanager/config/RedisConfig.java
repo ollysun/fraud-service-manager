@@ -12,13 +12,17 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class RedisConfig {
 
-	private final JedisConnectionFactory fraudEngineConnectionFactory;
+
+    @Bean
+    public JedisConnectionFactory redisConnectionFactory() {
+        return new JedisConnectionFactory();
+    }
 
 	@Bean
     public RedisTemplate<String, Object> redisTemplate() {
     	RedisTemplate<String, Object> template = new RedisTemplate<>();
-        template.setConnectionFactory(fraudEngineConnectionFactory);
-        setSerializer(template);
+        template.setConnectionFactory(redisConnectionFactory());
+        //setSerializer(template);
         return template;
     }
 

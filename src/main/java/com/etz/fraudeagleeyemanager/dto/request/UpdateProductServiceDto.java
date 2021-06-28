@@ -3,6 +3,7 @@ package com.etz.fraudeagleeyemanager.dto.request;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+import net.minidev.json.annotate.JsonIgnore;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
@@ -20,7 +21,7 @@ public class UpdateProductServiceDto implements Serializable {
     private String serviceName;
     private String description;
     private String callback;
-    @NotBlank(message = "Please enter the updated by")
+    @JsonIgnore
     private String updatedBy;
     @NotNull(message = "Please enter the status")
     private Boolean status;

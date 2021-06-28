@@ -12,12 +12,14 @@ import java.util.Objects;
 @Getter
 @Setter
 @ToString
-@RequiredArgsConstructor
+@AllArgsConstructor
+
 @Entity
 @Table(name = "card_product", uniqueConstraints = @UniqueConstraint(name="UC_CARD_PRODUCT",
         columnNames = {"card_id"}))
 @SQLDelete(sql = "UPDATE card_product SET deleted = true, status=0 WHERE id = ?", check = ResultCheckStyle.COUNT)
 @IdClass(CardProductId.class)
+@NoArgsConstructor
 public class CardProduct extends BaseAuditVersionEntity<CardProductId> implements Serializable {
 	private static final long serialVersionUID = 1L;
 
