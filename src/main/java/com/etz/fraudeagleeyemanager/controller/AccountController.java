@@ -42,7 +42,7 @@ public class AccountController {
 	}
 
 	@GetMapping
-	public PageResponse<Account> queryAccount(Long accountId) {
+	public PageResponse<Account> queryAccount(@RequestParam(required = false) Long accountId) {
 		return new PageResponse<>(accountService.getAccount(accountId));
 	}
 	
