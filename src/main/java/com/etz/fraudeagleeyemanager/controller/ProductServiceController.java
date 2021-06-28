@@ -29,7 +29,8 @@ public class ProductServiceController {
     }
 
     @PutMapping
-    public ModelResponse<ProductServiceResponse> updateProductService(@RequestBody @Valid UpdateProductServiceDto request, @ApiIgnore @RequestAttribute(AppConstant.USERNAME) String username){
+    public ModelResponse<ProductServiceResponse> updateProductService(@RequestBody @Valid UpdateProductServiceDto request,
+                                                                      @ApiIgnore @RequestAttribute(AppConstant.USERNAME) String username){
         request.setUpdatedBy(username);
         return new ModelResponse<>(productService.updateProductService(request));
     }
@@ -45,7 +46,9 @@ public class ProductServiceController {
     }
 
     @PostMapping("/dataset")
-    public ResponseEntity<ModelResponse<ServiceDataSet>> addServiceDataset(@RequestBody @Valid DatasetProductRequest request){
+    public ResponseEntity<ModelResponse<ServiceDataSet>> addServiceDataset(@RequestBody @Valid DatasetProductRequest request,
+                                                                           @ApiIgnore @RequestAttribute(AppConstant.USERNAME) String username){
+        request.setCreatedBy(username);
         ModelResponse<ServiceDataSet> response = new ModelResponse<>(productService.createServiceDataset(request), HttpStatus.CREATED);
         return ResponseEntity.status(HttpStatus.valueOf(response.getStatus())).body(response);
     }
@@ -57,7 +60,9 @@ public class ProductServiceController {
     }
 
     @PutMapping("/dataset")
-    public CollectionResponse<ServiceDataSetResponse> updateServiceDataset(@RequestBody UpdateDataSetRequest request){
+    public CollectionResponse<ServiceDataSetResponse> updateServiceDataset(@RequestBody UpdateDataSetRequest request,
+                                                                           @ApiIgnore @RequestAttribute(AppConstant.USERNAME) String username){
+        request.setUpdatedBy(username);
         return new CollectionResponse<>(productService.updateServiceDataset(request));
     }
 

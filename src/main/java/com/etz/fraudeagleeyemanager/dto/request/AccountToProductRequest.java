@@ -1,6 +1,7 @@
 package com.etz.fraudeagleeyemanager.dto.request;
 
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -17,7 +18,7 @@ public class AccountToProductRequest implements Serializable {
 	private String productCode;
 	@NotNull(message="Please enter the accountId")
 	private Long accountId;
-	@NotBlank(message="CratedBY cannot be empty")
+	@JsonIgnore
 	private String createdBy;
 	
 }

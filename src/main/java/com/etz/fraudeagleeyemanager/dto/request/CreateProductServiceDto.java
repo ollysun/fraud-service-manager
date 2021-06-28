@@ -1,5 +1,6 @@
 package com.etz.fraudeagleeyemanager.dto.request;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
 
 import javax.validation.constraints.NotBlank;
@@ -16,6 +17,6 @@ public class CreateProductServiceDto  {
     private String serviceName;
     private String description;
     private String callback;
-    @NotBlank(message = "please enter the created by")
+    @JsonIgnore
     private String createdBy;
 }

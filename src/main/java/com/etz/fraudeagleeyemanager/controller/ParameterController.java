@@ -33,7 +33,9 @@ public class ParameterController {
 	}
 	
 	@PutMapping
-	public ModelResponse<Parameter> updateParameter(@RequestBody @Valid UpdateParameterRequest request){
+	public ModelResponse<Parameter> updateParameter(@RequestBody @Valid UpdateParameterRequest request,
+													@ApiIgnore @RequestAttribute(AppConstant.USERNAME) String username){
+		request.setUpdatedBy(username);
 		return new ModelResponse<>(parameterService.updateParameter(request));
 	}
 	

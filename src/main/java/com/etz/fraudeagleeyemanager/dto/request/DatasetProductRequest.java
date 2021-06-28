@@ -6,6 +6,7 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.PositiveOrZero;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 
 @Data
@@ -28,7 +29,7 @@ public class DatasetProductRequest implements Serializable {
 	@NotNull(message="Please tell the compulsory status")
 	private Boolean compulsory;
 
-	@NotBlank(message="Please enter the created by name")
+	@JsonIgnore
 	private String createdBy;
 
 	@NotNull(message="Please state the status of the authorization")

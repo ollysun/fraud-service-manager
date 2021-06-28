@@ -58,18 +58,22 @@ public class RuleController {
 	}
 	
 	@PostMapping("/service")
-	public ResponseEntity<ModelResponse<ServiceRule>> mapRuleToService(@RequestBody @Valid MapRuleToServiceRequest request){
+	public ResponseEntity<ModelResponse<ServiceRule>> mapRuleToService(@RequestBody @Valid MapRuleToServiceRequest request,
+																	   @ApiIgnore @RequestAttribute(AppConstant.USERNAME) String username){
+		request.setCreatedBy(username);
 		ModelResponse<ServiceRule> response = new ModelResponse<>(ruleService.mapRuleToService(request), HttpStatus.CREATED);
 		return ResponseEntity.status(HttpStatus.valueOf(response.getStatus())).body(response);
 	}
 	
 	@PutMapping("/service")
-	public CollectionResponse<ProductRuleResponse> updateServiceRule(@RequestBody @Valid UpdateMapRuleToServiceRequest request){
+	public CollectionResponse<ProductRuleResponse> updateServiceRule(@RequestBody @Valid UpdateMapRuleToServiceRequest request,
+																	 @ApiIgnore @RequestAttribute(AppConstant.USERNAME) String username){
+		request.setUpdatedBy(username);
 		return new CollectionResponse<>(ruleService.updateServiceRule(request));
 	}
 
 	@DeleteMapping("/service/{serviceId}/ruleId/{ruleId}")
-	public BooleanResponse deleteServiceRule(@PathVariable @NotNull @Positive Long ruleId, @PathVariable @NotNull Long serviceId){
+	public BooleanResponse deleteServiceRule(@PathVariable @NotNull @Positive Long ruleId, @PathVariable @NotNull @Positive Long serviceId){
 		return new BooleanResponse(ruleService.deleteServiceRule(ruleId, serviceId));
 	}
 
