@@ -21,6 +21,9 @@ public final class AppConstant {
 	public static final String ERROR_SAVING_TO_REDIS = "Error while saving to Redis";
 	public static final String ERROR_DELETING_FROM_DATABASE = "Error while saving to the database";
 	public static final String ERROR_DELETING_FROM_REDIS = "Error while deleting from Redis";
+	public static final String AUTHORIZATION = "Authorization";
+	public static final String TOKEN_PREFIX = "Bearer ";
+	public static final String USERNAME = "username";
 
 	
 	

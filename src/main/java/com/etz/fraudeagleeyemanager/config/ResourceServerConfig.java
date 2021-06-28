@@ -16,6 +16,7 @@ import org.springframework.security.oauth2.provider.token.DefaultTokenServices;
 import org.springframework.security.oauth2.provider.token.TokenStore;
 import org.springframework.security.oauth2.provider.token.store.JwtAccessTokenConverter;
 import org.springframework.security.oauth2.provider.token.store.JwtTokenStore;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.filter.CorsFilter;
@@ -30,6 +31,11 @@ public class ResourceServerConfig extends ResourceServerConfigurerAdapter {
 
 	private static final String RESOURCE_ID = "fraud-engine";
 
+    private static final String[] SWAGGER_WHITELIST = {
+            // -- swagger ui
+            "/swagger", "/v2/api-docs", "/swagger-resources", "/swagger-resources/**", "/configuration/ui", "/actuator/health",
+            "/configuration/security", "/swagger-ui.html", "/webjars/**" };
+
     @Override
     public void configure(ResourceServerSecurityConfigurer resources) {
         resources.resourceId(RESOURCE_ID).tokenServices(tokenServices(tokenStore())).tokenStore(tokenStore());
@@ -41,9 +47,12 @@ public class ResourceServerConfig extends ResourceServerConfigurerAdapter {
         http.authorizeRequests()
                 .antMatchers("/health","/info", "/trace", "/monitoring",
                         "/webjars/**","/swagger.html")
+                .permitAll()
+                .antMatchers(SWAGGER_WHITELIST)
                 .permitAll();
         http.authorizeRequests().antMatchers("/**")
                 .authenticated();
+        http.addFilterBefore(authenticationTokenFilterBean(), UsernamePasswordAuthenticationFilter.class);
     }
 
     @Bean
@@ -70,16 +79,21 @@ public class ResourceServerConfig extends ResourceServerConfigurerAdapter {
     public FilterRegistrationBean<CorsFilter> corFilter() {
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
 
-        CorsConfiguration configAutenticacao = new CorsConfiguration();
-        configAutenticacao.setAllowCredentials(true);
-        configAutenticacao.setAllowedOriginPatterns(Collections.singletonList(AppConstant.ALL));
-        configAutenticacao.addAllowedHeader(AppConstant.ALL);
-        configAutenticacao.addAllowedMethod(AppConstant.ALL);
-        source.registerCorsConfiguration("/**", configAutenticacao); // Global for all paths
+        CorsConfiguration config = new CorsConfiguration();
+        config.setAllowCredentials(true);
+        config.setAllowedOriginPatterns(Collections.singletonList(AppConstant.ALL));
+        config.addAllowedHeader(AppConstant.ALL);
+        config.addAllowedMethod(AppConstant.ALL);
+        source.registerCorsConfiguration("/**", config); // Global for all paths
 
         FilterRegistrationBean<CorsFilter> bean = new FilterRegistrationBean<>(new CorsFilter(source));
         bean.setOrder(Ordered.HIGHEST_PRECEDENCE);
         return bean;
+    }
+
+    @Bean
+    public JwtAuthenticationFilter authenticationTokenFilterBean() {
+        return new JwtAuthenticationFilter();
     }
     
 }

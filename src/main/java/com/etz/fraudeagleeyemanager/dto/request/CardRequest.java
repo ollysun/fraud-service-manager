@@ -1,6 +1,7 @@
 package com.etz.fraudeagleeyemanager.dto.request;
 
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 
 import javax.validation.constraints.NotBlank;
@@ -40,6 +41,6 @@ public class CardRequest {
 	private String isoCountryCode;
 	private Integer suspicionCount;
 	private String blockReason;
-	@NotBlank(message="Please enter the value for created by")
+	@JsonIgnore
 	private String createdBy;
 }

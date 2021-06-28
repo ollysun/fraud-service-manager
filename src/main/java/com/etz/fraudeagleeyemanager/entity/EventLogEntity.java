@@ -1,22 +1,21 @@
 package com.etz.fraudeagleeyemanager.entity;
 
-import java.io.Serializable;
-import java.time.LocalDateTime;
-
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.Table;
-
+import lombok.*;
+import org.hibernate.Hibernate;
 import org.hibernate.annotations.Type;
 
-import lombok.Data;
+import javax.persistence.*;
+import java.io.Serializable;
+import java.time.LocalDateTime;
+import java.util.Objects;
 
 @Entity
 @Table(name = "event_log")
-@Data
+@Getter
+@Setter
+@ToString
+@AllArgsConstructor
+@NoArgsConstructor
 public class EventLogEntity implements Serializable {
 	private static final long serialVersionUID = 1L;
 	
@@ -28,7 +27,7 @@ public class EventLogEntity implements Serializable {
 	@Column(name = "entity", nullable = false, columnDefinition="VARCHAR(150)")
 	private String entity;
 	
-	@Column(name = "entity_id", nullable = true, columnDefinition="VARCHAR(250)")
+	@Column(name = "entity_id",  columnDefinition="VARCHAR(250)")
 	private String entityId;
 	
 	@Column(name = "event_desc", columnDefinition="VARCHAR(250)")
@@ -58,4 +57,17 @@ public class EventLogEntity implements Serializable {
 	@Column(name = "event_time", nullable = false)
 	private LocalDateTime eventTime;
 
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) return true;
+		if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
+		EventLogEntity that = (EventLogEntity) o;
+
+		return Objects.equals(id, that.id);
+	}
+
+	@Override
+	public int hashCode() {
+		return 1911697463;
+	}
 }

@@ -1,30 +1,22 @@
 package com.etz.fraudeagleeyemanager.entity;
 
-import java.io.Serializable;
-
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.Table;
-
+import lombok.*;
+import org.hibernate.Hibernate;
 import org.hibernate.annotations.ResultCheckStyle;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.Type;
-import org.hibernate.annotations.Where;
-
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.ToString;
+import javax.persistence.*;
+import java.io.Serializable;
+import java.util.Objects;
 
 @Entity
 @Table(name = "notification_groups")
-@SQLDelete(sql = "UPDATE account SET deleted = true WHERE id = ?", check = ResultCheckStyle.COUNT)
-@Where(clause = "deleted = false")
+@SQLDelete(sql = "UPDATE account SET deleted = true, status=0 WHERE id = ?", check = ResultCheckStyle.COUNT)
 @ToString
-@Data
-@EqualsAndHashCode(callSuper = true)
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class NotificationGroup extends BaseAuditEntity implements Serializable {
 	private static final long serialVersionUID = 1L;
 
@@ -53,10 +45,26 @@ public class NotificationGroup extends BaseAuditEntity implements Serializable {
 	@Column(name = "authorised", nullable = false, columnDefinition = "TINYINT", length = 1)
 	private Boolean authorised;
 	
-	@Column(name = "authoriser", nullable = true, length=100) //at creation authoriser will not be provided
+	@Column(name = "authoriser", length=100) //at creation authoriser will not be provided
 	private String authoriser;
 	
 	@Column(name = "status", nullable = false, columnDefinition = "TINYINT", length = 1)
 	private Boolean status;
-	
+
+	@Column(name = "export_type", nullable = false)
+	private String exportType;
+
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) return true;
+		if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
+		NotificationGroup that = (NotificationGroup) o;
+
+		return Objects.equals(id, that.id);
+	}
+
+	@Override
+	public int hashCode() {
+		return 1854275612;
+	}
 }

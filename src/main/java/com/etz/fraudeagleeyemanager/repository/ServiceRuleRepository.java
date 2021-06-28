@@ -1,6 +1,6 @@
 package com.etz.fraudeagleeyemanager.repository;
 
-import com.etz.fraudeagleeyemanager.entity.ProductRule;
+import com.etz.fraudeagleeyemanager.entity.ServiceRule;
 import com.etz.fraudeagleeyemanager.entity.ProductRuleId;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -12,13 +12,13 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface ProductRuleRepository extends JpaRepository<ProductRule, ProductRuleId> {
-    Optional<ProductRule> findByProductCode(String code);
-    List<ProductRule> findByRuleId(Long ruleId);
+public interface ServiceRuleRepository extends JpaRepository<ServiceRule, ProductRuleId> {
+    Optional<ServiceRule> findByServiceId(Long serviceId);
+    List<ServiceRule> findByRuleId(Long ruleId);
 
     // NOTE: you have return void
     @Modifying
     @Transactional
-    @Query(value="UPDATE ProductRule SET deleted = true, status=0 WHERE ruleId = ?1 and productCode = ?2")
-    void deleteByRuleId(Long ruleId, String code);
+    @Query(value="UPDATE ServiceRule SET deleted = true, status=0 WHERE ruleId = ?1 and serviceId = ?2")
+    void deleteByRuleIdAndServiceId(Long ruleId, Long serviceId);
 }

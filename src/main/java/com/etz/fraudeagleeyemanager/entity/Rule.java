@@ -1,37 +1,27 @@
 package com.etz.fraudeagleeyemanager.entity;
 
-import java.io.Serializable;
-import java.util.Set;
-
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.OneToMany;
-import javax.persistence.Table;
-import javax.persistence.UniqueConstraint;
-
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import org.hibernate.Hibernate;
 import org.hibernate.annotations.ResultCheckStyle;
 import org.hibernate.annotations.SQLDelete;
-import org.hibernate.annotations.Where;
-
-import com.fasterxml.jackson.annotation.JsonManagedReference;
-
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.Setter;
+import javax.persistence.*;
+import java.io.Serializable;
+import java.util.Objects;
+import java.util.Set;
 
 @Entity
 @Table(name = "rule",uniqueConstraints = @UniqueConstraint(name="UQ_RULE",
 		columnNames = {"rule_name"}))
-@SQLDelete(sql = "UPDATE rule SET deleted = true WHERE id = ?", check = ResultCheckStyle.COUNT)
-@Where(clause = "deleted = false")
+@SQLDelete(sql = "UPDATE rule SET deleted = true, status=0 WHERE id = ?", check = ResultCheckStyle.COUNT)
 @Getter
 @Setter
-@EqualsAndHashCode(exclude = {"productRule"}, callSuper = false)
+@AllArgsConstructor
+@NoArgsConstructor
 public class Rule extends BaseAuditEntity implements Serializable {
 	private static final long serialVersionUID = 1L;
 
@@ -44,6 +34,9 @@ public class Rule extends BaseAuditEntity implements Serializable {
 	
 	@Column(name = "source_value_1", nullable=false)
 	private String sourceValueOne;
+
+	@Column(name = "value_1_data_type", nullable=false)
+	private String valueOneDataType;
 
 	@Column(name = "operator_1", nullable=false)
 	private String operatorOne;
@@ -59,6 +52,9 @@ public class Rule extends BaseAuditEntity implements Serializable {
 
 	@Column(name = "source_value_2")
 	private String sourceValueTwo;
+
+	@Column(name = "value_2_data_type", nullable=false)
+	private String valueTwoDataType;
 
 	@Column(name = "operator_2")
 	private String operatorTwo;
@@ -80,9 +76,23 @@ public class Rule extends BaseAuditEntity implements Serializable {
 	@Column(name = "authorised")
 	private Boolean authorised;
 
-	@JsonManagedReference
 	@OneToMany(mappedBy = "rule",fetch = FetchType.LAZY,
 			cascade = CascadeType.ALL, orphanRemoval = true)
-	private Set<ProductRule> productRule;
-		
+	@JsonManagedReference
+	@JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+	private Set<ServiceRule> serviceRule;
+
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) return true;
+		if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
+		Rule rule = (Rule) o;
+
+		return Objects.equals(id, rule.id);
+	}
+
+	@Override
+	public int hashCode() {
+		return 667350611;
+	}
 }

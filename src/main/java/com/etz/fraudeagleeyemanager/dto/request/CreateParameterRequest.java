@@ -5,6 +5,7 @@ import java.io.Serializable;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 
 @Data
@@ -16,7 +17,7 @@ public class CreateParameterRequest implements Serializable {
 	private String operator;
 	@NotNull(message = "Please set the requiredValue")
 	private Boolean requireValue;
-	@NotBlank(message = "createdBy cannot be empty")
+	@JsonIgnore
 	private String createdBy;
 	@NotNull(message = "Authorised cannot be empty")
 	private Boolean authorised;

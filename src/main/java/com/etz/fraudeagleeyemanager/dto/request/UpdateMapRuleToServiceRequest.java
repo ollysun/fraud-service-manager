@@ -7,10 +7,10 @@ import java.io.Serializable;
 import javax.validation.constraints.NotNull;
 
 @Data
-public class UpdateMapRuleToProductRequest implements Serializable {
+public class UpdateMapRuleToServiceRequest implements Serializable {
 	private static final long serialVersionUID = 1L;
-	@NotNull(message="productRuleId cannot be empty")
-	private Long productRuleId;
+	@NotNull(message="serviceRuleId cannot be empty")
+	private Long serviceRuleId;
 	private Boolean notifyAdmin;
 	private Long emailGroupId;
 	private Boolean notifyCustomer;

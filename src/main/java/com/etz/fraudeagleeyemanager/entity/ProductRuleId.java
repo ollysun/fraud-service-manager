@@ -15,5 +15,5 @@ public class ProductRuleId implements Serializable {
 
 	private Long ruleId;
 
-    private String productCode;
+    private Long serviceId;
 }

@@ -23,6 +23,8 @@ import com.etz.fraudeagleeyemanager.util.PageRequestUtil;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
 @Service
@@ -32,13 +34,12 @@ public class ParameterService {
 	private final RedisTemplate<String, Object> redisTemplate;
 	private final ParameterRedisRepository parameterRedisRepository;
 	private final ParameterRepository parameterRepository;
-	
 
+	@Transactional(propagation = Propagation.REQUIRES_NEW)
 	public Parameter createParameter(CreateParameterRequest request) {
 		Parameter parameterEntity = new Parameter();
-		try {
 			parameterEntity.setName(request.getName());
-			parameterEntity.setOperator(AppUtil.checkOperator(request.getOperator()));
+			parameterEntity.setOperator(AppUtil.checkParameterOperator(request.getOperator()));
 			parameterEntity.setAuthorised(request.getAuthorised());
 			parameterEntity.setRequireValue(request.getRequireValue());
 			parameterEntity.setCreatedBy(request.getCreatedBy());
@@ -47,10 +48,10 @@ public class ParameterService {
 			parameterEntity.setEntityId(null);
 			parameterEntity.setRecordBefore(null);
 			parameterEntity.setRequestDump(request);
-		} catch (Exception ex) {
-			log.error("Error occurred while creating Parameter entity object", ex);
-			throw new FraudEngineException(AppConstant.ERROR_SETTING_PROPERTY);
-		}
+		//} catch (Exception ex) {
+		//	log.error("Error occurred while creating Parameter entity object", ex);
+		//	throw new FraudEngineException(AppConstant.ERROR_SETTING_PROPERTY);
+		//}
 		return saveInternalWatchlistEntityToDatabase(parameterEntity);
 	}
 
@@ -63,7 +64,7 @@ public class ParameterService {
 			parameterEntity.setRequestDump(request);
 
 			parameterEntity.setName(request.getName());
-			parameterEntity.setOperator(AppUtil.checkOperator(request.getOperator()));
+			parameterEntity.setOperator(AppUtil.checkParameterOperator(request.getOperator()));
 			parameterEntity.setRequireValue(request.getRequireValue());
 			parameterEntity.setAuthorised(request.getAuthorised());
 			parameterEntity.setUpdatedBy(request.getUpdatedBy());

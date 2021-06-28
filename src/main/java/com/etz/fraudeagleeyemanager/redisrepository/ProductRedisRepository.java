@@ -14,11 +14,12 @@ import java.util.Map;
 public class ProductRedisRepository implements RedisRepository<ProductEntity, String> {
 	
     private HashOperations<String, String, ProductEntity> hashOperations;
-	
-    public void setHashOperations(RedisTemplate<String, Object> redisTemplate){
+
+
+	public void setHashOperations(RedisTemplate<String, Object> redisTemplate){
         this.hashOperations = redisTemplate.opsForHash();
     }
-    
+
 	@Override
 	public void create(ProductEntity model) {
 		hashOperations.put(FraudRedisKey.PRODUCT.name(), model.getCode(), model);

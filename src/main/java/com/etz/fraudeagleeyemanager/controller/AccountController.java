@@ -3,14 +3,10 @@ package com.etz.fraudeagleeyemanager.controller;
 
 import javax.validation.Valid;
 
+import com.etz.fraudeagleeyemanager.constant.AppConstant;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import com.etz.fraudeagleeyemanager.dto.request.AccountToProductRequest;
 import com.etz.fraudeagleeyemanager.dto.request.AddAccountRequest;
@@ -26,6 +22,7 @@ import com.etz.fraudeagleeyemanager.service.AccountService;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import springfox.documentation.annotations.ApiIgnore;
 
 @Slf4j
 @RestController
@@ -37,13 +34,15 @@ public class AccountController {
 	
 	//TODO set pre-authorize permission
 	@PostMapping
-	public ResponseEntity<ModelResponse<Account>> createAccount(@RequestBody @Valid AddAccountRequest request) {
+	public ResponseEntity<ModelResponse<Account>> createAccount(@RequestBody @Valid AddAccountRequest request,
+																@ApiIgnore @RequestAttribute(AppConstant.USERNAME) String username) {
+		request.setCreatedBy(username);
 		ModelResponse<Account> response = new ModelResponse<>(accountService.createAccount(request), HttpStatus.CREATED);
 		return ResponseEntity.status(HttpStatus.valueOf(response.getStatus())).body(response);
 	}
 
 	@GetMapping
-	public PageResponse<Account> queryAccount(Long accountId) {
+	public PageResponse<Account> queryAccount(@RequestParam(required = false) Long accountId) {
 		return new PageResponse<>(accountService.getAccount(accountId));
 	}
 	
@@ -53,14 +52,17 @@ public class AccountController {
 	}
 
 	@PostMapping("/product")
-	public ResponseEntity<ModelResponse<AccountProduct>> mapAccountToProduct(@RequestBody @Valid AccountToProductRequest request) {
-		log.info(request.toString());
+	public ResponseEntity<ModelResponse<AccountProduct>> mapAccountToProduct(@RequestBody @Valid AccountToProductRequest request,
+																			 @ApiIgnore @RequestAttribute(AppConstant.USERNAME) String username) {
+		request.setCreatedBy(username);
 		ModelResponse<AccountProduct> response = new ModelResponse<>(accountService.mapAccountProduct(request), HttpStatus.CREATED);
 		return ResponseEntity.status(HttpStatus.valueOf(response.getStatus())).body(response);
 	}
 
 	@PutMapping("/product")
-	public CollectionResponse<AccountProductResponse> updateAccountProduct(@RequestBody @Valid UpdateAccountProductRequest request) {
+	public CollectionResponse<AccountProductResponse> updateAccountProduct(@RequestBody @Valid UpdateAccountProductRequest request,
+																		   @ApiIgnore @RequestAttribute(AppConstant.USERNAME) String username) {
+		request.setUpdatedBy(username);
 		return new CollectionResponse<>(accountService.updateAccountProduct(request), "All Updated AccountProduct");
 	}
 

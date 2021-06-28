@@ -1,5 +1,6 @@
 package com.etz.fraudeagleeyemanager.dto.request;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -14,6 +15,6 @@ public class CardToProductRequest implements Serializable {
 	private String productCode;
 	@NotNull(message="Please enter the cardId")
 	private Long cardId;
-	@NotBlank(message="CreatedBy cannot be null")
+	@JsonIgnore
 	private String createdBy;
 }

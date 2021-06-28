@@ -1,30 +1,24 @@
 package com.etz.fraudeagleeyemanager.entity;
 
-import java.io.Serializable;
-
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.Table;
-import javax.persistence.UniqueConstraint;
-
+import lombok.*;
+import org.hibernate.Hibernate;
 import org.hibernate.annotations.ResultCheckStyle;
 import org.hibernate.annotations.SQLDelete;
-import org.hibernate.annotations.Where;
 
-import lombok.Data;
-import lombok.EqualsAndHashCode;
+import javax.persistence.*;
+import java.io.Serializable;
+import java.util.Objects;
 
-@EqualsAndHashCode(callSuper = true)
 @Entity
 @Table(name = "parameter", 
 uniqueConstraints = @UniqueConstraint(
 		columnNames = {"name", "operator"}, name = "UC_Parameter"))
-@SQLDelete(sql = "UPDATE parameter SET deleted = true WHERE id = ?", check = ResultCheckStyle.COUNT)
-@Where(clause = "deleted = false")
-@Data
+@SQLDelete(sql = "UPDATE parameter SET deleted = true, status=0 WHERE id = ?", check = ResultCheckStyle.COUNT)
+@Getter
+@Setter
+@ToString
+@NoArgsConstructor
+@AllArgsConstructor
 public class Parameter extends BaseAuditEntity implements Serializable {
 	private static final long serialVersionUID = 1L;
 
@@ -43,5 +37,18 @@ public class Parameter extends BaseAuditEntity implements Serializable {
 	
 	@Column(name = "authorised")
 	private Boolean authorised;
-		
+
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) return true;
+		if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
+		Parameter parameter = (Parameter) o;
+
+		return Objects.equals(id, parameter.id);
+	}
+
+	@Override
+	public int hashCode() {
+		return 1131502493;
+	}
 }

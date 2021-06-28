@@ -1,13 +1,19 @@
 package com.etz.fraudeagleeyemanager.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import lombok.AllArgsConstructor;
-import lombok.Data;
+import lombok.*;
 
+import javax.persistence.Column;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
 import java.io.Serializable;
 
-@Data
+@Getter
+@Setter
+@ToString
 @AllArgsConstructor
+@NoArgsConstructor
 @JsonIgnoreProperties({ "productRule", "productEntity", "emailGroup", })
 public class RuleProductResponse implements Serializable {
 	private static final long serialVersionUID = 1L;
@@ -18,6 +24,8 @@ public class RuleProductResponse implements Serializable {
 
     private String sourceValueOne;
 
+    private String valueOneDataType;
+
     private String operatorOne;
 
     private String compareValueOne;
@@ -27,6 +35,8 @@ public class RuleProductResponse implements Serializable {
     private String logicOperator;
 
     private String sourceValueTwo;
+
+    private String valueTwoDataType;
 
     private String operatorTwo;
 
@@ -42,7 +52,7 @@ public class RuleProductResponse implements Serializable {
 
     private Boolean authorised;
 
-    private String productCode;
+    private Long serviceId;
 
     private Long productRuleId;
 }

@@ -6,6 +6,7 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.PositiveOrZero;
 import javax.validation.constraints.Size;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 
 @Data
@@ -26,7 +27,7 @@ public class AddAccountRequest implements Serializable {
 	@NotBlank(message = "Please enter the bank name")
 	private String bankName;
 
-	@NotBlank(message = "Please enter your name")
+	@JsonIgnore
 	private String createdBy;
 	
 	private String blockReason;

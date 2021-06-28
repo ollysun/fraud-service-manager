@@ -5,6 +5,7 @@ import java.io.Serializable;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 
 @Data
@@ -14,6 +15,8 @@ public class UpdateRuleRequest implements Serializable {
     private Long ruleId;
     @NotBlank(message="firstSourceVal cannot be empty")
     private String firstSourceVal;
+    @NotBlank(message="firstDataType cannot be empty")
+    private String firstDataType;
     @NotBlank(message="firstOperator cannot be empty")
     private String firstOperator;
     @NotNull(message="firstCompareVal cannot be empty")
@@ -22,6 +25,8 @@ public class UpdateRuleRequest implements Serializable {
     private String firstDataSource;
     private String logicOperator;
     private String secondSourceVal;
+    @NotBlank(message="secondDataType cannot be empty")
+    private String secondDataType;
     private String secondOperator;
     private String secondCompareVal;
     private String secondDataSource;
@@ -29,7 +34,7 @@ public class UpdateRuleRequest implements Serializable {
     private Integer suspicion;
     @NotNull(message="action cannot be empty")
     private String action;
-    @NotNull(message="updatedBy cannot be empty")
+    @JsonIgnore
     private String updatedBy;
     @NotNull(message="authorised cannot be empty")
     private Boolean authorised;
