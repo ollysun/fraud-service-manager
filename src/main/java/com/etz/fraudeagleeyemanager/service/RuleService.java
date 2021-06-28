@@ -62,7 +62,11 @@ public class RuleService {
 	public Rule createRule(CreateRuleRequest request) {
 		Rule ruleEntity = new Rule();
 		if (Boolean.FALSE.equals(parameterRepository.existsByNameAndOperator(request.getFirstSourceVal(), request.getFirstOperator()))){
-			throw new FraudEngineException("The source value and operator doesn't exists in Parameter table ");
+			throw new FraudEngineException("The source value one and operator one doesn't exists in Parameter table ");
+		}
+
+		if (!(Objects.isNull(request.getSecondSourceVal()) && Objects.isNull(request.getSecondOperator())) && Boolean.FALSE.equals(parameterRepository.existsByNameAndOperator(request.getSecondSourceVal(), request.getSecondOperator()))) {
+			throw new FraudEngineException("The source value two and operator two doesn't exists in Parameter table ");
 		}
 		//try {
 			ruleEntity.setName(request.getRuleName());

@@ -202,7 +202,7 @@ public class AppUtil {
     }
 
     public static String checkParameterOperator(String operatorRequest){
-        List<String> allowedOperators = Arrays.asList("==","!=", "<", ">", "<=", ">=");
+        List<String> allowedOperators = Arrays.asList("==","!=", "<", ">", "<=", ">=", "change");
         String operator = "";
             operator = allowedOperators.stream()
                     .filter(bl -> bl.toUpperCase().equalsIgnoreCase(operatorRequest))

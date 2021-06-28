@@ -44,7 +44,6 @@ public class ServiceRule extends BaseAuditVersionEntity<ProductRuleId> implement
 	@Column(nullable = false, name = "authorised", columnDefinition = "TINYINT", length = 1)
 	private Boolean authorised;
 
-
 	@JsonBackReference
 	@OneToOne(fetch = FetchType.LAZY)
 	@MapsId("emailGroupId")
@@ -59,15 +58,6 @@ public class ServiceRule extends BaseAuditVersionEntity<ProductRuleId> implement
 	@JoinColumn(name = "rule_id")
 	@ToString.Exclude
 	private Rule rule;
-
-
-	@JsonBackReference
-	@ManyToOne(fetch = FetchType.LAZY)
-	@MapsId("productCode")
-	@JoinColumn(name = "product_code")
-	@ToString.Exclude
-	private ProductEntity productEntity;
-
 
 	@Override
 	public ProductRuleId getId() {

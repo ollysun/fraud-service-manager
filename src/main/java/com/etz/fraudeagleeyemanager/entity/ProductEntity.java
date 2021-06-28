@@ -58,12 +58,6 @@ public class ProductEntity extends BaseAuditVersionEntity<String> implements Ser
     private List<ProductDataSet> productDataset;
 
     @JsonManagedReference
-    @ToString.Exclude
-    @OneToMany(mappedBy = "productEntity", fetch = FetchType.LAZY,
-            cascade = {CascadeType.PERSIST,CascadeType.MERGE}, orphanRemoval = true)
-    private Set<ServiceRule> serviceRules;
-
-    @JsonManagedReference
     @OneToMany(mappedBy = "productEntity",fetch = FetchType.LAZY,
             cascade = {CascadeType.PERSIST,CascadeType.MERGE}, orphanRemoval = true)
     private Set<AccountProduct> accountProducts;
