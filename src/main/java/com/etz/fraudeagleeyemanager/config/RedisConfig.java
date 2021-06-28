@@ -22,7 +22,7 @@ public class RedisConfig {
     public RedisTemplate<String, Object> redisTemplate() {
     	RedisTemplate<String, Object> template = new RedisTemplate<>();
         template.setConnectionFactory(redisConnectionFactory());
-        //setSerializer(template);
+        setSerializer(template);
         return template;
     }
 

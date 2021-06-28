@@ -37,11 +37,11 @@ spring:
 
   redis:
     client-type: jedis
-#    host: 172.17.10.16
-    host: 127.0.0.1
+    host: 172.17.10.16
+ //   host: 127.0.0.1
     port: 6379
     database: 0
-#    password: visionsvisions
+    password: visionsvisions
 
   cloud:
     consul:
