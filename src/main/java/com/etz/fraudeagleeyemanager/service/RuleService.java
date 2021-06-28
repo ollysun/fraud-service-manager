@@ -287,10 +287,10 @@ public class RuleService {
 		return saveRuleServiceEntityToDatabase(serviceRuleEntity);
 	}
 
-	public List<ProductRuleResponse> updateProductRule(UpdateMapRuleToServiceRequest request) {
-		List<ServiceRule> prodRuleEntityList = serviceRuleRepository.findByRuleId(request.getProductRuleId());
+	public List<ProductRuleResponse> updateServiceRule(UpdateMapRuleToServiceRequest request) {
+		List<ServiceRule> prodRuleEntityList = serviceRuleRepository.findByRuleId(request.getServiceRuleId());
 		if(prodRuleEntityList.isEmpty()){
-			throw new FraudEngineException("ServiceRule Not found for Id " + request.getProductRuleId());
+			throw new FraudEngineException("ServiceRule Not found for Id " + request.getServiceRuleId());
 		}
 		
 		if (!Objects.isNull(request.getEmailGroupId()) && !emailGroupRepository.findById(request.getEmailGroupId()).isPresent()) {
@@ -320,9 +320,9 @@ public class RuleService {
 		return outputProductRuleResponseList(updatedServiceRuleEntity);
 	}
 
-	public boolean deleteProductRule(Long ruleId, Long serviceId) {
+	public boolean deleteServiceRule(Long ruleId, Long serviceId) {
 		if (Objects.isNull(ruleId) && Objects.isNull(serviceId)){
-			throw new FraudEngineException("Please enter value for code and ruleId");
+			throw new FraudEngineException("Please enter value for serviceId and ruleId");
 		}
 		Optional<ServiceRule> productRuleOptional = serviceRuleRepository.findById(new ProductRuleId(ruleId, serviceId));
 		productRuleRedisRepository.setHashOperations(redisTemplate);
@@ -335,8 +335,7 @@ public class RuleService {
 			serviceRule.setRequestDump("ruleId:" + ruleId + " serviceId:" + serviceId);
 
 			try {
-				// serviceRuleRepository.deleteByRuleId(ruleId, code);
-				serviceRuleRepository.delete(serviceRule);
+				serviceRuleRepository.deleteByRuleIdAndServiceId(ruleId, serviceId);
 			} catch (Exception ex) {
 				log.error("Error occurred while deleting product rule entity from the database", ex);
 				throw new FraudEngineException(AppConstant.ERROR_DELETING_FROM_DATABASE);

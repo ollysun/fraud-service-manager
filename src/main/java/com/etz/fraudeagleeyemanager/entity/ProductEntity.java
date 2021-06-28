@@ -55,7 +55,7 @@ public class ProductEntity extends BaseAuditVersionEntity<String> implements Ser
     @ToString.Exclude
     @OneToMany(mappedBy = "productEntity", fetch = FetchType.LAZY,
             cascade = {CascadeType.PERSIST,CascadeType.MERGE}, orphanRemoval = true)
-    private List<ProductDataSet> productDataset;
+    private List<ServiceDataSet> serviceDataset;
 
     @JsonManagedReference
     @OneToMany(mappedBy = "productEntity",fetch = FetchType.LAZY,

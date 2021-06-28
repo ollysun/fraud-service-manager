@@ -9,14 +9,14 @@ import java.util.Objects;
 
 
 @Entity
-@Table(name = "product_dataset")
+@Table(name = "service_dataset")
 @Getter
 @Setter
 @AllArgsConstructor
 @ToString(exclude = { "productEntity" })
 @IdClass(ProductDatasetId.class)
 @NoArgsConstructor
-public class ProductDataSet extends BaseAuditVersionEntity<ProductDatasetId> implements Serializable {
+public class ServiceDataSet extends BaseAuditVersionEntity<ProductDatasetId> implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	@Id
@@ -64,7 +64,7 @@ public class ProductDataSet extends BaseAuditVersionEntity<ProductDatasetId> imp
 	public boolean equals(Object o) {
 		if (this == o) return true;
 		if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
-		ProductDataSet that = (ProductDataSet) o;
+		ServiceDataSet that = (ServiceDataSet) o;
 
 		if (!Objects.equals(id, that.id)) return false;
 		if (!Objects.equals(productCode, that.productCode)) return false;

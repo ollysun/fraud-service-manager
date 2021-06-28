@@ -9,18 +9,19 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.etz.fraudeagleeyemanager.entity.ProductDataSet;
+import com.etz.fraudeagleeyemanager.entity.ServiceDataSet;
 import com.etz.fraudeagleeyemanager.entity.ProductDatasetId;
 
 @Repository
-public interface ProductDataSetRepository extends JpaRepository<ProductDataSet, ProductDatasetId> {
+public interface ProductDataSetRepository extends JpaRepository<ServiceDataSet, ProductDatasetId> {
 
-	List<ProductDataSet> findByProductCode(String productCode);
+	List<ServiceDataSet> findByProductCode(String productCode);
+	List<ServiceDataSet> findByServiceId(Long serviceId);
 
 	//@Override
-	@Query("update #{#entityName} e set e.deleted=true where e.productCode=?1")
+	@Query("update #{#entityName} e set e.deleted=true where e.serviceId=?1")
 	@Modifying
 	@Transactional
-	void delete(@Param("code")String code);
+	void delete(@Param("serviceId")Long serviceId);
 
 }

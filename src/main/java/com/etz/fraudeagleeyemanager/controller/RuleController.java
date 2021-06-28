@@ -53,24 +53,24 @@ public class RuleController {
 	}
 	
 	@GetMapping
-	public PageResponse<RuleResponse> queryRule(Long ruleId){
+	public PageResponse<RuleResponse> queryRule(@RequestParam(required = false) Long ruleId){
 		return new PageResponse<>(ruleService.getRule(ruleId));
 	}
 	
 	@PostMapping("/service")
-	public ResponseEntity<ModelResponse<ServiceRule>> mapRuleToProduct(@RequestBody @Valid MapRuleToServiceRequest request){
+	public ResponseEntity<ModelResponse<ServiceRule>> mapRuleToService(@RequestBody @Valid MapRuleToServiceRequest request){
 		ModelResponse<ServiceRule> response = new ModelResponse<>(ruleService.mapRuleToService(request), HttpStatus.CREATED);
 		return ResponseEntity.status(HttpStatus.valueOf(response.getStatus())).body(response);
 	}
 	
-	@PutMapping("/product")
-	public CollectionResponse<ProductRuleResponse> updateProductRule(@RequestBody @Valid UpdateMapRuleToServiceRequest request){
-		return new CollectionResponse<>(ruleService.updateProductRule(request));
+	@PutMapping("/service")
+	public CollectionResponse<ProductRuleResponse> updateServiceRule(@RequestBody @Valid UpdateMapRuleToServiceRequest request){
+		return new CollectionResponse<>(ruleService.updateServiceRule(request));
 	}
 
-	@DeleteMapping("/product/{code}/ruleId/{ruleId}")
-	public BooleanResponse deleteProductRule(@PathVariable @NotNull @Positive Long ruleId, @PathVariable @NotNull Long serviceId){
-		return new BooleanResponse(ruleService.deleteProductRule(ruleId, serviceId));
+	@DeleteMapping("/service/{serviceId}/ruleId/{ruleId}")
+	public BooleanResponse deleteServiceRule(@PathVariable @NotNull @Positive Long ruleId, @PathVariable @NotNull Long serviceId){
+		return new BooleanResponse(ruleService.deleteServiceRule(ruleId, serviceId));
 	}
 
 	@GetMapping("/product")

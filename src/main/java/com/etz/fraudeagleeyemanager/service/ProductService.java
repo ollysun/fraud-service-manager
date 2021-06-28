@@ -7,8 +7,10 @@ import java.util.Optional;
 
 import com.etz.fraudeagleeyemanager.dto.request.*;
 import com.etz.fraudeagleeyemanager.dto.response.ProductServiceResponse;
+import com.etz.fraudeagleeyemanager.entity.ProductDatasetId;
 import com.etz.fraudeagleeyemanager.entity.ProductServiceEntity;
 import com.etz.fraudeagleeyemanager.repository.ProductServiceRepository;
+import com.etz.fraudeagleeyemanager.util.AppUtil;
 import com.etz.fraudeagleeyemanager.util.PageRequestUtil;
 import org.springframework.beans.BeanUtils;
 import org.springframework.cache.annotation.CacheEvict;
@@ -17,9 +19,9 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 import com.etz.fraudeagleeyemanager.constant.AppConstant;
-import com.etz.fraudeagleeyemanager.dto.response.ProductDataSetResponse;
+import com.etz.fraudeagleeyemanager.dto.response.ServiceDataSetResponse;
 import com.etz.fraudeagleeyemanager.dto.response.ProductResponse;
-import com.etz.fraudeagleeyemanager.entity.ProductDataSet;
+import com.etz.fraudeagleeyemanager.entity.ServiceDataSet;
 import com.etz.fraudeagleeyemanager.entity.ProductEntity;
 import com.etz.fraudeagleeyemanager.exception.FraudEngineException;
 import com.etz.fraudeagleeyemanager.exception.ResourceNotFoundException;
@@ -134,8 +136,7 @@ public class ProductService {
 	@Transactional
 	@CacheEvict(value = "product", allEntries=true)
 	public ProductResponse updateProduct(UpdateProductRequest request) {
-		Optional<ProductEntity> productEntityOptional = findByCode(request.getProductCode());
-		ProductEntity productEntity = productEntityOptional.get();
+		ProductEntity productEntity = findByCode(request.getProductCode()).get();
 
 		try {
 			// for auditing purpose for UPDATE
@@ -201,11 +202,11 @@ public class ProductService {
 	}
 
 	@Transactional(propagation = Propagation.REQUIRES_NEW)
-	public ProductDataSet createProductDataset(DatasetProductRequest request) {
+	public ServiceDataSet createServiceDataset(DatasetProductRequest request) {
 		//check for the code before creating the dataset
 		findByCode(request.getProductCode());
 
-		ProductDataSet prodDatasetEntity = new ProductDataSet();
+		ServiceDataSet prodDatasetEntity = new ServiceDataSet();
 		try {
 			prodDatasetEntity.setProductCode(request.getProductCode());
 			prodDatasetEntity.setServiceId(request.getServiceId());
@@ -223,36 +224,43 @@ public class ProductService {
 			log.error("Error occurred while creating product dataset entity object", ex);
 			throw new FraudEngineException(AppConstant.ERROR_SETTING_PROPERTY);
 		}
-		return outputCreatedProductDataset(saveProductDatasetEntityToDatabase(prodDatasetEntity));
+		return outputCreatedServiceDataset(saveServiceDatasetEntityToDatabase(prodDatasetEntity));
 	}
 
-	private ProductDataSetResponse outputCreatedProductDataset(ProductDataSet productEntity) {
-		ProductDataSetResponse productResponse = new ProductDataSetResponse();
+	private ServiceDataSetResponse outputCreatedServiceDataset(ServiceDataSet productEntity) {
+		ServiceDataSetResponse productResponse = new ServiceDataSetResponse();
 		BeanUtils.copyProperties(productEntity, productResponse, "productEntity");
 		return productResponse;
 	}
+
 	@Transactional(readOnly = true)
-	public List<ProductDataSetResponse> getProductDataset(String productCode) {
-		if (Objects.isNull(productCode)) {
-			return outputProductDatasetEntity(productDataSetRepository.findAll());
+	public Page<ServiceDataSetResponse> getServiceDataset(String productCode, Long serviceId) {
+		Page<ServiceDataSetResponse> serviceDataSetResponsePage;
+		List<ServiceDataSet> serviceDataSetList = new ArrayList<>();
+		if (Objects.nonNull(productCode)) {
+			serviceDataSetResponsePage = AppUtil.listConvertToPage(outputServiceDatasetEntity(productDataSetRepository.findByProductCode(productCode)), PageRequestUtil.getPageRequest());
+		}else if (Objects.isNull(serviceId)){
+			serviceDataSetResponsePage = AppUtil.listConvertToPage(outputServiceDatasetEntity(productDataSetRepository.findAll()), PageRequestUtil.getPageRequest());
+		}else{
+			Optional<ServiceDataSet> serviceDataSetOptional = productDataSetRepository.findById(new ProductDatasetId(null, productCode, serviceId));
+			serviceDataSetOptional.ifPresent(serviceDataSetList::add);
+			serviceDataSetResponsePage = AppUtil.listConvertToPage(outputServiceDatasetEntity(serviceDataSetList), PageRequestUtil.getPageRequest());
 		}
-	
-		List<ProductDataSet> productDatasetList = new ArrayList<>(productDataSetRepository.findByProductCode(productCode));
-		return outputProductDatasetEntity(productDatasetList);
+		return serviceDataSetResponsePage;
 	}
 
-	@Transactional(propagation = Propagation.REQUIRES_NEW)
-	public List<ProductDataSetResponse> updateProductDataset(UpdateDataSetRequest request) {
-		List<ProductDataSet> productDataSetList = productDataSetRepository.findByProductCode(request.getProductCode());
-		if (productDataSetList.isEmpty()) {
-			throw new ResourceNotFoundException("Product dataset details not found for this code " + request.getProductCode());
+	@Transactional(propagation = Propagation.REQUIRED)
+	public List<ServiceDataSetResponse> updateServiceDataset(UpdateDataSetRequest request) {
+		List<ServiceDataSet> serviceDataSetList = productDataSetRepository.findByServiceId(request.getServiceId());
+		if (serviceDataSetList.isEmpty()) {
+			throw new ResourceNotFoundException("Service dataset details not found for this ServiceId " + request.getServiceId());
 		}
 
-		List<ProductDataSet> updatedDatasetList = new ArrayList<>();
-		productDataSetList.forEach(productDataSet -> {
+		List<ServiceDataSet> updatedDatasetList = new ArrayList<>();
+		serviceDataSetList.forEach(productDataSet -> {
 			try {
 				// for auditing purpose for UPDATE
-				productDataSet.setEntityId(request.getProductCode());
+				productDataSet.setEntityId(request.getServiceId().toString());
 				productDataSet.setRecordBefore(JsonConverter.objectToJson(productDataSet));
 				productDataSet.setRequestDump(request);
 
@@ -260,19 +268,20 @@ public class ProductService {
 				productDataSet.setMandatory(request.getCompulsory());
 				productDataSet.setAuthorised(request.getAuthorised());
 				productDataSet.setUpdatedBy(request.getUpdatedBy());
+				productDataSet.setFieldName(request.getFieldName());
 			} catch (Exception ex) {
 				log.error("Error occurred while creating product dataset entity object", ex);
 				throw new FraudEngineException(AppConstant.ERROR_SETTING_PROPERTY);
 			}
-			updatedDatasetList.add(saveProductDatasetEntityToDatabase(productDataSet));
+			updatedDatasetList.add(saveServiceDatasetEntityToDatabase(productDataSet));
 		});
 		return outputUpdatedProductDatasetResponse(updatedDatasetList);
 	}
 
-	private List<ProductDataSetResponse> outputUpdatedProductDatasetResponse(List<ProductDataSet> productDataSetList) {
-		List<ProductDataSetResponse> updatedProductDatasetResponseList = new ArrayList<>();
-		productDataSetList.forEach(productDataSet -> {
-			ProductDataSetResponse productDataSetResponse = new ProductDataSetResponse();
+	private List<ServiceDataSetResponse> outputUpdatedProductDatasetResponse(List<ServiceDataSet> serviceDataSetList) {
+		List<ServiceDataSetResponse> updatedProductDatasetResponseList = new ArrayList<>();
+		serviceDataSetList.forEach(productDataSet -> {
+			ServiceDataSetResponse productDataSetResponse = new ServiceDataSetResponse();
 			BeanUtils.copyProperties(productDataSet, productDataSetResponse, "createdBy", "createdAt", "productEntity");
 			updatedProductDatasetResponseList.add(productDataSetResponse);
 		});
@@ -280,21 +289,21 @@ public class ProductService {
 	}
 
 	@Transactional
-	public boolean deleteProductDataset(String productCode) {
-		List<ProductDataSet> productDatasetEntityList = productDataSetRepository.findByProductCode(productCode);
-		if (productDatasetEntityList.isEmpty()) {
-			throw new ResourceNotFoundException("Product dataset details not found for this code " + productCode);
+	public boolean deleteServiceDataset(Long serviceId) {
+		List<ServiceDataSet> serviceDatasetEntityList = productDataSetRepository.findByServiceId(serviceId);
+		if (serviceDatasetEntityList.isEmpty()) {
+			throw new ResourceNotFoundException("Service dataset details not found for this serviceId " + serviceId);
 		}
 		productDatasetRedisRepository.setHashOperations(redisTemplate);
-		productDatasetEntityList.forEach(productDataset -> {
+		serviceDatasetEntityList.forEach(productDataset -> {
 			// for auditing purpose for DELETE
-			productDataset.setEntityId(productCode);
+			productDataset.setEntityId(serviceId.toString());
 			productDataset.setRecordBefore(JsonConverter.objectToJson(productDataset));
 			productDataset.setRecordAfter(null);
-			productDataset.setRequestDump(productCode);
+			productDataset.setRequestDump(serviceId);
 
 			try {
-				productDataSetRepository.delete(productCode);
+				productDataSetRepository.delete(serviceId);
 			} catch (Exception ex) {
 				log.error("Error occurred while deleting product dataset entity from database", ex);
 				throw new FraudEngineException(AppConstant.ERROR_DELETING_FROM_DATABASE);
@@ -310,10 +319,10 @@ public class ProductService {
 		return Boolean.TRUE;
 	}
 
-	private List<ProductDataSetResponse> outputProductDatasetEntity(List<ProductDataSet> productDatasetList) {
-		List<ProductDataSetResponse> productResponseList = new ArrayList<>();
-		productDatasetList.forEach(productVal -> {
-			ProductDataSetResponse productResponse = new ProductDataSetResponse();
+	private List<ServiceDataSetResponse> outputServiceDatasetEntity(List<ServiceDataSet> serviceDatasetList) {
+		List<ServiceDataSetResponse> productResponseList = new ArrayList<>();
+		serviceDatasetList.forEach(productVal -> {
+			ServiceDataSetResponse productResponse = new ServiceDataSetResponse();
 			BeanUtils.copyProperties(productVal, productResponse, "productEntity");
 			productResponseList.add(productResponse);
 		});
@@ -321,22 +330,22 @@ public class ProductService {
 	}
 
 	
-	private ProductDataSet saveProductDatasetEntityToDatabase(ProductDataSet accountEntity) {
-		ProductDataSet persistedProductDatasetEntity;
+	private ServiceDataSet saveServiceDatasetEntityToDatabase(ServiceDataSet accountEntity) {
+		ServiceDataSet persistedServiceDatasetEntity;
 		try {
-			persistedProductDatasetEntity = productDataSetRepository.save(accountEntity);
+			persistedServiceDatasetEntity = productDataSetRepository.save(accountEntity);
 		} catch (Exception ex) {
 			log.error("Error occurred while saving product entity to database", ex);
 			throw new FraudEngineException(AppConstant.ERROR_SAVING_TO_DATABASE);
 		}
-		saveProductDatasetEntityToRedis(persistedProductDatasetEntity);
-		return persistedProductDatasetEntity;
+		saveServiceDatasetEntityToRedis(persistedServiceDatasetEntity);
+		return persistedServiceDatasetEntity;
 	}
 
-	private void saveProductDatasetEntityToRedis(ProductDataSet alreadyPersistedProductDatasetEntity) {
+	private void saveServiceDatasetEntityToRedis(ServiceDataSet alreadyPersistedServiceDatasetEntity) {
 		try {
 			productDatasetRedisRepository.setHashOperations(redisTemplate);
-			productDatasetRedisRepository.update(alreadyPersistedProductDatasetEntity);
+			productDatasetRedisRepository.update(alreadyPersistedServiceDatasetEntity);
 		} catch (Exception ex) {
 			// TODO actually delete already saved entity from the database (NOT SOFT DELETE)
 			log.error("Error occurred while saving product entity to Redis", ex);

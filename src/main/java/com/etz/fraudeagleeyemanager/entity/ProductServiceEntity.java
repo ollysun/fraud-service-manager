@@ -54,6 +54,6 @@ public class ProductServiceEntity extends BaseAuditEntity implements Serializabl
             cascade = {CascadeType.MERGE,CascadeType.PERSIST}, orphanRemoval = true)
     @JsonManagedReference
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
-    private Set<ProductDataSet> productDataset;
+    private Set<ServiceDataSet> serviceDataset;
 
 }

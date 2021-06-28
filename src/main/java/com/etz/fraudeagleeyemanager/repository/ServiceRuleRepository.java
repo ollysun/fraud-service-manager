@@ -20,5 +20,5 @@ public interface ServiceRuleRepository extends JpaRepository<ServiceRule, Produc
     @Modifying
     @Transactional
     @Query(value="UPDATE ServiceRule SET deleted = true, status=0 WHERE ruleId = ?1 and serviceId = ?2")
-    void deleteByRuleId(Long ruleId, Long serviceId);
+    void deleteByRuleIdAndServiceId(Long ruleId, Long serviceId);
 }

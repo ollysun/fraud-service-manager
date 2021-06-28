@@ -16,9 +16,9 @@ import com.etz.fraudeagleeyemanager.dto.request.UpdateProductRequest;
 import com.etz.fraudeagleeyemanager.dto.response.BooleanResponse;
 import com.etz.fraudeagleeyemanager.dto.response.CollectionResponse;
 import com.etz.fraudeagleeyemanager.dto.response.ModelResponse;
-import com.etz.fraudeagleeyemanager.dto.response.ProductDataSetResponse;
+import com.etz.fraudeagleeyemanager.dto.response.ServiceDataSetResponse;
 import com.etz.fraudeagleeyemanager.dto.response.ProductResponse;
-import com.etz.fraudeagleeyemanager.entity.ProductDataSet;
+import com.etz.fraudeagleeyemanager.entity.ServiceDataSet;
 import com.etz.fraudeagleeyemanager.service.ProductService;
 
 import lombok.RequiredArgsConstructor;
@@ -54,26 +54,6 @@ public class ProductController {
 		return new CollectionResponse<>(productService.getProduct(code), "All Product");
 	}
 	
-	@PostMapping("/dataset")
-	public ResponseEntity<ModelResponse<ProductDataSet>> addProductDataset(@RequestBody @Valid DatasetProductRequest request){
-		ModelResponse<ProductDataSet> response = new ModelResponse<>(productService.createProductDataset(request), HttpStatus.CREATED);
-		return ResponseEntity.status(HttpStatus.valueOf(response.getStatus())).body(response);
-	}
-	
-	@GetMapping("/dataset")
-	public CollectionResponse<ProductDataSetResponse> queryProductDataset(String code){
-		return new CollectionResponse<>(productService.getProductDataset(code), "All Dataset");
-	}
-	
-	@PutMapping("/dataset")
-	public CollectionResponse<ProductDataSetResponse> updateProductDataset(@RequestBody UpdateDataSetRequest request){
-		return new CollectionResponse<>(productService.updateProductDataset(request));
-	}
-	
-	@DeleteMapping("/dataset/{code}")
-	public BooleanResponse deleteProductDataset(@PathVariable String code){
-		return new BooleanResponse(productService.deleteProductDataset(code));
-	}
 
 
 	
