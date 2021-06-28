@@ -128,7 +128,7 @@ public class AccountService {
 	
 	public AccountProduct mapAccountProduct(AccountToProductRequest request) {
 		
-		if(!productRepository.findByCode(request.getProductCode()).isPresent()){
+		if(!productRepository.findByCodeAndDeletedFalse(request.getProductCode()).isPresent()){
 			throw new ResourceNotFoundException("Product not found for this code " + request.getProductCode());
 		}
 

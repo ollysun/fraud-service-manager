@@ -6,5 +6,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface ParameterRepository extends JpaRepository<Parameter, Long>{
-
+        boolean existsByNameAndOperator(String name, String operator);
 }

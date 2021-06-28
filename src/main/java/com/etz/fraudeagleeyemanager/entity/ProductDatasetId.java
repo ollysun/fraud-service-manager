@@ -19,5 +19,5 @@ public class ProductDatasetId implements Serializable{
     private String productCode;
 
     @NotNull
-    private String fieldName;
+    private Long serviceId;
 }

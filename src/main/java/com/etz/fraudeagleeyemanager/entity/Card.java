@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonManagedReference;
 import lombok.*;
 import org.hibernate.annotations.ResultCheckStyle;
 import org.hibernate.annotations.SQLDelete;
-import org.hibernate.annotations.Where;
 
 import javax.persistence.*;
 import java.io.*;
@@ -14,12 +13,11 @@ import java.util.Set;
 @Table(name = "card", 
 		uniqueConstraints = @UniqueConstraint(name="UC_CARD",
 				columnNames = {"card_bin", "iso_country_code"}))
-@SQLDelete(sql = "UPDATE card SET deleted = true WHERE id = ?", check = ResultCheckStyle.COUNT)
-@Where(clause = "deleted = false")
+@SQLDelete(sql = "UPDATE card SET deleted = true, status=0 WHERE id = ?", check = ResultCheckStyle.COUNT)
 @Getter
 @Setter
-@ToString(exclude = { "cardProducts" })
-@RequiredArgsConstructor
+@AllArgsConstructor
+@NoArgsConstructor
 public class Card extends BaseAuditEntity implements Serializable {
 	private static final long serialVersionUID = 1L;
 
@@ -66,9 +64,10 @@ public class Card extends BaseAuditEntity implements Serializable {
 	@Column(nullable = false, name = "status", columnDefinition = "TINYINT", length = 1)
 	private Boolean status;
 
-	@JsonManagedReference
+	@ToString.Exclude
 	@OneToMany(mappedBy = "card",fetch = FetchType.LAZY,
 			cascade = CascadeType.ALL, orphanRemoval = true)
+	@JsonManagedReference
 	private Set<CardProduct> cardProducts;
 
 }

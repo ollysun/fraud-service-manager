@@ -13,7 +13,8 @@ import java.util.Set;
 @Getter
 @Setter
 @ToString
-@RequiredArgsConstructor
+@AllArgsConstructor
+@NoArgsConstructor
 public class Report extends BaseAuditEntity implements Serializable {
 	private static final long serialVersionUID = 1L;
 
