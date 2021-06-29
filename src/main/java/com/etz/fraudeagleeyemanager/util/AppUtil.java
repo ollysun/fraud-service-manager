@@ -9,6 +9,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
@@ -60,7 +61,7 @@ public class AppUtil {
     }
 
     public static String checkDataSource(String text) {
-        List<String> dataSourceVal = Arrays.asList("FRAUD ENGINE", "STATISTICS");
+        List<String> dataSourceVal = Arrays.asList("TRANSACTIONAL", "STATISTICS");
         String output = "";
         if(!Objects.isNull(text)){
             output = dataSourceVal.stream()
@@ -145,7 +146,7 @@ public class AppUtil {
                 }
             } else if (datatypeAllowed.equalsIgnoreCase("Time")) {
                 try {
-                    Integer.parseInt(compareValue);
+                    new BigInteger(compareValue);
                 } catch (NumberFormatException e) {
                     log.error("Wrong compare value for Time value" + compareValue);
                     return false;

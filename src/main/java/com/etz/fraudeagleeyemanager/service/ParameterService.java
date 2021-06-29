@@ -131,7 +131,7 @@ public class ParameterService {
 			log.error("Error occurred while saving Internal Watchlist entity to database" , ex);
 			throw new FraudEngineException(AppConstant.ERROR_SAVING_TO_DATABASE);
 		}
-		saveParameterEntityToRedis(persistedParameterEntity);
+		//saveParameterEntityToRedis(persistedParameterEntity);
 		return persistedParameterEntity;
 	}
 	

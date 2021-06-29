@@ -12,7 +12,7 @@ import java.util.Map;
 @Repository
 public class CardRedisRepository implements RedisRepository<Card, Long> {
 	
-    private HashOperations<String, Long, Card> hashOperations;
+    private HashOperations<String, Long, Object> hashOperations;
 	
     public void setHashOperations(RedisTemplate<String, Object> redisTemplate){
         this.hashOperations = redisTemplate.opsForHash();
@@ -20,17 +20,17 @@ public class CardRedisRepository implements RedisRepository<Card, Long> {
     
 	@Override
 	public void create(Card model) {
-		hashOperations.put(FraudRedisKey.CARD.name(), model.getId(), model);
+		hashOperations.put(FraudRedisKey.CARD.name(), model.getId(), toJsonString(model));
 	}
 
 	@Override
 	public Map<Long, Card> findAll() {
-        return hashOperations.entries(FraudRedisKey.CARD.name());
+        return convertResponseToEntityMap(hashOperations.entries(FraudRedisKey.CARD.name()),Card.class);
 	}
 
 	@Override
 	public Card findById(Long cardBin) {
-		return hashOperations.get(FraudRedisKey.CARD.name(), cardBin);
+		return convertResponseToEntity(hashOperations.get(FraudRedisKey.CARD.name(), cardBin),Card.class);
 	}
 
 	@Override

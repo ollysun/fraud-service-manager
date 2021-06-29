@@ -61,19 +61,16 @@ public class RuleService {
 	@Transactional(propagation = Propagation.REQUIRES_NEW)
 	public Rule createRule(CreateRuleRequest request) {
 		Rule ruleEntity = new Rule();
-		if (Boolean.FALSE.equals(parameterRepository.existsByNameAndOperator(request.getFirstSourceVal(), request.getFirstOperator()))){
-			throw new FraudEngineException("The source value one and operator one doesn't exists in Parameter table ");
-		}
-
-		if (!(Objects.isNull(request.getSecondSourceVal()) && Objects.isNull(request.getSecondOperator())) && Boolean.FALSE.equals(parameterRepository.existsByNameAndOperator(request.getSecondSourceVal(), request.getSecondOperator()))) {
-			throw new FraudEngineException("The source value two and operator two doesn't exists in Parameter table ");
-		}
+//		if (Boolean.FALSE.equals(parameterRepository.existsByNameAndOperator(request.getFirstSourceVal(), request.getFirstOperator()))){
+//			throw new FraudEngineException("The source value one and operator one doesn't exists in Parameter table ");
+//		}
+//
+//		if (!(Objects.isNull(request.getSecondSourceVal()) && Objects.isNull(request.getSecondOperator())) && Boolean.FALSE.equals(parameterRepository.existsByNameAndOperator(request.getSecondSourceVal(), request.getSecondOperator()))) {
+//			throw new FraudEngineException("The source value two and operator two doesn't exists in Parameter table ");
+//		}
 		//try {
 			ruleEntity.setName(request.getRuleName());
 			ruleEntity.setValueOneDataType(AppUtil.checkDataType(request.getFirstDataType()));
-			if(AppUtil.checkDataType(request.getFirstDataType()).equalsIgnoreCase("TIME")) {
-				ruleEntity.setSourceValueOne(AppUtil.checkTimeSourceValue(request.getFirstDataType(),request.getFirstSourceVal()));
-			}
 			ruleEntity.setSourceValueOne(request.getFirstSourceVal());
 
 			// check the operator
@@ -88,9 +85,6 @@ public class RuleService {
 			// check logical operator
 			ruleEntity.setLogicOperator(AppUtil.checkLogicOperator(request.getLogicOperator()));
 
-			if(AppUtil.checkDataType(request.getSecondDataType()).equalsIgnoreCase("TIME")) {
-				ruleEntity.setSourceValueTwo(AppUtil.checkTimeSourceValue(request.getSecondDataType(),request.getSecondSourceVal()));
-			}
 			ruleEntity.setSourceValueTwo(request.getSecondSourceVal());
 
 			ruleEntity.setValueTwoDataType(AppUtil.checkDataType(request.getSecondDataType()));
@@ -132,18 +126,22 @@ public class RuleService {
 			throw new ResourceNotFoundException("Rule Not found for Id " + request.getRuleId());
 		}
 		Rule ruleEntity = ruleEntityOptional.get();
-		try {
+		//try {
 			// for auditing purpose for UPDATE
 			ruleEntity.setEntityId(String.valueOf(request.getRuleId()));
 			ruleEntity.setRecordBefore(JsonConverter.objectToJson(ruleEntity));
 			ruleEntity.setRequestDump(request);
 
-			ruleEntity.setSourceValueOne(request.getFirstSourceVal());
+
 			ruleEntity.setValueOneDataType(AppUtil.checkDataType(request.getFirstDataType()));
-			// check for the list of Operator
-			ruleEntity.setOperatorOne(AppUtil.checkOperator(request.getFirstDataType(), request.getFirstOperator()));
-			if (AppUtil.isCompareValueValid(request.getFirstDataType(), request.getFirstCompareVal())) {
+			ruleEntity.setSourceValueOne(request.getFirstSourceVal());
+
+			// check the operator
+			ruleEntity.setOperatorOne(AppUtil.checkOperator(request.getFirstDataType(),request.getFirstOperator()));
+			if(AppUtil.isCompareValueValid(request.getFirstDataType(),request.getFirstCompareVal())){
 				ruleEntity.setCompareValueOne(request.getFirstCompareVal());
+			}else {
+				throw new FraudEngineException("Invalid  first compare value ");
 			}
 			ruleEntity.setDataSourceValOne(AppUtil.checkDataSource(request.getFirstDataSource()));
 			ruleEntity.setLogicOperator(AppUtil.checkLogicOperator(request.getLogicOperator()));
@@ -153,6 +151,8 @@ public class RuleService {
 			ruleEntity.setOperatorTwo(AppUtil.checkOperator(request.getSecondDataType(),request.getSecondOperator()));
 			if (AppUtil.isCompareValueValid(request.getFirstDataType(), request.getFirstCompareVal())) {
 				ruleEntity.setCompareValueTwo(request.getSecondCompareVal());
+			}else {
+				throw new FraudEngineException("Invalid  second compare value ");
 			}
 			ruleEntity.setDataSourceValTwo(AppUtil.checkDataSource(request.getSecondDataSource()));
 			ruleEntity.setSuspicionLevel(request.getSuspicion());
@@ -160,10 +160,10 @@ public class RuleService {
 			ruleEntity.setAuthorised(request.getAuthorised());
 			ruleEntity.setStatus(request.getStatus());
 			ruleEntity.setUpdatedBy(request.getUpdatedBy());
-		} catch (Exception ex) {
-			log.error("Error occurred while creating Rule entity object", ex);
-			throw new FraudEngineException(AppConstant.ERROR_SETTING_PROPERTY);
-		}
+		//} catch (Exception ex) {
+		//	log.error("Error occurred while creating Rule entity object", ex);
+		//	throw new FraudEngineException(AppConstant.ERROR_SETTING_PROPERTY);
+		//}
 		return outputUpdatedRuleResponse(saveRuleEntityToDatabase(ruleEntity));
 	}
 
@@ -182,7 +182,7 @@ public class RuleService {
 	private void saveRuleEntityToRedis(Rule alreadyPersistedRuleEntity) {
 		try {
 			ruleRedisRepository.setHashOperations(redisTemplate);
-			//ruleRedisRepository.update(alreadyPersistedRuleEntity);
+			ruleRedisRepository.update(alreadyPersistedRuleEntity);
 		} catch(Exception ex){
 			//TODO actually delete already saved entity from the database (NOT SOFT DELETE)
 			log.error("Error occurred while saving Rule entity to Redis" , ex);
