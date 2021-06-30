@@ -8,4 +8,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface RuleRepository extends JpaRepository<Rule, Long> {
+    boolean existsByName(String name);
 }

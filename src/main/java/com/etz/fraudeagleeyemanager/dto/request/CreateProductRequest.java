@@ -5,6 +5,7 @@ import java.io.Serializable;
 
 import javax.validation.constraints.NotNull;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 
 @Data
@@ -27,6 +28,6 @@ public class CreateProductRequest implements Serializable {
 
 	private String callback;
 
-	@NotNull(message = "CreatedBy cannot be empty")
+	@JsonIgnore
 	private String createdBy;
 }

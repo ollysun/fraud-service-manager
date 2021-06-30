@@ -10,24 +10,20 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.validation.constraints.NotBlank;
 
+import lombok.*;
 import org.hibernate.annotations.ResultCheckStyle;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.Where;
 
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
-
 
 @Entity
 @Table(name = "internal_watchlist")
-@SQLDelete(sql = "UPDATE internal_watchlist SET deleted = true WHERE id = ?", check = ResultCheckStyle.COUNT)
-@Where(clause = "deleted = false")
+@SQLDelete(sql = "UPDATE internal_watchlist SET deleted = true, status=0 WHERE id = ?", check = ResultCheckStyle.COUNT)
 @Getter
 @Setter
 @ToString
-@RequiredArgsConstructor
+@NoArgsConstructor
+@AllArgsConstructor
 public class InternalWatchlist extends BaseAuditEntity implements Serializable {
 	private static final long serialVersionUID = 1L;
 
@@ -43,7 +39,6 @@ public class InternalWatchlist extends BaseAuditEntity implements Serializable {
 	private String comments;
 		
 	@Column(nullable = false, name = "status", columnDefinition = "TINYINT", length = 1)
-	//@Enumerated(EnumType.ORDINAL)
 	private Boolean status;
 
 	@Column(nullable = false, name = "authorised", columnDefinition = "TINYINT", length = 1)

@@ -1,6 +1,6 @@
 package com.etz.fraudeagleeyemanager.redisrepository;
 
-import com.etz.fraudeagleeyemanager.entity.ProductRule;
+import com.etz.fraudeagleeyemanager.entity.ServiceRule;
 import com.etz.fraudeagleeyemanager.enums.FraudRedisKey;
 import com.etz.fraudeagleeyemanager.repository.RedisRepository;
 import org.springframework.data.redis.core.Cursor;
@@ -16,32 +16,32 @@ import java.util.Set;
 
 
 @Repository
-public class ProductRuleRedisRepository implements RedisRepository<ProductRule, String> {
+public class ProductRuleRedisRepository implements RedisRepository<ServiceRule, String> {
 	
-    private HashOperations<String, String, ProductRule> hashOperations;
+    private HashOperations<String, String, Object> hashOperations;
 	
     public void setHashOperations(RedisTemplate<String, Object> redisTemplate){
         this.hashOperations = redisTemplate.opsForHash();
     }
     
 	@Override
-	public void create(ProductRule model) {
-		String hashKey = model.getProductCode().toUpperCase() + ":" + model.getRuleId();
-		hashOperations.put(FraudRedisKey.PRODUCTRULE.name(), hashKey, model);
+	public void create(ServiceRule model) {
+		String hashKey = model.getServiceId() + ":" + model.getRuleId();
+		hashOperations.put(FraudRedisKey.PRODUCTRULE.name(), hashKey, toJsonString(model));
 	}
 
 	@Override
-	public Map<String, ProductRule> findAll() {
-        return hashOperations.entries(FraudRedisKey.PRODUCTRULE.name());
+	public Map<String, ServiceRule> findAll() {
+        return convertResponseToEntityMap(hashOperations.entries(FraudRedisKey.PRODUCTRULE.name()),ServiceRule.class);
 	}
 
 	@Override
-	public ProductRule findById(String id) {
-		return hashOperations.get(FraudRedisKey.PRODUCTRULE.name(), id);
+	public ServiceRule findById(String id) {
+		return convertResponseToEntity(hashOperations.get(FraudRedisKey.PRODUCTRULE.name(), id),ServiceRule.class);
 	}
 
 	@Override
-	public void update(ProductRule model) {
+	public void update(ServiceRule model) {
 		create(model);
 	}
 
@@ -51,17 +51,7 @@ public class ProductRuleRedisRepository implements RedisRepository<ProductRule, 
 	}
 	
 	public Set<String> scanKeys(String keyPatternToMatch) {
-		Set<String> foundKeys = new HashSet<>();
-		ScanOptions options = ScanOptions.scanOptions().match(keyPatternToMatch).count(Integer.MAX_VALUE).build();
-		Cursor<Map.Entry<String, ProductRule>> cursor = hashOperations.scan(FraudRedisKey.PRODUCTRULE.name(), options);
-		while (cursor.hasNext()) {
-			foundKeys.add(cursor.next().getKey());
-		}
-		try {
-			cursor.close();
-		} catch (IOException e) {
-		}
-		return foundKeys;
+		return scanKeys(keyPatternToMatch, hashOperations, FraudRedisKey.PRODUCTRULE.name());
 	}
 	
 }

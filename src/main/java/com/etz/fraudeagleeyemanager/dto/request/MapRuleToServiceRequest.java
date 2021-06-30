@@ -2,17 +2,16 @@ package com.etz.fraudeagleeyemanager.dto.request;
 
 import java.io.Serializable;
 
-import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
 import lombok.Data;
 
 @Data
-public class MapRuleToProductRequest implements Serializable {
+public class MapRuleToServiceRequest implements Serializable {
 	private static final long serialVersionUID = 1L;
 
-	@NotBlank(message="productCode cannot be empty")
-	private String productCode;
+	@NotNull(message="serviceId cannot be empty")
+	private Long serviceId;
 	@NotNull(message="ruleId cannot be empty")
 	private Long ruleId;
 	private Boolean notifyAdmin;

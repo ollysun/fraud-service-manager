@@ -13,7 +13,7 @@ import com.etz.fraudeagleeyemanager.repository.RedisRepository;
 @Repository
 public class NotificationGroupRedisRepository implements RedisRepository<NotificationGroup, Long> {
 	
-    private HashOperations<String, Long, NotificationGroup> hashOperations;
+    private HashOperations<String, Long, Object> hashOperations;
 	
     public void setHashOperations(RedisTemplate<String, Object> redisTemplate){
         this.hashOperations = redisTemplate.opsForHash();
@@ -21,17 +21,17 @@ public class NotificationGroupRedisRepository implements RedisRepository<Notific
 		
 	@Override
 	public void create(NotificationGroup model) {
-		hashOperations.put(FraudRedisKey.NOTIFICATIONGROUP.name(), model.getId(), model);
+		hashOperations.put(FraudRedisKey.NOTIFICATIONGROUP.name(), model.getId(), toJsonString(model));
 	}
 
 	@Override
 	public Map<Long, NotificationGroup> findAll() {
-        return hashOperations.entries(FraudRedisKey.NOTIFICATIONGROUP.name());
+        return convertResponseToEntityMap(hashOperations.entries(FraudRedisKey.NOTIFICATIONGROUP.name()),NotificationGroup.class);
 	}
 
 	@Override
 	public NotificationGroup findById(Long groupId) {
-		return hashOperations.get(FraudRedisKey.NOTIFICATIONGROUP.name(), groupId);
+		return convertResponseToEntity(hashOperations.get(FraudRedisKey.NOTIFICATIONGROUP.name(), groupId),NotificationGroup.class );
 	}
 
 	@Override

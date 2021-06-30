@@ -1,40 +1,27 @@
 package com.etz.fraudeagleeyemanager.entity;
 
-import java.io.Serializable;
-import java.util.Set;
-
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.OneToMany;
-import javax.persistence.Table;
-import javax.persistence.UniqueConstraint;
-import javax.validation.constraints.NotBlank;
-
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+import lombok.*;
+import org.hibernate.Hibernate;
 import org.hibernate.annotations.ResultCheckStyle;
 import org.hibernate.annotations.SQLDelete;
-import org.hibernate.annotations.Where;
-
-import com.fasterxml.jackson.annotation.JsonManagedReference;
-
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.ToString;
+import javax.persistence.*;
+import javax.validation.constraints.NotBlank;
+import java.io.Serializable;
+import java.util.Objects;
+import java.util.Set;
 
 
-@EqualsAndHashCode(callSuper = true)
 @Entity
 @Table(name = "account",
 		uniqueConstraints = @UniqueConstraint(name="UC_ACCOUNT",
 				columnNames = {"account_no"}))
 @SQLDelete(sql = "UPDATE account SET deleted = true, status=0 WHERE id = ?", check = ResultCheckStyle.COUNT)
-@Where(clause = "deleted = false")
-@ToString//(exclude = { "products" })
-@Data
+@ToString
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class Account extends BaseAuditEntity implements Serializable {
 	private static final long serialVersionUID = 1L;
 
@@ -68,16 +55,24 @@ public class Account extends BaseAuditEntity implements Serializable {
 	@Column(name = "block_reason")
 	private String blockReason;
 
-//	@ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-//	@JoinTable(name = "account_product",
-//			joinColumns = @JoinColumn(name = "account_id"),
-//			inverseJoinColumns = @JoinColumn(name = "product_code"))
-//	private List<ProductEntity> products = new ArrayList<>();
 
 	@JsonManagedReference
 	@OneToMany(mappedBy = "account",fetch = FetchType.LAZY,
 			cascade = CascadeType.ALL, orphanRemoval = true)
+	@ToString.Exclude
 	private Set<AccountProduct> accountProducts;
 
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) return true;
+		if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
+		Account account = (Account) o;
 
+		return Objects.equals(id, account.id);
+	}
+
+	@Override
+	public int hashCode() {
+		return 2083479647;
+	}
 }
