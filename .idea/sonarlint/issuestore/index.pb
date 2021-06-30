@@ -1,8 +1,6 @@
 
 ‚
 Rsrc/main/java/com/etz/fraudeagleeyemanager/dto/request/CreateParameterRequest.java,c\5\c550743c8500598707b52312dcb86fef1bb8f5fb
-~
-Nsrc/main/java/com/etz/fraudeagleeyemanager/repository/ParameterRepository.java,5\1\516d2db9bb36952b5f929db58ce795fcddd9d391
 {
 Ksrc/main/java/com/etz/fraudeagleeyemanager/config/ResourceServerConfig.java,2\9\29e8545b755fa95c41c104c2dd9f53228b22f5e5
 q
@@ -33,11 +31,5 @@ v
 Fsrc/main/java/com/etz/fraudeagleeyemanager/service/AccountService.java,f\c\fc328ab4fde7f27484f003c460ec54dc6c1ab072
 u
 Esrc/main/java/com/etz/fraudeagleeyemanager/entity/AccountProduct.java,7\0\70159386b90e4a6fa3f6f45702676d8ad38cf628
-n
->src/main/java/com/etz/fraudeagleeyemanager/entity/Account.java,c\3\c3c407be9a4e85e1f26b8c9d9e29c244fac2e031
 |
 Lsrc/main/java/com/etz/fraudeagleeyemanager/repository/AccountRepository.java,1\2\128442369fd70d8caef36b4ab7ad35fba7795c96
-y
-Isrc/main/java/com/etz/fraudeagleeyemanager/repository/RuleRepository.java,4\8\48d88375a6cc72649b3dbc24e312cb32bf11a1c5
-7
-pom.xml,4\4\442292b8a7efeabbe4cc176709b833b1792140ec

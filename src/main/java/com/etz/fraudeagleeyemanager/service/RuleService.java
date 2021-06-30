@@ -14,6 +14,7 @@ import javax.persistence.TypedQuery;
 import com.etz.fraudeagleeyemanager.entity.*;
 import com.etz.fraudeagleeyemanager.repository.*;
 import org.springframework.beans.BeanUtils;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.Page;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -53,21 +54,17 @@ public class RuleService {
 	private final RuleRedisRepository ruleRedisRepository;
 	private final ProductRuleRedisRepository productRuleRedisRepository;
 	private final ProductServiceRepository productServiceRepository;
-	private final ParameterRepository parameterRepository;
 
 	@PersistenceContext
 	private final EntityManager em;
 
 	@Transactional(propagation = Propagation.REQUIRES_NEW)
+	@CacheEvict(value = "product", allEntries=true)
 	public Rule createRule(CreateRuleRequest request) {
 		Rule ruleEntity = new Rule();
-//		if (Boolean.FALSE.equals(parameterRepository.existsByNameAndOperator(request.getFirstSourceVal(), request.getFirstOperator()))){
-//			throw new FraudEngineException("The source value one and operator one doesn't exists in Parameter table ");
-//		}
-//
-//		if (!(Objects.isNull(request.getSecondSourceVal()) && Objects.isNull(request.getSecondOperator())) && Boolean.FALSE.equals(parameterRepository.existsByNameAndOperator(request.getSecondSourceVal(), request.getSecondOperator()))) {
-//			throw new FraudEngineException("The source value two and operator two doesn't exists in Parameter table ");
-//		}
+			if (Boolean.TRUE.equals(ruleRepository.existsByName(request.getRuleName()))){
+				throw new FraudEngineException("Similar record already exists");
+			}
 		//try {
 			ruleEntity.setName(request.getRuleName());
 			ruleEntity.setValueOneDataType(AppUtil.checkDataType(request.getFirstDataType()));
@@ -79,7 +76,7 @@ public class RuleService {
 			if(AppUtil.isCompareValueValid(request.getFirstDataType(),request.getFirstCompareVal())){
 				ruleEntity.setCompareValueOne(request.getFirstCompareVal());
 			}else {
-				throw new FraudEngineException("Invalid  first compare value ");
+				throw new FraudEngineException("Invalid  first datatype and compare value ");
 			}
 			ruleEntity.setDataSourceValOne(AppUtil.checkDataSource(request.getFirstDataSourceVal()));
 			// check logical operator
@@ -92,12 +89,10 @@ public class RuleService {
 			ruleEntity.setOperatorTwo(AppUtil.checkOperator(request.getSecondDataType(),request.getSecondOperator()));
 			if(AppUtil.isCompareValueValid(request.getSecondDataType(),request.getSecondCompareVal())){
 				ruleEntity.setCompareValueTwo(request.getSecondCompareVal());
-			}else{
-				throw new FraudEngineException("Please check the compare value and datatype");
 			}
 			ruleEntity.setDataSourceValTwo(AppUtil.checkDataSource(request.getSecondDataSourceVal()));
 			ruleEntity.setSuspicionLevel(request.getSuspicion());
-			ruleEntity.setAction(request.getAction());
+		    ruleEntity.setAction(AppUtil.getLevelAction(request.getSuspicion()));
 			ruleEntity.setAuthorised(request.getAuthorised());
 			ruleEntity.setStatus(Boolean.TRUE);
 			ruleEntity.setCreatedBy(request.getCreatedBy());
@@ -126,7 +121,7 @@ public class RuleService {
 			throw new ResourceNotFoundException("Rule Not found for Id " + request.getRuleId());
 		}
 		Rule ruleEntity = ruleEntityOptional.get();
-		//try {
+		try {
 			// for auditing purpose for UPDATE
 			ruleEntity.setEntityId(String.valueOf(request.getRuleId()));
 			ruleEntity.setRecordBefore(JsonConverter.objectToJson(ruleEntity));
@@ -156,14 +151,14 @@ public class RuleService {
 			}
 			ruleEntity.setDataSourceValTwo(AppUtil.checkDataSource(request.getSecondDataSource()));
 			ruleEntity.setSuspicionLevel(request.getSuspicion());
-			ruleEntity.setAction(request.getAction());
+			ruleEntity.setAction(AppUtil.getLevelAction(request.getSuspicion()));
 			ruleEntity.setAuthorised(request.getAuthorised());
 			ruleEntity.setStatus(request.getStatus());
 			ruleEntity.setUpdatedBy(request.getUpdatedBy());
-		//} catch (Exception ex) {
-		//	log.error("Error occurred while creating Rule entity object", ex);
-		//	throw new FraudEngineException(AppConstant.ERROR_SETTING_PROPERTY);
-		//}
+		} catch (Exception ex) {
+			log.error("Error occurred while creating Rule entity object", ex);
+			throw new FraudEngineException(AppConstant.ERROR_SETTING_PROPERTY);
+		}
 		return outputUpdatedRuleResponse(saveRuleEntityToDatabase(ruleEntity));
 	}
 
@@ -175,7 +170,7 @@ public class RuleService {
 			log.error("Error occurred while saving Rule entity to database" , ex);
 			throw new FraudEngineException(AppConstant.ERROR_SAVING_TO_DATABASE);
 		}
-		saveRuleEntityToRedis(persistedRuleEntity);
+		//saveRuleEntityToRedis(persistedRuleEntity);
 		return persistedRuleEntity;
 	}
 	
