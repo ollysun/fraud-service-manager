@@ -4,6 +4,7 @@ package com.etz.fraudeagleeyemanager.service;
 import java.util.Objects;
 import java.util.Optional;
 
+import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.Page;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -12,6 +13,7 @@ import org.springframework.stereotype.Service;
 import com.etz.fraudeagleeyemanager.constant.AppConstant;
 import com.etz.fraudeagleeyemanager.dto.request.NotificationGroupRequest;
 import com.etz.fraudeagleeyemanager.dto.request.UpdateNotificationGroupRequest;
+import com.etz.fraudeagleeyemanager.dto.response.NotificationGroupResponse;
 import com.etz.fraudeagleeyemanager.entity.NotificationGroup;
 import com.etz.fraudeagleeyemanager.exception.FraudEngineException;
 import com.etz.fraudeagleeyemanager.exception.ResourceNotFoundException;
@@ -125,6 +127,13 @@ public class NotificationGroupService {
 			log.error("Error occurred while saving NotificationGroup entity to Redis" , ex);
 			throw new FraudEngineException(AppConstant.ERROR_SAVING_TO_REDIS);
 		}
+	}
+	
+	@SuppressWarnings("unused")
+	private NotificationGroupResponse outputNotificationGroupResponse(NotificationGroup notificationGroup) {
+		NotificationGroupResponse notificationGroupResponse = new NotificationGroupResponse();
+		BeanUtils.copyProperties(notificationGroup, notificationGroupResponse);
+		return notificationGroupResponse;
 	}
 	
 }

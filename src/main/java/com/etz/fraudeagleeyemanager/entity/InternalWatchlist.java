@@ -36,7 +36,7 @@ public class InternalWatchlist extends BaseAuditEntity implements Serializable {
 	private Long id;
 
 	@NotBlank(message = "Bvn number cannot be empty")
-	@Column(name = "bvn", unique = true)
+	@Column(name = "bvn", unique = true, nullable = false, length=11)
 	private String bvn;
 
 	@Column(name = "comments")

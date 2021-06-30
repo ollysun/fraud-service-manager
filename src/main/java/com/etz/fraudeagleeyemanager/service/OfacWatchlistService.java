@@ -57,7 +57,7 @@ public class OfacWatchlistService {
 		OfacWatchlist ofacWatchlist = findById(ofacId).get();
 		try {
 		// for auditing purpose for UPDATE
-		ofacWatchlist.setEntityId(String.valueOf(request.getOfacId()));
+		ofacWatchlist.setEntityId(String.valueOf(ofacId));
 		ofacWatchlist.setRecordBefore(JsonConverter.objectToJson(ofacWatchlist));
 		ofacWatchlist.setRequestDump(request);
 		
