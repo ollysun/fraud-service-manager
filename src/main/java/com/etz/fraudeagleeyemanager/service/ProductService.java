@@ -9,6 +9,7 @@ import com.etz.fraudeagleeyemanager.dto.request.*;
 import com.etz.fraudeagleeyemanager.dto.response.ProductServiceResponse;
 import com.etz.fraudeagleeyemanager.entity.ProductDatasetId;
 import com.etz.fraudeagleeyemanager.entity.ProductServiceEntity;
+import com.etz.fraudeagleeyemanager.redisrepository.ProductServiceRedisRepository;
 import com.etz.fraudeagleeyemanager.repository.ProductServiceRepository;
 import com.etz.fraudeagleeyemanager.util.AppUtil;
 import com.etz.fraudeagleeyemanager.util.PageRequestUtil;
@@ -48,6 +49,7 @@ public class ProductService {
 	private final ProductRedisRepository productRedisRepository;
 	private final ProductDatasetRedisRepository productDatasetRedisRepository;
 	private final ProductServiceRepository productServiceRepository;
+	private final ProductServiceRedisRepository productServiceRedisRepository;
 
 	@Transactional(propagation = Propagation.REQUIRES_NEW)
 	@CacheEvict(value = "product", allEntries=true)
@@ -88,7 +90,7 @@ public class ProductService {
 			log.error("Error occurred while saving product entity to database", ex);
 			throw new FraudEngineException(AppConstant.ERROR_SAVING_TO_DATABASE);
 		}
-		saveProductEntityToRedis(persistedProductEntity);
+		//saveProductEntityToRedis(persistedProductEntity);
 		return persistedProductEntity;
 	}
 
@@ -338,7 +340,7 @@ public class ProductService {
 			log.error("Error occurred while saving product entity to database", ex);
 			throw new FraudEngineException(AppConstant.ERROR_SAVING_TO_DATABASE);
 		}
-		saveServiceDatasetEntityToRedis(persistedServiceDatasetEntity);
+		//saveServiceDatasetEntityToRedis(persistedServiceDatasetEntity);
 		return persistedServiceDatasetEntity;
 	}
 
@@ -416,9 +418,21 @@ public class ProductService {
 	}
 
 	private ProductServiceResponse outputCreatedProductService(ProductServiceEntity productEntityService) {
+		//saveProductServiceEntityToRedis(productEntityService);
 		ProductServiceResponse productResponse = new ProductServiceResponse();
 		BeanUtils.copyProperties(productEntityService, productResponse, "productEntity", "productDataset");
 		return productResponse;
+	}
+
+	private void saveProductServiceEntityToRedis(ProductServiceEntity alreadyPersistedProductServiceEntity) {
+		try {
+			productServiceRedisRepository.setHashOperations(redisTemplate);
+			productServiceRedisRepository.update(alreadyPersistedProductServiceEntity);
+		} catch (Exception ex) {
+			// TODO actually delete already saved entity from the database (NOT SOFT DELETE)
+			log.error("Error occurred while saving product entity to Redis", ex);
+			throw new FraudEngineException(AppConstant.ERROR_SAVING_TO_REDIS);
+		}
 	}
 
 	@Transactional

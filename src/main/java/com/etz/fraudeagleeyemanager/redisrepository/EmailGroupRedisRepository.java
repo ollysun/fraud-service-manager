@@ -13,7 +13,7 @@ import java.util.Map;
 @Repository
 public class EmailGroupRedisRepository implements RedisRepository<EmailGroup, Long> {
 	
-    private HashOperations<String, Long, EmailGroup> hashOperations;
+    private HashOperations<String, Long, Object> hashOperations;
 	
     public void setHashOperations(RedisTemplate<String, Object> redisTemplate){
         this.hashOperations = redisTemplate.opsForHash();
@@ -21,17 +21,17 @@ public class EmailGroupRedisRepository implements RedisRepository<EmailGroup, Lo
     
 	@Override
 	public void create(EmailGroup model) {
-		hashOperations.put(FraudRedisKey.EMAILGROUP.name(), model.getId(), model);
+		hashOperations.put(FraudRedisKey.EMAILGROUP.name(), model.getId(), toJsonString(model));
 	}
 
 	@Override
 	public Map<Long, EmailGroup> findAll() {
-        return hashOperations.entries(FraudRedisKey.EMAILGROUP.name());
+        return convertResponseToEntityMap(hashOperations.entries(FraudRedisKey.EMAILGROUP.name()),EmailGroup.class);
 	}
 
 	@Override
 	public EmailGroup findById(Long id) {
-		return hashOperations.get(FraudRedisKey.EMAILGROUP.name(), id);
+		return convertResponseToEntity(hashOperations.get(FraudRedisKey.EMAILGROUP.name(), id),EmailGroup.class);
 	}
 
 	@Override

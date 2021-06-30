@@ -13,7 +13,7 @@ import java.util.Map;
 @Repository
 public class InternalWatchlistRedisRepository implements RedisRepository<InternalWatchlist, Long> {
 	
-    private HashOperations<String, Long, InternalWatchlist> hashOperations;
+    private HashOperations<String, Long, Object> hashOperations;
 	
     public void setHashOperations(RedisTemplate<String, Object> redisTemplate){
         this.hashOperations = redisTemplate.opsForHash();
@@ -21,17 +21,17 @@ public class InternalWatchlistRedisRepository implements RedisRepository<Interna
     
 	@Override
 	public void create(InternalWatchlist model) {
-		hashOperations.put(FraudRedisKey.INTERNALWATCHLIST.name(), model.getId(), model);
+		hashOperations.put(FraudRedisKey.INTERNALWATCHLIST.name(), model.getId(), toJsonString(model));
 	}
 
 	@Override
 	public Map<Long, InternalWatchlist> findAll() {
-        return hashOperations.entries(FraudRedisKey.INTERNALWATCHLIST.name());
+        return convertResponseToEntityMap(hashOperations.entries(FraudRedisKey.INTERNALWATCHLIST.name()),InternalWatchlist.class);
 	}
 
 	@Override
 	public InternalWatchlist findById(Long id) {
-		return hashOperations.get(FraudRedisKey.INTERNALWATCHLIST.name(), id);
+		return convertResponseToEntity(hashOperations.get(FraudRedisKey.INTERNALWATCHLIST.name(), id),InternalWatchlist.class);
 	}
 
 	@Override

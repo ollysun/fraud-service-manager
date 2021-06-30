@@ -13,7 +13,7 @@ import java.util.Map;
 @Repository
 public class OfacWatchlistRedisRepository implements RedisRepository<OfacWatchlist, Long> {
 	
-    private HashOperations<String, Long, OfacWatchlist> hashOperations;
+    private HashOperations<String, Long, Object> hashOperations;
 	
     public void setHashOperations(RedisTemplate<String, Object> redisTemplate){
         this.hashOperations = redisTemplate.opsForHash();
@@ -21,17 +21,17 @@ public class OfacWatchlistRedisRepository implements RedisRepository<OfacWatchli
     
 	@Override
 	public void create(OfacWatchlist model) {
-		hashOperations.put(FraudRedisKey.OFACWATCHLIST.name(), model.getId(), model);
+		hashOperations.put(FraudRedisKey.OFACWATCHLIST.name(), model.getId(), toJsonString(model));
 	}
 
 	@Override
 	public Map<Long, OfacWatchlist> findAll() {
-        return hashOperations.entries(FraudRedisKey.OFACWATCHLIST.name());
+        return convertResponseToEntityMap(hashOperations.entries(FraudRedisKey.OFACWATCHLIST.name()),OfacWatchlist.class );
 	}
 
 	@Override
 	public OfacWatchlist findById(Long id) {
-		return hashOperations.get(FraudRedisKey.OFACWATCHLIST.name(), id);
+		return convertResponseToEntity(hashOperations.get(FraudRedisKey.OFACWATCHLIST.name(), id),OfacWatchlist.class);
 	}
 
 	@Override

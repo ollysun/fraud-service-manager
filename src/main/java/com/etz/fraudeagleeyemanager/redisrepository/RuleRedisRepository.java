@@ -13,7 +13,7 @@ import java.util.Map;
 @Repository
 public class RuleRedisRepository implements RedisRepository<Rule, Long> {
 	
-    private HashOperations<String, Long, Rule> hashOperations;
+    private HashOperations<String, Long, Object> hashOperations;
 	
     public void setHashOperations(RedisTemplate<String, Object> redisTemplate){
         this.hashOperations = redisTemplate.opsForHash();
@@ -21,17 +21,17 @@ public class RuleRedisRepository implements RedisRepository<Rule, Long> {
     
 	@Override
 	public void create(Rule model) {
-		hashOperations.put(FraudRedisKey.RULE.name(), model.getId(), model);
+		hashOperations.put(FraudRedisKey.RULE.name(), model.getId(), toJsonString(model));
 	}
 
 	@Override
 	public Map<Long, Rule> findAll() {
-        return hashOperations.entries(FraudRedisKey.RULE.name());
+        return convertResponseToEntityMap(hashOperations.entries(FraudRedisKey.RULE.name()), Rule.class);
 	}
 
 	@Override
 	public Rule findById(Long id) {
-		return hashOperations.get(FraudRedisKey.RULE.name(), id);
+		return convertResponseToEntity(hashOperations.get(FraudRedisKey.RULE.name(), id), Rule.class);
 	}
 
 	@Override
