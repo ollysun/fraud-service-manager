@@ -41,7 +41,7 @@ public class ProductServiceRedisRepository implements RedisRepository<ProductSer
 				@Override
 				public void afterCommit() {
 					TransactionSynchronization.super.afterCommit();
-					String hashKey = model.getServiceId() + ":" + model.getProductCode();
+					String hashKey = model.getServiceId().toUpperCase() + ":" + model.getProductCode().toUpperCase();
 					hashOperations.put(FraudRedisKey.PRODUCTSERVICE.name(), hashKey, toJsonString(model));
 				}
 			});

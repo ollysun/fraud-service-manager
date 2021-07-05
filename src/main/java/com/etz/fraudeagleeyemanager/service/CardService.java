@@ -35,6 +35,7 @@ import com.etz.fraudeagleeyemanager.util.PageRequestUtil;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
 @Service
@@ -48,6 +49,7 @@ public class CardService {
 	private final CardRedisRepository cardRedisRepository;
 	private final CardProductRedisRepository cardProductRedisRepository;
 
+	@Transactional(rollbackFor = Throwable.class)
 	public CardResponse createCard(CardRequest request) {
 		Card cardEntity = new Card();
 		try {
@@ -85,6 +87,7 @@ public class CardService {
 	}
 	
  	// update card to increment suspicious count
+	@Transactional(rollbackFor = Throwable.class)
 	public Card updateCard(UpdateCardRequestDto updateCardRequestDto){
 		Optional<Card> cardOptional = cardRepository.findByCardBin(updateCardRequestDto.getCardBin());
 		if(!cardOptional.isPresent()) {
@@ -129,7 +132,8 @@ public class CardService {
 			throw new FraudEngineException(AppConstant.ERROR_SAVING_TO_REDIS);
 		}
 	}
-	
+
+	@Transactional(readOnly = true)
 	public Page<CardResponse> getCards(Long cardId) {
 		List<CardResponse> cardResponseList;
 		if (Objects.isNull(cardId)) {
@@ -144,6 +148,7 @@ public class CardService {
 		return AppUtil.listConvertToPage(cardResponseList, PageRequestUtil.getPageRequest());
 	}
 
+	@Transactional(rollbackFor = Throwable.class)
 	public CardProduct cardToProduct(CardToProductRequest request) {
 		if (!productEntityRepository.findByCodeAndDeletedFalse(request.getProductCode()).isPresent()){
 			throw new ResourceNotFoundException("Product Entity not found for productCode " + request.getProductCode());
@@ -170,6 +175,7 @@ public class CardService {
 		return saveCardProductEntityToDatabase(cardToProdEntity);
 	}
 
+	@Transactional(rollbackFor = Throwable.class)
 	public List<CardProductResponse> updateCardProduct(UpdateCardProductRequest request) {
 		List<CardProduct> cardProductList = cardProductRepository.findByCardId(request.getCardId());
 		if(cardProductList.isEmpty()){

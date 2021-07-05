@@ -58,8 +58,8 @@ public class RuleService {
 	@PersistenceContext
 	private final EntityManager em;
 
-	@Transactional
 	@CacheEvict(value = "product", allEntries=true)
+	@Transactional(rollbackFor = Throwable.class)
 	public Rule createRule(CreateRuleRequest request) {
 		Rule ruleEntity = new Rule();
 			if (Boolean.TRUE.equals(ruleRepository.existsByName(request.getRuleName()))){
@@ -114,6 +114,7 @@ public class RuleService {
 		// refresh fraud engine redis server;
 	}
 
+	@Transactional(rollbackFor = Throwable.class)
 	public Rule updateRule(UpdateRuleRequest request) {
 
 		Optional<Rule> ruleEntityOptional = ruleRepository.findById(request.getRuleId());
@@ -192,6 +193,7 @@ public class RuleService {
 		return updatedRuleResponse;
 	}
 
+	@Transactional(rollbackFor = Throwable.class)
 	public boolean deleteRule(Long ruleId) {
 		List<ServiceRule> prodRuleEntity = serviceRuleRepository.findByRuleId(ruleId);
 		if (!(prodRuleEntity.isEmpty())){
@@ -232,6 +234,7 @@ public class RuleService {
 		return Boolean.TRUE;
 	}
 
+	@Transactional(readOnly = true)
 	public Page<RuleResponse> getRule(Long ruleId) {
 		List<RuleResponse> ruleResponseList;
 		if (Objects.isNull(ruleId)) {
@@ -246,6 +249,7 @@ public class RuleService {
 		return AppUtil.listConvertToPage(ruleResponseList, PageRequestUtil.getPageRequest());
 	}
 
+	@Transactional(rollbackFor = Throwable.class)
 	public ServiceRule mapRuleToService(MapRuleToServiceRequest request) {
 		Optional<ProductServiceEntity> productServiceEntityOptional = productServiceRepository.findById(request.getServiceId());
 		if (!productServiceEntityOptional.isPresent()){
@@ -282,6 +286,7 @@ public class RuleService {
 		return saveRuleServiceEntityToDatabase(serviceRuleEntity);
 	}
 
+	@Transactional(rollbackFor = Throwable.class)
 	public List<ProductRuleResponse> updateServiceRule(UpdateMapRuleToServiceRequest request) {
 		List<ServiceRule> prodRuleEntityList = serviceRuleRepository.findByRuleId(request.getServiceRuleId());
 		if(prodRuleEntityList.isEmpty()){
@@ -315,6 +320,7 @@ public class RuleService {
 		return outputProductRuleResponseList(updatedServiceRuleEntity);
 	}
 
+	@Transactional(rollbackFor = Throwable.class)
 	public boolean deleteServiceRule(Long ruleId, String serviceId) {
 		if (Objects.isNull(ruleId) && Objects.isNull(serviceId)){
 			throw new FraudEngineException("Please enter value for serviceId and ruleId");
@@ -349,6 +355,7 @@ public class RuleService {
 	}
 
 
+	@Transactional(rollbackFor = Throwable.class)
 	public List<RuleProductResponse> getRuleService(String serviceId) {
 		List<RuleProductResponse> ruleProductResponseList = new ArrayList<>();
 		TypedQuery<RuleProductResponse> ruleProductResponseTypedQuery;

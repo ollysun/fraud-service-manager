@@ -41,7 +41,7 @@ public class ProductRuleRedisRepository implements RedisRepository<ServiceRule, 
 				@Override
 				public void afterCommit() {
 					TransactionSynchronization.super.afterCommit();
-					String hashKey = model.getServiceId() + ":" + model.getRuleId();
+					String hashKey = model.getServiceId().toUpperCase() + ":" + model.getRuleId();
 					hashOperations.put(FraudRedisKey.PRODUCTRULE.name(), hashKey, toJsonString(model));				}
 			});
 		}

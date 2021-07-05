@@ -22,6 +22,7 @@ import com.etz.fraudeagleeyemanager.util.PageRequestUtil;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
 @Service
@@ -31,7 +32,8 @@ public class OfacWatchlistService {
 	private final RedisTemplate<String, Object> redisTemplate;
 	private final OfacWatchlistRepository ofacWatchlistRepository;
 	private final OfacWatchlistRedisRepository ofacWatchlistRedisRepository;
-		
+
+	@Transactional(rollbackFor = Throwable.class)
 	public OfacWatchlist createOfacWatchlist(OfacWatchlistRequest request){
 		OfacWatchlist ofacWatchlist = new OfacWatchlist();
 		try {
@@ -53,6 +55,7 @@ public class OfacWatchlistService {
 		return saveOfacWatchlistEntityToDatabase(ofacWatchlist);
 	}
 
+	@Transactional(rollbackFor = Throwable.class)
 	public OfacWatchlist updateOfacWatchlist(UpdateOfacWatchlistRequest request, Long ofacId){
 		OfacWatchlist ofacWatchlist = findById(ofacId).get();
 		try {
@@ -73,6 +76,7 @@ public class OfacWatchlistService {
 		return saveOfacWatchlistEntityToDatabase(ofacWatchlist);
 	}
 
+	@Transactional(readOnly = true)
 	private Optional<OfacWatchlist> findById(Long ofacId) {
 		Optional<OfacWatchlist> ofacWatchlistOptional = ofacWatchlistRepository.findById(ofacId);
 		if(!ofacWatchlistOptional.isPresent()) {
@@ -80,7 +84,8 @@ public class OfacWatchlistService {
 		}
 		return ofacWatchlistOptional;
 	}
-	
+
+	@Transactional(readOnly = true,rollbackFor = Throwable.class)
 	public Page<OfacWatchlist> getOfacWatchlist(Long ofacId){
 		if (Objects.isNull(ofacId)) {
 			return ofacWatchlistRepository.findAll(PageRequestUtil.getPageRequest());
@@ -88,7 +93,8 @@ public class OfacWatchlistService {
 		Optional<OfacWatchlist> ofacWatchlistOptional = findById(ofacId);
 		return ofacWatchlistRepository.findAll(Example.of(ofacWatchlistOptional.get()), PageRequestUtil.getPageRequest());
 	}
-	
+
+	@Transactional(rollbackFor = Throwable.class)
 	public boolean deleteOfacWatchlist(Long ofacId) {
 		OfacWatchlist ofacWatchlist = findById(ofacId).get();
 
