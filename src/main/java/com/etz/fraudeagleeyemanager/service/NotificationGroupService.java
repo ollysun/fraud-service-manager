@@ -22,6 +22,7 @@ import com.etz.fraudeagleeyemanager.util.PageRequestUtil;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
 @Service
@@ -31,7 +32,8 @@ public class NotificationGroupService {
 	private final RedisTemplate<String, Object> redisTemplate;
 	private final NotificationGroupRepository notificationGroupRepository;
 	private final NotificationGroupRedisRepository notificationGroupRedisRepository;
-		
+
+	@Transactional(rollbackFor = Throwable.class)
 	public NotificationGroup createNotificationGroup(NotificationGroupRequest request){
 		NotificationGroup notificationGroup = new NotificationGroup();
 		try {
@@ -55,6 +57,7 @@ public class NotificationGroupService {
 		return saveNotificationGroupEntityToDatabase(notificationGroup);
 	}
 
+	@Transactional(rollbackFor = Throwable.class)
 	public NotificationGroup updateNotificationGroup(UpdateNotificationGroupRequest request, Long groupId){
 		Optional<NotificationGroup> notificationGroupOptional = notificationGroupRepository.findById(groupId);
 		if(!notificationGroupOptional.isPresent()) {
@@ -80,6 +83,7 @@ public class NotificationGroupService {
 		return saveNotificationGroupEntityToDatabase(notificationGroup);
 	}
 
+	@Transactional(readOnly = true)
 	public Page<NotificationGroup> getNotificationGroup(Long groupId, String groupName){
 		if (Objects.isNull(groupId) && Objects.isNull(groupName)) {
 			return notificationGroupRepository.findAll(PageRequestUtil.getPageRequest());

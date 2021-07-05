@@ -16,12 +16,12 @@ import com.etz.fraudeagleeyemanager.entity.ProductDatasetId;
 public interface ProductDataSetRepository extends JpaRepository<ServiceDataSet, ProductDatasetId> {
 
 	List<ServiceDataSet> findByProductCode(String productCode);
-	List<ServiceDataSet> findByServiceId(Long serviceId);
+	List<ServiceDataSet> findByServiceId(String serviceId);
 
 	//@Override
 	@Query("update #{#entityName} e set e.deleted=true where e.serviceId=?1")
 	@Modifying
 	@Transactional
-	void delete(@Param("serviceId")Long serviceId);
+	void delete(@Param("serviceId")String serviceId);
 
 }

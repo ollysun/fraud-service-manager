@@ -36,8 +36,9 @@ public class ProductDatasetRedisRepository implements RedisRepository<ServiceDat
 				@Override
 				public void afterCommit() {
 					TransactionSynchronization.super.afterCommit();
-					String hashKey = model.getProductCode().toUpperCase() + ":" + model.getServiceId() + ":" + model.getFieldName().toUpperCase();
-					hashOperations.put(FraudRedisKey.PRODUCTDATASET.name(), hashKey, toJsonString(model));				}
+					String hashKey = model.getProductCode().toUpperCase() + ":" + model.getServiceId().toUpperCase() + ":" + model.getFieldName().toUpperCase();
+					hashOperations.put(FraudRedisKey.PRODUCTDATASET.name(), hashKey, toJsonString(model));
+				}
 			});
 		}
 

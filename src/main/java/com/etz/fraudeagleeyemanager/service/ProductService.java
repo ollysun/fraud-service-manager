@@ -54,7 +54,7 @@ public class ProductService {
 	private final ProductServiceRedisRepository productServiceRedisRepository;
 
 	@CacheEvict(value = "product", allEntries=true)
-	@Transactional(propagation = Propagation.REQUIRED, rollbackFor = Throwable.class)
+	@Transactional(rollbackFor = Throwable.class)
 	public ProductResponse createProduct(CreateProductRequest request) {
 		ProductEntity productEntity = new ProductEntity();
 		if (productEntityRepository.findCountByCode(request.getProductCode()) > 0){
@@ -114,8 +114,8 @@ public class ProductService {
 		return productResponse;
 	}
 
-	@Transactional(readOnly=true)
 	@Cacheable(value="product")
+	@Transactional(readOnly = true)
 	public List<ProductResponse> getProduct(String productCode) {
 		if (Objects.isNull(productCode)) {
 			return outputCreateProduct(productEntityRepository.findAllByDeletedFalse());
@@ -137,8 +137,8 @@ public class ProductService {
 		return productResponseList;
 	}
 
-	@Transactional
 	@CacheEvict(value = "product", allEntries=true)
+	@Transactional(rollbackFor = Throwable.class)
 	public ProductResponse updateProduct(UpdateProductRequest request) {
 		ProductEntity productEntity = findByCode(request.getProductCode()).get();
 
@@ -169,8 +169,8 @@ public class ProductService {
 		return productResponse;
 	}
 
-	@Transactional
 	@CacheEvict(value = "product")
+	@Transactional(rollbackFor = Throwable.class)
 	public Boolean deleteProduct(String productCode) {
 		Optional<ProductEntity> productEntityOptional = findByCode(productCode);
 		ProductEntity productEntity = productEntityOptional.get();
@@ -205,7 +205,7 @@ public class ProductService {
 		return productEntityOptional;
 	}
 
-	@Transactional(propagation = Propagation.REQUIRES_NEW)
+	@Transactional(rollbackFor = Throwable.class)
 	public ServiceDataSet createServiceDataset(DatasetProductRequest request) {
 		//check for the code before creating the dataset
 		findByCode(request.getProductCode());
@@ -253,7 +253,7 @@ public class ProductService {
 		return serviceDataSetResponsePage;
 	}
 
-	@Transactional(propagation = Propagation.REQUIRED)
+	@Transactional(rollbackFor = Throwable.class)
 	public List<ServiceDataSetResponse> updateServiceDataset(UpdateDataSetRequest request) {
 		List<ServiceDataSet> serviceDataSetList = productDataSetRepository.findByServiceId(request.getServiceId());
 		if (serviceDataSetList.isEmpty()) {
@@ -292,8 +292,8 @@ public class ProductService {
 		return updatedProductDatasetResponseList;
 	}
 
-	@Transactional
-	public boolean deleteServiceDataset(Long serviceId) {
+	@Transactional(rollbackFor = Throwable.class)
+	public boolean deleteServiceDataset(String serviceId) {
 		List<ServiceDataSet> serviceDatasetEntityList = productDataSetRepository.findByServiceId(serviceId);
 		if (serviceDatasetEntityList.isEmpty()) {
 			throw new ResourceNotFoundException("Service dataset details not found for this serviceId " + serviceId);
@@ -358,7 +358,7 @@ public class ProductService {
 	}
 
 	@CacheEvict(value = "Service", allEntries=true)
-	@Transactional
+	@Transactional(rollbackFor = Throwable.class)
 	public ProductServiceResponse createProductService(CreateProductServiceDto request) {
 		Optional<ProductEntity> productEntityOptional = productEntityRepository.findByCodeAndDeletedFalse(request.getProductCode());
 		if (!productEntityOptional.isPresent()) {
@@ -384,7 +384,7 @@ public class ProductService {
 			throw new FraudEngineException(AppConstant.ERROR_SAVING_TO_REDIS);
 		}
 	}
-	@Transactional
+	@Transactional(rollbackFor = Throwable.class)
 	public ProductServiceResponse updateProductService(UpdateProductServiceDto request) {
 		Optional<ProductEntity> productEntityOptional = productEntityRepository.findByCodeAndDeletedFalse(request.getProductCode());
 		if (!productEntityOptional.isPresent()) {
@@ -401,7 +401,7 @@ public class ProductService {
 			}).orElseThrow(()  -> new ResourceNotFoundException("Product service not found for this id " + request.getServiceId()));
 	}
 
-	@Transactional
+	@Transactional(rollbackFor = Throwable.class)
 	public Boolean deactivateProductService(String serviceId){
 		Optional<ProductServiceEntity> productServiceEntity = productServiceRepository.findById(serviceId);
 		if (!productServiceEntity.isPresent()) {
@@ -446,7 +446,7 @@ public class ProductService {
 		}
 	}
 
-	@Transactional
+	@Transactional(rollbackFor = Throwable.class)
 	public void deleteProductInTransaction(ProductEntity productEntity) {
 		productServiceRepository.deleteByProductCode(productEntity.getId());
 		productEntityRepository.delete(productEntity);
