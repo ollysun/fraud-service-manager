@@ -63,8 +63,9 @@ public class ProductServiceController {
 
     @GetMapping("/dataset")
     public PageResponse<ServiceDataSetResponse> queryServiceDataset(@RequestParam(required = false) String code,
-                                                                    @RequestParam(required = false) String serviceId){
-        return new PageResponse<>(productService.getServiceDataset(code, serviceId));
+                                                                    @RequestParam(required = false) String serviceId,
+                                                                    @RequestParam(required = false) Long datasetId){
+        return new PageResponse<>(productService.getServiceDataset(code, serviceId, datasetId));
     }
 
     @PutMapping("/dataset")
