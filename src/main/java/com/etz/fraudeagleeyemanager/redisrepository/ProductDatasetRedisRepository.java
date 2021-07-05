@@ -1,34 +1,46 @@
 package com.etz.fraudeagleeyemanager.redisrepository;
 
-import java.io.IOException;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import org.springframework.data.redis.core.Cursor;
 import org.springframework.data.redis.core.HashOperations;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.core.ScanOptions;
 import org.springframework.stereotype.Repository;
 
 import com.etz.fraudeagleeyemanager.entity.ServiceDataSet;
 import com.etz.fraudeagleeyemanager.enums.FraudRedisKey;
 import com.etz.fraudeagleeyemanager.repository.RedisRepository;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 
 @Repository
 public class ProductDatasetRedisRepository implements RedisRepository<ServiceDataSet, String> {
 	
     private HashOperations<String, String, Object> hashOperations;
-	
-    public void setHashOperations(RedisTemplate<String, Object> redisTemplate){
+	private RedisTemplate<String, Object> redisTemplateField;
+
+	public void setHashOperations(RedisTemplate<String, Object> redisTemplate){
         this.hashOperations = redisTemplate.opsForHash();
-    }
+		redisTemplateField = redisTemplate;
+	}
     
 	@Override
 	public void create(ServiceDataSet model) {
-		String hashKey = model.getProductCode().toUpperCase() + ":" + model.getServiceId() + ":" + model.getFieldName().toUpperCase();
-		hashOperations.put(FraudRedisKey.PRODUCTDATASET.name(), hashKey, toJsonString(model));
+		// start the transaction
+		redisTemplateField.multi();
+
+		// register synchronisation
+		if(TransactionSynchronizationManager.isActualTransactionActive()) {
+			TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+				@Override
+				public void afterCommit() {
+					TransactionSynchronization.super.afterCommit();
+					String hashKey = model.getProductCode().toUpperCase() + ":" + model.getServiceId() + ":" + model.getFieldName().toUpperCase();
+					hashOperations.put(FraudRedisKey.PRODUCTDATASET.name(), hashKey, toJsonString(model));				}
+			});
+		}
+
 	}
 
 	@Override
