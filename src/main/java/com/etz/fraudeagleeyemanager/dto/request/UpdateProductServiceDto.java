@@ -14,7 +14,7 @@ import java.io.Serializable;
 @ToString
 public class UpdateProductServiceDto implements Serializable {
     @NotNull(message = "Please enter the service id")
-    private Long serviceId;
+    private String serviceId;
     @NotBlank(message = "Please enter the product code")
     private String productCode;
     @NotBlank(message = "Please enter the service name")

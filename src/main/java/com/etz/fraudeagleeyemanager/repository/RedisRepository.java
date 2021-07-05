@@ -14,7 +14,6 @@ import org.springframework.data.redis.core.HashOperations;
 import org.springframework.data.redis.core.ScanOptions;
 
 
-@Repository
 public interface RedisRepository<T, U> {
 
     public void create(T model);
