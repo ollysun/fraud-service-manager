@@ -25,7 +25,21 @@ public class ProductRedisRepository implements RedisRepository<ProductEntity, St
     }
 	@Override
 	public void create(ProductEntity model) {
-		hashOperations.put(FraudRedisKey.PRODUCT.name(), model.getCode(), toJsonString(model));
+		// start the transaction
+		redisTemplateField.multi();
+
+		// register synchronisation
+		if(TransactionSynchronizationManager.isActualTransactionActive()) {
+			TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+				@Override
+				public void afterCommit() {
+					TransactionSynchronization.super.afterCommit();
+					hashOperations.put(FraudRedisKey.PRODUCT.name(), model.getCode(), toJsonString(model));
+				}
+			});
+		}
+
+
 	}
 
 	@Override
@@ -40,20 +54,7 @@ public class ProductRedisRepository implements RedisRepository<ProductEntity, St
 
 	@Override
 	public void update(ProductEntity model) {
-
-		// start the transaction
-		redisTemplateField.multi();
-
-		// register synchronisation
-		if(TransactionSynchronizationManager.isActualTransactionActive()) {
-			TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
-				@Override
-				public void afterCommit() {
-					TransactionSynchronization.super.afterCommit();
-					create(model);
-				}
-			});
-		}
+		create(model);
 	}
 
 	@Override

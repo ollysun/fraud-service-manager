@@ -8,6 +8,8 @@ import org.springframework.data.redis.core.HashOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ScanOptions;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.io.IOException;
 import java.util.HashSet;
@@ -19,15 +21,30 @@ import java.util.Set;
 public class ProductRuleRedisRepository implements RedisRepository<ServiceRule, String> {
 	
     private HashOperations<String, String, Object> hashOperations;
-	
-    public void setHashOperations(RedisTemplate<String, Object> redisTemplate){
+	private RedisTemplate<String, Object> redisTemplateField;
+
+	public void setHashOperations(RedisTemplate<String, Object> redisTemplate){
         this.hashOperations = redisTemplate.opsForHash();
-    }
+		redisTemplateField = redisTemplate;
+	}
     
 	@Override
 	public void create(ServiceRule model) {
-		String hashKey = model.getServiceId() + ":" + model.getRuleId();
-		hashOperations.put(FraudRedisKey.PRODUCTRULE.name(), hashKey, toJsonString(model));
+
+
+		// start the transaction
+		redisTemplateField.multi();
+
+		// register synchronisation
+		if(TransactionSynchronizationManager.isActualTransactionActive()) {
+			TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+				@Override
+				public void afterCommit() {
+					TransactionSynchronization.super.afterCommit();
+					String hashKey = model.getServiceId() + ":" + model.getRuleId();
+					hashOperations.put(FraudRedisKey.PRODUCTRULE.name(), hashKey, toJsonString(model));				}
+			});
+		}
 	}
 
 	@Override
