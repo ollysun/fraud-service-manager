@@ -6,6 +6,8 @@ import com.etz.fraudeagleeyemanager.repository.RedisRepository;
 import org.springframework.data.redis.core.HashOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.util.Map;
 
@@ -14,14 +16,29 @@ import java.util.Map;
 public class EmailGroupRedisRepository implements RedisRepository<EmailGroup, Long> {
 	
     private HashOperations<String, Long, Object> hashOperations;
-	
-    public void setHashOperations(RedisTemplate<String, Object> redisTemplate){
+	private RedisTemplate<String, Object> redisTemplateField;
+
+	public void setHashOperations(RedisTemplate<String, Object> redisTemplate){
         this.hashOperations = redisTemplate.opsForHash();
-    }
+		redisTemplateField = redisTemplate;
+	}
     
 	@Override
 	public void create(EmailGroup model) {
-		hashOperations.put(FraudRedisKey.EMAILGROUP.name(), model.getId(), toJsonString(model));
+
+		// start the transaction
+		redisTemplateField.multi();
+
+		// register synchronisation
+		if(TransactionSynchronizationManager.isActualTransactionActive()) {
+			TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+				@Override
+				public void afterCommit() {
+					TransactionSynchronization.super.afterCommit();
+					hashOperations.put(FraudRedisKey.EMAILGROUP.name(), model.getId(), toJsonString(model));
+				}
+			});
+		}
 	}
 
 	@Override
