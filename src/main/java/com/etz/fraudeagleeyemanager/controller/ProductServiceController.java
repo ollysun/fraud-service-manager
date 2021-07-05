@@ -75,7 +75,7 @@ public class ProductServiceController {
     }
 
     @DeleteMapping("/dataset/{serviceId}")
-    public BooleanResponse deleteServiceDataset(@PathVariable Long serviceId){
+    public BooleanResponse deleteServiceDataset(@PathVariable String serviceId){
         return new BooleanResponse(productService.deleteServiceDataset(serviceId));
     }
 
