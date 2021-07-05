@@ -21,8 +21,8 @@ public class JsonConverter {
 	}
 	
 	public static String objectToJson(Object object) {
-		ObjectMapper objMapper = new ObjectMapper()
-				.enable(SerializationFeature.INDENT_OUTPUT);
+		ObjectMapper objMapper = new ObjectMapper();
+				//.enable(SerializationFeature.INDENT_OUTPUT);
 				//.setFieldNamingPolicy(FieldNamingPolicy.UPPER_CAMEL_CASE)
 		
 		String json = "";

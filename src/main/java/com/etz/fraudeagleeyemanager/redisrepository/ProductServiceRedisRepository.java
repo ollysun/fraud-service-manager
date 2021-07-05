@@ -1,5 +1,6 @@
 package com.etz.fraudeagleeyemanager.redisrepository;
 
+import com.etz.fraudeagleeyemanager.entity.ProductServiceEntity;
 import com.etz.fraudeagleeyemanager.entity.ServiceRule;
 import com.etz.fraudeagleeyemanager.enums.FraudRedisKey;
 import com.etz.fraudeagleeyemanager.repository.RedisRepository;
@@ -16,7 +17,7 @@ import java.util.Set;
 
 
 @Repository
-public class ProductRuleRedisRepository implements RedisRepository<ServiceRule, String> {
+public class ProductServiceRedisRepository implements RedisRepository<ProductServiceEntity, String> {
 	
     private HashOperations<String, String, Object> hashOperations;
 	
@@ -25,33 +26,33 @@ public class ProductRuleRedisRepository implements RedisRepository<ServiceRule, 
     }
     
 	@Override
-	public void create(ServiceRule model) {
-		String hashKey = model.getServiceId() + ":" + model.getRuleId();
-		hashOperations.put(FraudRedisKey.PRODUCTRULE.name(), hashKey, toJsonString(model));
+	public void create(ProductServiceEntity model) {
+		String hashKey = model.getServiceId() + ":" + model.getProductCode();
+		hashOperations.put(FraudRedisKey.PRODUCTSERVICE.name(), hashKey, toJsonString(model));
 	}
 
 	@Override
-	public Map<String, ServiceRule> findAll() {
-        return convertResponseToEntityMap(hashOperations.entries(FraudRedisKey.PRODUCTRULE.name()),ServiceRule.class);
+	public Map<String, ProductServiceEntity> findAll() {
+        return convertResponseToEntityMap(hashOperations.entries(FraudRedisKey.PRODUCTSERVICE.name()),ProductServiceEntity.class);
 	}
 
 	@Override
-	public ServiceRule findById(String id) {
-		return convertResponseToEntity(hashOperations.get(FraudRedisKey.PRODUCTRULE.name(), id),ServiceRule.class);
+	public ProductServiceEntity findById(String id) {
+		return convertResponseToEntity(hashOperations.get(FraudRedisKey.PRODUCTSERVICE.name(), id),ProductServiceEntity.class);
 	}
 
 	@Override
-	public void update(ServiceRule model) {
+	public void update(ProductServiceEntity model) {
 		create(model);
 	}
 
 	@Override
 	public void delete(String id) {
-        hashOperations.delete(FraudRedisKey.PRODUCTRULE.name(), id);
+        hashOperations.delete(FraudRedisKey.PRODUCTSERVICE.name(), id);
 	}
 	
 	public Set<String> scanKeys(String keyPatternToMatch) {
-		return scanKeys(keyPatternToMatch, hashOperations, FraudRedisKey.PRODUCTRULE.name());
+		return scanKeys(keyPatternToMatch, hashOperations, FraudRedisKey.PRODUCTSERVICE.name());
 	}
 	
 }

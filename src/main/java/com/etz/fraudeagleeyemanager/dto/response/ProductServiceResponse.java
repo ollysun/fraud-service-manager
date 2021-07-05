@@ -9,7 +9,7 @@ import lombok.ToString;
 @ToString
 public class ProductServiceResponse {
 
-    private Long serviceId;
+    private String serviceId;
 
     private String serviceName;
 

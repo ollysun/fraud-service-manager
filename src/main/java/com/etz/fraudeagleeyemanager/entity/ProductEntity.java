@@ -12,7 +12,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
-
 @Entity
 @Table(name = "product", indexes = {
         @Index(name = "uniqueProductIndex", columnList = "code, name", unique = true)
@@ -54,23 +53,25 @@ public class ProductEntity extends BaseAuditVersionEntity<String> implements Ser
     @JsonManagedReference
     @ToString.Exclude
     @OneToMany(mappedBy = "productEntity", fetch = FetchType.LAZY,
-            cascade = {CascadeType.PERSIST,CascadeType.MERGE}, orphanRemoval = true)
+            cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ServiceDataSet> serviceDataset;
 
     @JsonManagedReference
+    @ToString.Exclude
     @OneToMany(mappedBy = "productEntity",fetch = FetchType.LAZY,
-            cascade = {CascadeType.PERSIST,CascadeType.MERGE}, orphanRemoval = true)
+            cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<AccountProduct> accountProducts;
 
     @JsonManagedReference
+    @ToString.Exclude
     @OneToMany(mappedBy = "productEntity",fetch = FetchType.LAZY,
-            cascade = {CascadeType.PERSIST,CascadeType.MERGE}, orphanRemoval = true)
+            cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<CardProduct> cardProducts;
 
     @JsonManagedReference
+    @ToString.Exclude
     @OneToMany(mappedBy = "productEntity", fetch = FetchType.LAZY,
             cascade = CascadeType.ALL, orphanRemoval = true)
-    @ToString.Exclude
     private Set<ProductServiceEntity> productServiceEntities;
 
 	@Override

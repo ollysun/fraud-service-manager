@@ -13,8 +13,8 @@ import java.util.Set;
 
 @Entity
 @Table(name = "product_service", uniqueConstraints = @UniqueConstraint(name="UC_PRODUCT_SERVICE",
-        columnNames = {"product_code","service_name" }),
-        indexes = {@Index(name = "serviceNameUniqueIndex", columnList = "service_id, service_name")})
+        columnNames = {"product_code","service_name", "service_id" }),
+        indexes = {@Index(name = "serviceNameUniqueIndex", columnList = "service_id, service_name, product_code")})
 @SQLDelete(sql = "UPDATE product_service SET deleted = true, status=0 WHERE service_id = ?", check = ResultCheckStyle.COUNT)
 @Getter
 @Setter
@@ -23,9 +23,8 @@ import java.util.Set;
 @NoArgsConstructor
 public class ProductServiceEntity extends BaseAuditEntity implements Serializable {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "service_id", nullable = false)
-    private Long serviceId;
+    private String serviceId;
 
     @Column(name = "service_name", nullable = false, columnDefinition="VARCHAR(200)")
     private String serviceName;

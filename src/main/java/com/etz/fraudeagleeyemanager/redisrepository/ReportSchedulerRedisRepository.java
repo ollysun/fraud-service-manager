@@ -13,7 +13,7 @@ import java.util.Map;
 @Repository
 public class ReportSchedulerRedisRepository implements RedisRepository<ReportScheduler, Long> {
 	
-    private HashOperations<String, Long, ReportScheduler> hashOperations;
+    private HashOperations<String, Long, Object> hashOperations;
 	
     public void setHashOperations(RedisTemplate<String, Object> redisTemplate){
         this.hashOperations = redisTemplate.opsForHash();
@@ -21,17 +21,17 @@ public class ReportSchedulerRedisRepository implements RedisRepository<ReportSch
     
 	@Override
 	public void create(ReportScheduler model) {
-		hashOperations.put(FraudRedisKey.REPORTSCHEDULER.name(), model.getId(), model);		
+		hashOperations.put(FraudRedisKey.REPORTSCHEDULER.name(), model.getId(), toJsonString(model));
 	}
 
 	@Override
 	public Map<Long, ReportScheduler> findAll() {
-        return hashOperations.entries(FraudRedisKey.REPORTSCHEDULER.name());
+        return convertResponseToEntityMap(hashOperations.entries(FraudRedisKey.REPORTSCHEDULER.name()),ReportScheduler.class);
 	}
 
 	@Override
 	public ReportScheduler findById(Long id) {
-		return hashOperations.get(FraudRedisKey.REPORTSCHEDULER.name(), id);
+		return convertResponseToEntity(hashOperations.get(FraudRedisKey.REPORTSCHEDULER.name(), id),ReportScheduler.class);
 	}
 
 	@Override

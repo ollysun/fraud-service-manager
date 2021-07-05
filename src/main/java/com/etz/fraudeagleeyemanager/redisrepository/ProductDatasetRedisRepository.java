@@ -19,7 +19,7 @@ import com.etz.fraudeagleeyemanager.repository.RedisRepository;
 @Repository
 public class ProductDatasetRedisRepository implements RedisRepository<ServiceDataSet, String> {
 	
-    private HashOperations<String, String, ServiceDataSet> hashOperations;
+    private HashOperations<String, String, Object> hashOperations;
 	
     public void setHashOperations(RedisTemplate<String, Object> redisTemplate){
         this.hashOperations = redisTemplate.opsForHash();
@@ -27,18 +27,18 @@ public class ProductDatasetRedisRepository implements RedisRepository<ServiceDat
     
 	@Override
 	public void create(ServiceDataSet model) {
-		String hashKey = model.getProductCode().toUpperCase() + ":" + model.getId();
-		hashOperations.put(FraudRedisKey.PRODUCTDATASET.name(), hashKey, model);		
+		String hashKey = model.getProductCode().toUpperCase() + ":" + model.getServiceId() + ":" + model.getFieldName().toUpperCase();
+		hashOperations.put(FraudRedisKey.PRODUCTDATASET.name(), hashKey, toJsonString(model));
 	}
 
 	@Override
 	public Map<String, ServiceDataSet> findAll() {
-        return hashOperations.entries(FraudRedisKey.PRODUCTDATASET.name());
+        return convertResponseToEntityMap(hashOperations.entries(FraudRedisKey.PRODUCTDATASET.name()),ServiceDataSet.class);
 	}
 
 	@Override
 	public ServiceDataSet findById(String id) {
-		return hashOperations.get(FraudRedisKey.PRODUCTDATASET.name(), id);
+		return convertResponseToEntity(hashOperations.get(FraudRedisKey.PRODUCTDATASET.name(), id),ServiceDataSet.class);
 	}
 
 	@Override
@@ -52,16 +52,8 @@ public class ProductDatasetRedisRepository implements RedisRepository<ServiceDat
 	}
 	
 	public Set<String> scanKeys(String keyPatternToMatch) {
-		Set<String> foundKeys = new HashSet<>();
-		ScanOptions options = ScanOptions.scanOptions().match(keyPatternToMatch).count(Integer.MAX_VALUE).build();
-		Cursor<Map.Entry<String, ServiceDataSet>> cursor = hashOperations.scan(FraudRedisKey.PRODUCTDATASET.name(), options);
-		while (cursor.hasNext()) {
-			foundKeys.add(cursor.next().getKey());
-		}
-		try {
-			cursor.close();
-		} catch (IOException e) {
-		}
-		return foundKeys;
+
+
+		return scanKeys(keyPatternToMatch, hashOperations, FraudRedisKey.PRODUCTDATASET.name());
 	}
 }

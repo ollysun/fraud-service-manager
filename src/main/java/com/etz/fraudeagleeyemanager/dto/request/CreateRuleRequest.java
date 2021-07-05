@@ -28,7 +28,7 @@ public class CreateRuleRequest {
 	private String secondDataSourceVal;
 	@NotNull(message="suspicion level cannot be empty")
 	private Integer suspicion;
-	@NotBlank(message="action cannot be empty")
+	@JsonIgnore
 	private String action;
 	@JsonIgnore
 	private String createdBy;

@@ -4,8 +4,6 @@ import java.io.Serializable;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
-import javax.validation.constraints.PositiveOrZero;
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 
@@ -16,9 +14,8 @@ public class DatasetProductRequest implements Serializable {
 	@NotBlank(message="Please enter the product Code")
 	private String productCode;
 
-	@NotNull(message="Please enter the service Id")
-	@PositiveOrZero(message = "Please enter only Numeric number")
-	private Long serviceId;
+	@NotBlank(message="Please enter the service Id")
+	private String serviceId;
 
 	@NotBlank(message="Please enter the field name")
 	private String fieldName;

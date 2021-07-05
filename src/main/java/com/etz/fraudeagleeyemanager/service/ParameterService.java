@@ -37,7 +37,13 @@ public class ParameterService {
 
 	@Transactional(propagation = Propagation.REQUIRES_NEW)
 	public Parameter createParameter(CreateParameterRequest request) {
+		if (Boolean.TRUE.equals(parameterRepository.existsByNameAndOperator(request.getName(), request.getOperator()))){
+			throw new FraudEngineException("The name and operator already exists in Parameter table ");
+		}
+
+
 		Parameter parameterEntity = new Parameter();
+		try {
 			parameterEntity.setName(request.getName());
 			parameterEntity.setOperator(AppUtil.checkParameterOperator(request.getOperator()));
 			parameterEntity.setAuthorised(request.getAuthorised());
@@ -48,10 +54,10 @@ public class ParameterService {
 			parameterEntity.setEntityId(null);
 			parameterEntity.setRecordBefore(null);
 			parameterEntity.setRequestDump(request);
-		//} catch (Exception ex) {
-		//	log.error("Error occurred while creating Parameter entity object", ex);
-		//	throw new FraudEngineException(AppConstant.ERROR_SETTING_PROPERTY);
-		//}
+		} catch (Exception ex) {
+			log.error("Error occurred while creating Parameter entity object", ex);
+			throw new FraudEngineException(AppConstant.ERROR_SETTING_PROPERTY);
+		}
 		return saveInternalWatchlistEntityToDatabase(parameterEntity);
 	}
 
@@ -131,7 +137,7 @@ public class ParameterService {
 			log.error("Error occurred while saving Internal Watchlist entity to database" , ex);
 			throw new FraudEngineException(AppConstant.ERROR_SAVING_TO_DATABASE);
 		}
-		saveParameterEntityToRedis(persistedParameterEntity);
+		//saveParameterEntityToRedis(persistedParameterEntity);
 		return persistedParameterEntity;
 	}
 	
