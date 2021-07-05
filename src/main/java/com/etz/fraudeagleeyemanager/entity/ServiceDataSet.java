@@ -29,7 +29,7 @@ public class ServiceDataSet extends BaseAuditVersionEntity<ProductDatasetId> imp
 
 	@Id
 	@Column(name = "service_id",  nullable = false)
-	private Long serviceId;
+	private String serviceId;
 
 	@Column(name = "field_name",  nullable = false, columnDefinition="VARCHAR(250)")
 	private String fieldName;

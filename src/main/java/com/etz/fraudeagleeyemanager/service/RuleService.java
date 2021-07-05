@@ -58,7 +58,7 @@ public class RuleService {
 	@PersistenceContext
 	private final EntityManager em;
 
-	@Transactional(propagation = Propagation.REQUIRES_NEW)
+	@Transactional
 	@CacheEvict(value = "product", allEntries=true)
 	public Rule createRule(CreateRuleRequest request) {
 		Rule ruleEntity = new Rule();
@@ -170,7 +170,7 @@ public class RuleService {
 			log.error("Error occurred while saving Rule entity to database" , ex);
 			throw new FraudEngineException(AppConstant.ERROR_SAVING_TO_DATABASE);
 		}
-		//saveRuleEntityToRedis(persistedRuleEntity);
+		saveRuleEntityToRedis(persistedRuleEntity);
 		return persistedRuleEntity;
 	}
 	
@@ -315,7 +315,7 @@ public class RuleService {
 		return outputProductRuleResponseList(updatedServiceRuleEntity);
 	}
 
-	public boolean deleteServiceRule(Long ruleId, Long serviceId) {
+	public boolean deleteServiceRule(Long ruleId, String serviceId) {
 		if (Objects.isNull(ruleId) && Objects.isNull(serviceId)){
 			throw new FraudEngineException("Please enter value for serviceId and ruleId");
 		}
@@ -349,7 +349,7 @@ public class RuleService {
 	}
 
 
-	public List<RuleProductResponse> getRuleService(Long serviceId) {
+	public List<RuleProductResponse> getRuleService(String serviceId) {
 		List<RuleProductResponse> ruleProductResponseList = new ArrayList<>();
 		TypedQuery<RuleProductResponse> ruleProductResponseTypedQuery;
 		if (serviceId != null) {
