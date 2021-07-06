@@ -13,10 +13,8 @@ import com.etz.fraudeagleeyemanager.redisrepository.ProductServiceRedisRepositor
 import com.etz.fraudeagleeyemanager.repository.ProductServiceRepository;
 import com.etz.fraudeagleeyemanager.util.AppUtil;
 import com.etz.fraudeagleeyemanager.util.PageRequestUtil;
-import io.netty.util.internal.StringUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.data.domain.Page;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -238,16 +236,25 @@ public class ProductService {
 		return productResponse;
 	}
 
-	@Transactional(readOnly = true)
-	public Page<ServiceDataSetResponse> getServiceDataset(String productCode, String serviceId, Long dataSetId) {
+	@Transactional(readOnly = true, rollbackFor = Throwable.class)
+	public ServiceDataSetResponse getServiceDatasetByIds(Long datasetId, String productCode, String serviceId){
+		ServiceDataSet serviceDataSet = productDataSetRepository.findByIds(datasetId,productCode,serviceId)
+										.orElseThrow(() -> new ResourceNotFoundException("Service Dataset Details not found"));
+		ServiceDataSetResponse productDataSetResponse = new ServiceDataSetResponse();
+		BeanUtils.copyProperties(serviceDataSet, productDataSetResponse, "productServiceEntity", "productEntity");
+		return productDataSetResponse;
+	}
+
+	@Transactional(readOnly = true, rollbackFor = Throwable.class)
+	public Page<ServiceDataSetResponse> getServiceDataset(String productCode, String serviceId) {
 		Page<ServiceDataSetResponse> serviceDataSetResponsePage;
 		List<ServiceDataSet> serviceDataSetList = new ArrayList<>();
 		if (StringUtils.isNotBlank(productCode)) {
 			serviceDataSetResponsePage = AppUtil.listConvertToPage(outputServiceDatasetEntity(productDataSetRepository.findByProductCode(productCode)), PageRequestUtil.getPageRequest());
-		}else if (StringUtils.isBlank(serviceId) && StringUtils.isBlank(dataSetId.toString())){
+		}else if (StringUtils.isBlank(serviceId) && StringUtils.isBlank(productCode)){
 			serviceDataSetResponsePage = AppUtil.listConvertToPage(outputServiceDatasetEntity(productDataSetRepository.findAll()), PageRequestUtil.getPageRequest());
 		}else{
-			Optional<ServiceDataSet> serviceDataSetOptional = productDataSetRepository.findById(new ProductDatasetId(dataSetId, productCode, serviceId));
+			Optional<ServiceDataSet> serviceDataSetOptional = productDataSetRepository.findById(new ProductDatasetId(null, productCode, serviceId));
 			serviceDataSetOptional.ifPresent(serviceDataSetList::add);
 			serviceDataSetResponsePage = AppUtil.listConvertToPage(outputServiceDatasetEntity(serviceDataSetList), PageRequestUtil.getPageRequest());
 		}
@@ -416,7 +423,7 @@ public class ProductService {
 	@Transactional(readOnly = true)
 	public Page<ProductServiceEntity> queryAllProductService(String productCode){
 		Page<ProductServiceEntity> productServiceEntityPage;
-		if (!StringUtil.isNullOrEmpty(productCode)) {
+		if (StringUtils.isNotBlank(productCode)) {
 			productServiceEntityPage = productServiceRepository.findAllByProductCode(productCode, PageRequestUtil.getPageRequest());
 		}else{
 			productServiceEntityPage = productServiceRepository.findAllByDeletedFalse(PageRequestUtil.getPageRequest());

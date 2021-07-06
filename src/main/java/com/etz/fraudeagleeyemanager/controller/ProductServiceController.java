@@ -63,9 +63,15 @@ public class ProductServiceController {
 
     @GetMapping("/dataset")
     public PageResponse<ServiceDataSetResponse> queryServiceDataset(@RequestParam(required = false) String code,
-                                                                    @RequestParam(required = false) String serviceId,
-                                                                    @RequestParam(required = false) Long datasetId){
-        return new PageResponse<>(productService.getServiceDataset(code, serviceId, datasetId));
+                                                                    @RequestParam(required = false) String serviceId){
+        return new PageResponse<>(productService.getServiceDataset(code, serviceId));
+    }
+
+    @GetMapping("/dataset/{datasetId}/code/{code}/service/{serviceId}")
+    public ResponseEntity<ServiceDataSetResponse> queryServiceDatasetByIds(@PathVariable String code,
+                                                                           @PathVariable String serviceId,
+                                                                           @PathVariable Long datasetId){
+        return ResponseEntity.ok(productService.getServiceDatasetByIds(datasetId,code, serviceId));
     }
 
     @PutMapping("/dataset")
