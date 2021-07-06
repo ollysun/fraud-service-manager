@@ -51,9 +51,6 @@ public class NotificationGroup extends BaseAuditEntity implements Serializable {
 	@Column(name = "status", nullable = false, columnDefinition = "TINYINT", length = 1)
 	private Boolean status;
 
-	@Column(name = "export_type", nullable = false)
-	private String exportType;
-
 	@Override
 	public boolean equals(Object o) {
 		if (this == o) return true;

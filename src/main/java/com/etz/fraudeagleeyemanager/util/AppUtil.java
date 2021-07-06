@@ -17,6 +17,7 @@ import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.Month;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Slf4j
 public class AppUtil {
@@ -314,6 +315,11 @@ public class AppUtil {
                                     " can be any of " + operators.toString()));
         }
         return output;
+    }
+
+    public static String ListToString(List<String> listVal){
+        return  listVal.stream().map(Object::toString)
+                .collect(Collectors.joining(","));
     }
 
     public static Integer getLength(Integer cvv){
