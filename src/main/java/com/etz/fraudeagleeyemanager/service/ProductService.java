@@ -13,9 +13,8 @@ import com.etz.fraudeagleeyemanager.redisrepository.ProductServiceRedisRepositor
 import com.etz.fraudeagleeyemanager.repository.ProductServiceRepository;
 import com.etz.fraudeagleeyemanager.util.AppUtil;
 import com.etz.fraudeagleeyemanager.util.PageRequestUtil;
-import io.netty.util.internal.StringUtil;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.data.domain.Page;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -237,13 +236,22 @@ public class ProductService {
 		return productResponse;
 	}
 
-	@Transactional(readOnly = true)
+	@Transactional(readOnly = true, rollbackFor = Throwable.class)
+	public ServiceDataSetResponse getServiceDatasetByIds(Long datasetId, String productCode, String serviceId){
+		ServiceDataSet serviceDataSet = productDataSetRepository.findByIds(datasetId,productCode,serviceId)
+										.orElseThrow(() -> new ResourceNotFoundException("Service Dataset Details not found"));
+		ServiceDataSetResponse productDataSetResponse = new ServiceDataSetResponse();
+		BeanUtils.copyProperties(serviceDataSet, productDataSetResponse, "productServiceEntity", "productEntity");
+		return productDataSetResponse;
+	}
+
+	@Transactional(readOnly = true, rollbackFor = Throwable.class)
 	public Page<ServiceDataSetResponse> getServiceDataset(String productCode, String serviceId) {
 		Page<ServiceDataSetResponse> serviceDataSetResponsePage;
 		List<ServiceDataSet> serviceDataSetList = new ArrayList<>();
-		if (Objects.nonNull(productCode)) {
+		if (StringUtils.isNotBlank(productCode)) {
 			serviceDataSetResponsePage = AppUtil.listConvertToPage(outputServiceDatasetEntity(productDataSetRepository.findByProductCode(productCode)), PageRequestUtil.getPageRequest());
-		}else if (Objects.isNull(serviceId)){
+		}else if (StringUtils.isBlank(serviceId) && StringUtils.isBlank(productCode)){
 			serviceDataSetResponsePage = AppUtil.listConvertToPage(outputServiceDatasetEntity(productDataSetRepository.findAll()), PageRequestUtil.getPageRequest());
 		}else{
 			Optional<ServiceDataSet> serviceDataSetOptional = productDataSetRepository.findById(new ProductDatasetId(null, productCode, serviceId));
@@ -264,7 +272,7 @@ public class ProductService {
 		serviceDataSetList.forEach(productDataSet -> {
 			try {
 				// for auditing purpose for UPDATE
-				productDataSet.setEntityId(request.getServiceId().toString());
+				productDataSet.setEntityId(request.getServiceId());
 				productDataSet.setRecordBefore(JsonConverter.objectToJson(productDataSet));
 				productDataSet.setRequestDump(request);
 
@@ -301,7 +309,7 @@ public class ProductService {
 		productDatasetRedisRepository.setHashOperations(redisTemplate);
 		serviceDatasetEntityList.forEach(productDataset -> {
 			// for auditing purpose for DELETE
-			productDataset.setEntityId(serviceId.toString());
+			productDataset.setEntityId(serviceId);
 			productDataset.setRecordBefore(JsonConverter.objectToJson(productDataset));
 			productDataset.setRecordAfter(null);
 			productDataset.setRequestDump(serviceId);
@@ -378,6 +386,7 @@ public class ProductService {
 			productService.setCallbackUrl(request.getCallback());
 			productService.setProductCode(request.getProductCode());
 			productService.setCreatedBy(request.getCreatedBy());
+			productService.setDescription(request.getDescription());
 			productService.setProductEntity(productEntityOptional.get());
 			return outputCreatedProductService(productServiceRepository.save(productService));
 		} catch (Exception ex) {
@@ -414,7 +423,7 @@ public class ProductService {
 	@Transactional(readOnly = true)
 	public Page<ProductServiceEntity> queryAllProductService(String productCode){
 		Page<ProductServiceEntity> productServiceEntityPage;
-		if (!StringUtil.isNullOrEmpty(productCode)) {
+		if (StringUtils.isNotBlank(productCode)) {
 			productServiceEntityPage = productServiceRepository.findAllByProductCode(productCode, PageRequestUtil.getPageRequest());
 		}else{
 			productServiceEntityPage = productServiceRepository.findAllByDeletedFalse(PageRequestUtil.getPageRequest());
