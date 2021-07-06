@@ -9,7 +9,8 @@ import java.util.Objects;
 
 
 @Entity
-@Table(name = "service_dataset")
+@Table(name = "service_dataset",
+		indexes = {@Index(name = "serviceNameUniqueIndex", columnList = "service_id, id, product_code")})
 @Getter
 @Setter
 @AllArgsConstructor

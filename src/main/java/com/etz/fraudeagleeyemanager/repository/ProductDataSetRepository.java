@@ -1,6 +1,7 @@
 package com.etz.fraudeagleeyemanager.repository;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -17,6 +18,9 @@ public interface ProductDataSetRepository extends JpaRepository<ServiceDataSet, 
 
 	List<ServiceDataSet> findByProductCode(String productCode);
 	List<ServiceDataSet> findByServiceId(String serviceId);
+
+	@Query("SELECT p FROM ServiceDataSet p WHERE p.id = ?1 and p.productCode = ?2 and p.serviceId = ?3")
+	Optional<ServiceDataSet> findByIds(Long id, String code, String serviceId);
 
 	//@Override
 	@Query("update #{#entityName} e set e.deleted=true where e.serviceId=?1")

@@ -67,6 +67,13 @@ public class ProductServiceController {
         return new PageResponse<>(productService.getServiceDataset(code, serviceId));
     }
 
+    @GetMapping("/dataset/{datasetId}/code/{code}/service/{serviceId}")
+    public ResponseEntity<ServiceDataSetResponse> queryServiceDatasetByIds(@PathVariable String code,
+                                                                           @PathVariable String serviceId,
+                                                                           @PathVariable Long datasetId){
+        return ResponseEntity.ok(productService.getServiceDatasetByIds(datasetId,code, serviceId));
+    }
+
     @PutMapping("/dataset")
     public CollectionResponse<ServiceDataSetResponse> updateServiceDataset(@RequestBody UpdateDataSetRequest request,
                                                                            @ApiIgnore @RequestAttribute(AppConstant.USERNAME) String username){
