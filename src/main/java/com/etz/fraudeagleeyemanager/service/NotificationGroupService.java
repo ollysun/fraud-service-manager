@@ -4,6 +4,7 @@ package com.etz.fraudeagleeyemanager.service;
 import java.util.Objects;
 import java.util.Optional;
 
+import com.etz.fraudeagleeyemanager.util.AppUtil;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.Page;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -38,8 +39,8 @@ public class NotificationGroupService {
 		NotificationGroup notificationGroup = new NotificationGroup();
 		try {
 			notificationGroup.setGroupName(request.getName());
-			notificationGroup.setEmails(request.getEmails());
-			notificationGroup.setPhones(request.getPhoneNos());
+			notificationGroup.setEmails(AppUtil.ListToString(request.getEmails()));
+			notificationGroup.setPhones(AppUtil.ListToString(request.getPhoneNos()));
 			notificationGroup.setEmailAlert(request.getMailAlert());
 			notificationGroup.setSmsAlert(request.getSmsAlert());
 			notificationGroup.setAuthorised(false);
@@ -70,8 +71,8 @@ public class NotificationGroupService {
 			notificationGroup.setRecordBefore(JsonConverter.objectToJson(notificationGroup));
 			notificationGroup.setRequestDump(request);
 
-			notificationGroup.setEmails(request.getEmails());
-			notificationGroup.setPhones(request.getPhoneNos());
+			notificationGroup.setEmails(AppUtil.ListToString(request.getEmails()));
+			notificationGroup.setPhones(AppUtil.ListToString(request.getPhoneNos()));
 			notificationGroup.setEmailAlert(request.getMailAlert());
 			notificationGroup.setSmsAlert(request.getSmsAlert());
 			notificationGroup.setStatus(request.getStatus());
