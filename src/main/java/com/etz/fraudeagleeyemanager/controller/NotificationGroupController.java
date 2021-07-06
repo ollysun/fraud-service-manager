@@ -34,15 +34,16 @@ public class NotificationGroupController {
 		return ResponseEntity.status(HttpStatus.valueOf(response.getStatus())).body(response);
 	}
 		
-	@PutMapping("/{groupId}")
-	public ModelResponse<NotificationGroup> updateNotificationGroup(@PathVariable Long groupId, @RequestBody @Valid UpdateNotificationGroupRequest request,
+	@PutMapping
+	public ModelResponse<NotificationGroup> updateNotificationGroup(@RequestBody @Valid UpdateNotificationGroupRequest request,
 																	@ApiIgnore @RequestAttribute(AppConstant.USERNAME) String username){
 		request.setUpdatedBy(username);
-		return new ModelResponse<>(notificationGroupService.updateNotificationGroup(request, groupId));
+		return new ModelResponse<>(notificationGroupService.updateNotificationGroup(request));
 	}
 	
 	@GetMapping
-	public PageResponse<NotificationGroup> queryNotificationGroup(String name, Long groupId){
+	public PageResponse<NotificationGroup> queryNotificationGroup(@RequestParam(required = false) String name,
+																  @RequestParam(required = false) Long groupId){
 		return new PageResponse<>(notificationGroupService.getNotificationGroup(groupId, name));
 	}
 	

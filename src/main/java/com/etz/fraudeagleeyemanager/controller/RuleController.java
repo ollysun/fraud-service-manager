@@ -1,6 +1,7 @@
 package com.etz.fraudeagleeyemanager.controller;
 
 import javax.validation.Valid;
+import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Positive;
 
@@ -77,8 +78,8 @@ public class RuleController {
 		return new BooleanResponse(ruleService.deleteServiceRule(ruleId, serviceId));
 	}
 
-	@GetMapping("/product")
-	public CollectionResponse<RuleProductResponse> getRuleService(String serviceId){
+	@GetMapping("/service/{serviceId}")
+	public CollectionResponse<RuleProductResponse> getRuleService(@PathVariable @NotBlank @Positive String serviceId){
 		return new CollectionResponse<>(ruleService.getRuleService(serviceId));
 	}
 

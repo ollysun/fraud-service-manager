@@ -8,12 +8,17 @@ import javax.validation.constraints.NotNull;
 import com.etz.fraudeagleeyemanager.enums.UserCategory;
 
 import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
 
-@Data
+@Getter
+@Setter
+@ToString
 public class UpdateOfacWatchlistRequest implements Serializable{
 	private static final long serialVersionUID = 1L;
 
-	//@NotNull(message="Please enter the Ofac Id")
+	@NotNull(message="Please enter the Ofac Id")
 	private Long ofacId;
 	
 	@NotBlank(message="Please enter the full name")

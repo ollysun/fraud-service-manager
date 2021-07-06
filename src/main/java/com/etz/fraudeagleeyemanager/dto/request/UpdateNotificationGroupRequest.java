@@ -11,7 +11,7 @@ import lombok.Data;
 @Data
 public class UpdateNotificationGroupRequest implements Serializable{
 	private static final long serialVersionUID = 1L;
-
+	@NotNull(message = "Please enter the groupId")
 	private Long groupId;
 	
 	@NotBlank(message = "Please enter the group name")
