@@ -2,7 +2,9 @@ package com.etz.fraudeagleeyemanager.redisrepository;
 
 import com.etz.fraudeagleeyemanager.entity.ServiceRule;
 import com.etz.fraudeagleeyemanager.enums.FraudRedisKey;
+import com.etz.fraudeagleeyemanager.exception.FraudEngineException;
 import com.etz.fraudeagleeyemanager.repository.RedisRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.Cursor;
 import org.springframework.data.redis.core.HashOperations;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -16,7 +18,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-
+@Slf4j
 @Repository
 public class ProductRuleRedisRepository implements RedisRepository<ServiceRule, String> {
 	
@@ -31,19 +33,24 @@ public class ProductRuleRedisRepository implements RedisRepository<ServiceRule, 
 	@Override
 	public void create(ServiceRule model) {
 
+		try {
+			// start the transaction
+			redisTemplateField.multi();
 
-		// start the transaction
-		redisTemplateField.multi();
-
-		// register synchronisation
-		if(TransactionSynchronizationManager.isActualTransactionActive()) {
-			TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
-				@Override
-				public void afterCommit() {
-					TransactionSynchronization.super.afterCommit();
-					String hashKey = model.getServiceId().toUpperCase() + ":" + model.getRuleId();
-					hashOperations.put(FraudRedisKey.PRODUCTRULE.name(), hashKey, toJsonString(model));				}
-			});
+			// register synchronisation
+			if (TransactionSynchronizationManager.isActualTransactionActive()) {
+				TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+					@Override
+					public void afterCommit() {
+						TransactionSynchronization.super.afterCommit();
+						String hashKey = model.getServiceId().toUpperCase() + ":" + model.getRuleId();
+						hashOperations.put(FraudRedisKey.PRODUCTRULE.name(), hashKey, toJsonString(model));
+					}
+				});
+			}
+		}catch(Exception ex){
+			log.debug("error connecting to redis");
+			throw new FraudEngineException("error connecting to redis " + ex.getMessage());
 		}
 	}
 

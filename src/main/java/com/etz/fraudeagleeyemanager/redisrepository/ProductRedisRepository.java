@@ -2,7 +2,9 @@ package com.etz.fraudeagleeyemanager.redisrepository;
 
 import com.etz.fraudeagleeyemanager.entity.ProductEntity;
 import com.etz.fraudeagleeyemanager.enums.FraudRedisKey;
+import com.etz.fraudeagleeyemanager.exception.FraudEngineException;
 import com.etz.fraudeagleeyemanager.repository.RedisRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.HashOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Repository;
@@ -12,7 +14,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 
 import java.util.Map;
 
-
+@Slf4j
 @Repository
 public class ProductRedisRepository implements RedisRepository<ProductEntity, String> {
 	
@@ -25,20 +27,24 @@ public class ProductRedisRepository implements RedisRepository<ProductEntity, St
     }
 	@Override
 	public void create(ProductEntity model) {
-		// start the transaction
-		redisTemplateField.multi();
+		try {
+			// start the transaction
+			redisTemplateField.multi();
 
-		// register synchronisation
-		if(TransactionSynchronizationManager.isActualTransactionActive()) {
-			TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
-				@Override
-				public void afterCommit() {
-					TransactionSynchronization.super.afterCommit();
-					hashOperations.put(FraudRedisKey.PRODUCT.name(), model.getCode(), toJsonString(model));
-				}
-			});
+			// register synchronisation
+			if (TransactionSynchronizationManager.isActualTransactionActive()) {
+				TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+					@Override
+					public void afterCommit() {
+						TransactionSynchronization.super.afterCommit();
+						hashOperations.put(FraudRedisKey.PRODUCT.name(), model.getCode(), toJsonString(model));
+					}
+				});
+			}
+		}catch(Exception ex){
+			log.debug("error connecting to redis");
+			throw new FraudEngineException("error connecting to redis " + ex.getMessage());
 		}
-
 
 	}
 

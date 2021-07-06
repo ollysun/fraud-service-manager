@@ -55,7 +55,7 @@ public class AppUtil {
         String output = "";
         if(StringUtils.isNotBlank(text)){
             output = dataSourceVal.stream()
-                    .filter(bl -> bl.toUpperCase().equalsIgnoreCase(text))
+                    .filter(bl -> bl.equalsIgnoreCase(text))
                     .findFirst()
                     .orElseThrow(() ->
                             new FraudEngineException("cannot found this logic operator " + text + " can be any of " + dataSourceVal.toString()));
@@ -68,7 +68,7 @@ public class AppUtil {
         String output = "";
         if(StringUtils.isNotBlank(text)){
             output = dataSourceVal.stream()
-                    .filter(bl -> bl.toUpperCase().equalsIgnoreCase(text))
+                    .filter(bl -> bl.equalsIgnoreCase(text))
                     .findFirst()
                     .orElseThrow(() ->
                             new FraudEngineException("cannot found this data source " + text + " can be any " + dataSourceVal.toString()));
@@ -81,7 +81,7 @@ public class AppUtil {
         String operator = "";
         if (StringUtils.isNotBlank(dataType) && StringUtils.isNotBlank(operatorRequest) && dataType.equalsIgnoreCase("BOOLEAN")){
             operator = allowedOperators.stream()
-                      .filter(bl -> bl.toUpperCase().equalsIgnoreCase(operatorRequest))
+                      .filter(bl -> bl.equalsIgnoreCase(operatorRequest))
                       .findFirst()
                       .orElseThrow(() ->
                             new FraudEngineException("operator Not found for this Datatype " + dataType + operatorRequest +
@@ -95,7 +95,7 @@ public class AppUtil {
         String operator = "";
         if (StringUtils.isNotBlank(operatorRequest) && StringUtils.isNotBlank(dataType) && dataType.equalsIgnoreCase("NUMBER")){
             operator = allowedOperators.stream()
-                    .filter(bl -> bl.toUpperCase().equalsIgnoreCase(operatorRequest))
+                    .filter(bl -> bl.equalsIgnoreCase(operatorRequest))
                     .findFirst()
                     .orElseThrow(() ->
                             new FraudEngineException("operator Not found for this Datatype " + dataType + operatorRequest +
@@ -109,7 +109,7 @@ public class AppUtil {
         String operator = "";
         if (StringUtils.isNotBlank(dataType) && StringUtils.isNotBlank(operatorRequest) && dataType.equalsIgnoreCase("STRING")){
             operator = allowedOperators.stream()
-                    .filter(bl -> bl.toUpperCase().equalsIgnoreCase(operatorRequest))
+                    .filter(bl -> bl.equalsIgnoreCase(operatorRequest))
                     .findFirst()
                     .orElseThrow(() ->
                             new FraudEngineException("operator Not found for this Datatype " + dataType + operatorRequest +
@@ -183,7 +183,7 @@ public class AppUtil {
         String operator = "";
         if (StringUtils.isNotBlank(dataType)  && StringUtils.isNotBlank(operatorRequest) && dataType.equalsIgnoreCase("DATE")){
             operator = allowedOperators.stream()
-                    .filter(bl -> bl.toUpperCase().equalsIgnoreCase(operatorRequest))
+                    .filter(bl -> bl.equalsIgnoreCase(operatorRequest))
                     .findFirst()
                     .orElseThrow(() ->
                             new FraudEngineException("operator Not found for this Datatype " + dataType + operatorRequest +
@@ -197,7 +197,7 @@ public class AppUtil {
         String operator = "";
         if (StringUtils.isNotBlank(dataType) && StringUtils.isNotBlank(operatorRequest) && dataType.equalsIgnoreCase("TIME")){
             operator = allowedOperators.stream()
-                    .filter(bl -> bl.toUpperCase().equalsIgnoreCase(operatorRequest))
+                    .filter(bl -> bl.equalsIgnoreCase(operatorRequest))
                     .findFirst()
                     .orElseThrow(() ->
                             new FraudEngineException("operator Not found for this Datatype " + dataType + operatorRequest +
@@ -211,7 +211,7 @@ public class AppUtil {
         String operator = "";
         if (StringUtils.isNotBlank(operatorRequest)) {
             operator = allowedOperators.stream()
-                    .filter(bl -> bl.toUpperCase().equalsIgnoreCase(operatorRequest))
+                    .filter(bl -> bl.equalsIgnoreCase(operatorRequest))
                     .findFirst()
                     .orElseThrow(() ->
                             new FraudEngineException("operator Not found " + operatorRequest +
@@ -251,7 +251,7 @@ public class AppUtil {
         String output = "";
         if (StringUtils.isNotBlank(operatorRequest)) {
             output = operators.stream()
-                    .filter(bl -> bl.toUpperCase().equalsIgnoreCase(operatorRequest))
+                    .filter(bl -> bl.equalsIgnoreCase(operatorRequest))
                     .findFirst()
                     .orElseThrow(() ->
                             new FraudEngineException("Not found this Card Type " + operatorRequest +
@@ -266,7 +266,7 @@ public class AppUtil {
         String output = "";
         if (StringUtils.isNotBlank(operatorRequest)) {
             output = operators.stream()
-                    .filter(bl -> bl.toUpperCase().equalsIgnoreCase(operatorRequest))
+                    .filter(bl -> bl.equalsIgnoreCase(operatorRequest))
                     .findFirst()
                     .orElseThrow(() ->
                             new FraudEngineException("Not found this Card Brand " + operatorRequest +
@@ -308,7 +308,7 @@ public class AppUtil {
         String output = "";
         if (StringUtils.isNotBlank(operatorRequest)) {
             output = operators.stream()
-                    .filter(bl -> bl.toUpperCase().equalsIgnoreCase(operatorRequest))
+                    .filter(bl -> bl.equalsIgnoreCase(operatorRequest))
                     .findFirst()
                     .orElseThrow(() ->
                             new FraudEngineException("Not found this Data Type " + operatorRequest +
