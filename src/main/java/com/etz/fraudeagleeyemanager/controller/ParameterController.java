@@ -45,7 +45,7 @@ public class ParameterController {
 	}
 	
 	@GetMapping
-	public PageResponse<Parameter> queryParameter(Long paramId){
+	public PageResponse<Parameter> queryParameter(@RequestParam(required = false) Long paramId){
 		return new PageResponse<>(parameterService.getParameter(paramId));
 	}
 	

@@ -56,8 +56,8 @@ public class OfacWatchlistService {
 	}
 
 	@Transactional(rollbackFor = Throwable.class)
-	public OfacWatchlist updateOfacWatchlist(UpdateOfacWatchlistRequest request, Long ofacId){
-		OfacWatchlist ofacWatchlist = findById(ofacId).get();
+	public OfacWatchlist updateOfacWatchlist(UpdateOfacWatchlistRequest request){
+		OfacWatchlist ofacWatchlist = findById(request.getOfacId()).get();
 		try {
 		// for auditing purpose for UPDATE
 		ofacWatchlist.setEntityId(String.valueOf(request.getOfacId()));
@@ -76,7 +76,6 @@ public class OfacWatchlistService {
 		return saveOfacWatchlistEntityToDatabase(ofacWatchlist);
 	}
 
-	@Transactional(readOnly = true)
 	private Optional<OfacWatchlist> findById(Long ofacId) {
 		Optional<OfacWatchlist> ofacWatchlistOptional = ofacWatchlistRepository.findById(ofacId);
 		if(!ofacWatchlistOptional.isPresent()) {

@@ -2,7 +2,9 @@ package com.etz.fraudeagleeyemanager.redisrepository;
 
 import com.etz.fraudeagleeyemanager.entity.Account;
 import com.etz.fraudeagleeyemanager.enums.FraudRedisKey;
+import com.etz.fraudeagleeyemanager.exception.FraudEngineException;
 import com.etz.fraudeagleeyemanager.repository.RedisRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.HashOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Repository;
@@ -11,6 +13,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 
 import java.util.Map;
 
+@Slf4j
 @Repository
 public class AccountRedisRepository implements RedisRepository<Account, String> {
 	
@@ -26,18 +29,23 @@ public class AccountRedisRepository implements RedisRepository<Account, String> 
 	@Override
 	public void create(Account model) {
 
-		// start the transaction
-		redisTemplateField.multi();
+		try{
+			// start the transaction
+			redisTemplateField.multi();
 
-		// register synchronisation
-		if(TransactionSynchronizationManager.isActualTransactionActive()) {
-			TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
-				@Override
-				public void afterCommit() {
-					TransactionSynchronization.super.afterCommit();
-					hashOperations.put(FraudRedisKey.ACCOUNT.name(), model.getAccountNo(), toJsonString(model));
-				}
-			});
+			// register synchronisation
+			if(TransactionSynchronizationManager.isActualTransactionActive()) {
+				TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+					@Override
+					public void afterCommit() {
+						TransactionSynchronization.super.afterCommit();
+						hashOperations.put(FraudRedisKey.ACCOUNT.name(), model.getAccountNo(), toJsonString(model));
+					}
+				});
+			}
+		}catch(Exception ex){
+			log.debug("error connecting to redis");
+			throw new FraudEngineException("error connecting to redis " + ex.getMessage());
 		}
 	}
 
