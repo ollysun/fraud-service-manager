@@ -3,6 +3,8 @@ package com.etz.fraudeagleeyemanager.redisrepository;
 import java.util.Map;
 import java.util.Set;
 
+import com.etz.fraudeagleeyemanager.exception.FraudEngineException;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.HashOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Repository;
@@ -13,7 +15,7 @@ import com.etz.fraudeagleeyemanager.repository.RedisRepository;
 import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
-
+@Slf4j
 @Repository
 public class ProductDatasetRedisRepository implements RedisRepository<ServiceDataSet, String> {
 	
@@ -27,19 +29,24 @@ public class ProductDatasetRedisRepository implements RedisRepository<ServiceDat
     
 	@Override
 	public void create(ServiceDataSet model) {
-		// start the transaction
-		redisTemplateField.multi();
+		try {
+			// start the transaction
+			redisTemplateField.multi();
 
-		// register synchronisation
-		if(TransactionSynchronizationManager.isActualTransactionActive()) {
-			TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
-				@Override
-				public void afterCommit() {
-					TransactionSynchronization.super.afterCommit();
-					String hashKey = model.getProductCode().toUpperCase() + ":" + model.getServiceId().toUpperCase() + ":" + model.getFieldName().toUpperCase();
-					hashOperations.put(FraudRedisKey.PRODUCTDATASET.name(), hashKey, toJsonString(model));
-				}
-			});
+			// register synchronisation
+			if (TransactionSynchronizationManager.isActualTransactionActive()) {
+				TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+					@Override
+					public void afterCommit() {
+						TransactionSynchronization.super.afterCommit();
+						String hashKey = model.getProductCode().toUpperCase() + ":" + model.getServiceId().toUpperCase() + ":" + model.getFieldName().toUpperCase();
+						hashOperations.put(FraudRedisKey.PRODUCTDATASET.name(), hashKey, toJsonString(model));
+					}
+				});
+			}
+		}catch(Exception ex){
+			log.debug("error connecting to redis");
+			throw new FraudEngineException("error connecting to redis " + ex.getMessage());
 		}
 
 	}
