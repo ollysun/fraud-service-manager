@@ -13,6 +13,7 @@ import lombok.Data;
 public class UpdateInternalWatchlistRequest implements Serializable{
 	private static final long serialVersionUID = 1L;
 
+	@NotNull(message = "Please enter the watchId")
 	private Long watchId;
 	
 	@NotBlank(message="Please enter BVN")

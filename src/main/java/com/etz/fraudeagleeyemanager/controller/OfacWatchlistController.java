@@ -35,15 +35,15 @@ public class OfacWatchlistController {
 		return ResponseEntity.status(HttpStatus.valueOf(response.getStatus())).body(response);
 	}
 		
-	@PutMapping("/{ofacId}")
-	public ModelResponse<OfacWatchlist> updateOfac(@PathVariable Long ofacId, @RequestBody @Valid UpdateOfacWatchlistRequest request,
+	@PutMapping
+	public ModelResponse<OfacWatchlist> updateOfac(@RequestBody @Valid UpdateOfacWatchlistRequest request,
 												   @ApiIgnore @RequestAttribute(AppConstant.USERNAME) String username){
 		request.setUpdatedBy(username);
-		return new ModelResponse<>(ofacWatchlistService.updateOfacWatchlist(request, ofacId));
+		return new ModelResponse<>(ofacWatchlistService.updateOfacWatchlist(request));
 	}
 	
 	@GetMapping
-	public PageResponse<OfacWatchlist> queryOfac(Long ofacId){
+	public PageResponse<OfacWatchlist> queryOfac(@RequestParam(required = false) Long ofacId){
 		return new PageResponse<>(ofacWatchlistService.getOfacWatchlist(ofacId));
 	}
 	

@@ -5,6 +5,7 @@ import java.util.Objects;
 import java.util.Optional;
 
 import com.etz.fraudeagleeyemanager.util.AppUtil;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.Page;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -59,15 +60,15 @@ public class NotificationGroupService {
 	}
 
 	@Transactional(rollbackFor = Throwable.class)
-	public NotificationGroup updateNotificationGroup(UpdateNotificationGroupRequest request, Long groupId){
-		Optional<NotificationGroup> notificationGroupOptional = notificationGroupRepository.findById(groupId);
+	public NotificationGroup updateNotificationGroup(UpdateNotificationGroupRequest request){
+		Optional<NotificationGroup> notificationGroupOptional = notificationGroupRepository.findById(request.getGroupId());
 		if(!notificationGroupOptional.isPresent()) {
-			throw new ResourceNotFoundException("Notification group not found for group ID " + groupId);
+			throw new ResourceNotFoundException("Notification group not found for group ID " + request.getGroupId());
 		}
 		NotificationGroup notificationGroup = notificationGroupOptional.get();
 		try {
 			// for auditing purpose for UPDATE
-			notificationGroup.setEntityId(String.valueOf(groupId));
+			notificationGroup.setEntityId(String.valueOf(request.getGroupId()));
 			notificationGroup.setRecordBefore(JsonConverter.objectToJson(notificationGroup));
 			notificationGroup.setRequestDump(request);
 
@@ -86,11 +87,11 @@ public class NotificationGroupService {
 
 	@Transactional(readOnly = true)
 	public Page<NotificationGroup> getNotificationGroup(Long groupId, String groupName){
-		if (Objects.isNull(groupId) && Objects.isNull(groupName)) {
+		if (Objects.isNull(groupId) && StringUtils.isBlank(groupName)) {
 			return notificationGroupRepository.findAll(PageRequestUtil.getPageRequest());
 		}
 		Optional<NotificationGroup> notificationGroupOptional;
-		if (Objects.isNull(groupId) && !groupName.isEmpty()) {
+		if (Objects.isNull(groupId) && StringUtils.isNotBlank(groupName) ){
 			notificationGroupOptional = notificationGroupRepository.findByGroupName(groupName);
 			if(!notificationGroupOptional.isPresent()) {
 				throw new ResourceNotFoundException("Notification Group Not found for group name " + groupName);

@@ -13,6 +13,7 @@ import javax.persistence.TypedQuery;
 
 import com.etz.fraudeagleeyemanager.entity.*;
 import com.etz.fraudeagleeyemanager.repository.*;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.data.domain.Example;
@@ -359,7 +360,7 @@ public class RuleService {
 	public List<RuleProductResponse> getRuleService(String serviceId) {
 		List<RuleProductResponse> ruleProductResponseList = new ArrayList<>();
 		TypedQuery<RuleProductResponse> ruleProductResponseTypedQuery;
-		if (serviceId != null) {
+		if (StringUtils.isNotBlank(serviceId)) {
 			String sqlString = " SELECT NEW com.etz.fraudeagleeyemanager.dto.response.RuleProductResponse(" +
 					"rl.id,rl.name,rl.sourceValueOne,rl.valueOneDataType, rl.operatorOne, rl.compareValueOne, rl.dataSourceValOne," +
 					"rl.logicOperator,rl.sourceValueTwo,rl.operatorTwo,rl.compareValueTwo, rl.dataSourceValTwo, rl.valueTwoDataType," +

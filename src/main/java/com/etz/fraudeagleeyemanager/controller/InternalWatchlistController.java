@@ -35,16 +35,16 @@ public class InternalWatchlistController {
 		return ResponseEntity.status(HttpStatus.valueOf(response.getStatus())).body(response);
 	}
 		
-	@PutMapping("/{watchId}")
-	public ModelResponse<InternalWatchlist> updateOfac(@PathVariable Long watchId,
+	@PutMapping
+	public ModelResponse<InternalWatchlist> updateOfac(
 			@RequestBody @Valid UpdateInternalWatchlistRequest request,
 													   @ApiIgnore @RequestAttribute(AppConstant.USERNAME) String username){
 		request.setUpdatedBy(username);
-		return new ModelResponse<>(internalWatchlistService.updateInternalWatchlist(request, watchId));
+		return new ModelResponse<>(internalWatchlistService.updateInternalWatchlist(request));
 	}
 	
 	@GetMapping
-	public PageResponse<InternalWatchlist> queryOfac(Long watchId){
+	public PageResponse<InternalWatchlist> queryOfac(@RequestParam(required = false) Long watchId){
 		return new PageResponse<>(internalWatchlistService.getInternalWatchlist(watchId));
 	}
 	

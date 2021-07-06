@@ -54,11 +54,12 @@ public class InternalWatchlistService {
 		return saveInternalWatchlistEntityToDatabase(internalWatchlist);
 	}
 
-	public InternalWatchlist updateInternalWatchlist(UpdateInternalWatchlistRequest request, Long watchId){
-		InternalWatchlist internalWatchlist = findById(watchId).get();
+	@Transactional(rollbackFor = Throwable.class)
+	public InternalWatchlist updateInternalWatchlist(UpdateInternalWatchlistRequest request){
+		InternalWatchlist internalWatchlist = findById(request.getWatchId()).get();
 		try {
 			// for auditing purpose for UPDATE
-			internalWatchlist.setEntityId(String.valueOf(watchId));
+			internalWatchlist.setEntityId(String.valueOf(request.getWatchId()));
 			internalWatchlist.setRecordBefore(JsonConverter.objectToJson(internalWatchlist));
 			internalWatchlist.setRequestDump(request);
 
@@ -73,7 +74,6 @@ public class InternalWatchlistService {
 		return saveInternalWatchlistEntityToDatabase(internalWatchlist);
 	}
 
-	@Transactional(readOnly = true)
 	private Optional<InternalWatchlist> findById(Long watchId) {
 		Optional<InternalWatchlist> internalWatchlistOptional = internalWatchlistRepository.findById(watchId);
 		if(!internalWatchlistOptional.isPresent()) {
