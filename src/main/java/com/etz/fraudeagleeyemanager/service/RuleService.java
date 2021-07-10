@@ -11,14 +11,13 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.TypedQuery;
 
-import com.etz.fraudeagleeyemanager.entity.*;
-import com.etz.fraudeagleeyemanager.repository.*;
 import org.springframework.beans.BeanUtils;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.Page;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.etz.fraudeagleeyemanager.constant.AppConstant;
 import com.etz.fraudeagleeyemanager.dto.request.CreateRuleRequest;
@@ -29,18 +28,24 @@ import com.etz.fraudeagleeyemanager.dto.response.ProductRuleResponse;
 import com.etz.fraudeagleeyemanager.dto.response.RuleProductResponse;
 import com.etz.fraudeagleeyemanager.dto.response.RuleResponse;
 import com.etz.fraudeagleeyemanager.dto.response.UpdatedRuleResponse;
+import com.etz.fraudeagleeyemanager.entity.ProductRuleId;
+import com.etz.fraudeagleeyemanager.entity.ProductServiceEntity;
+import com.etz.fraudeagleeyemanager.entity.Rule;
+import com.etz.fraudeagleeyemanager.entity.ServiceRule;
 import com.etz.fraudeagleeyemanager.exception.FraudEngineException;
 import com.etz.fraudeagleeyemanager.exception.ResourceNotFoundException;
 import com.etz.fraudeagleeyemanager.redisrepository.ProductRuleRedisRepository;
 import com.etz.fraudeagleeyemanager.redisrepository.RuleRedisRepository;
+import com.etz.fraudeagleeyemanager.repository.EmailGroupRepository;
+import com.etz.fraudeagleeyemanager.repository.ProductServiceRepository;
+import com.etz.fraudeagleeyemanager.repository.RuleRepository;
+import com.etz.fraudeagleeyemanager.repository.ServiceRuleRepository;
 import com.etz.fraudeagleeyemanager.util.AppUtil;
 import com.etz.fraudeagleeyemanager.util.JsonConverter;
 import com.etz.fraudeagleeyemanager.util.PageRequestUtil;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
 @Service
@@ -58,24 +63,24 @@ public class RuleService {
 	@PersistenceContext
 	private final EntityManager em;
 
-	@Transactional(propagation = Propagation.REQUIRES_NEW)
+	//@Transactional//(rollbackFor = Exception.class)
 	@CacheEvict(value = "product", allEntries=true)
 	public Rule createRule(CreateRuleRequest request) {
 		Rule ruleEntity = new Rule();
-			if (Boolean.TRUE.equals(ruleRepository.existsByName(request.getRuleName()))){
-				throw new FraudEngineException("Similar record already exists");
-			}
-		//try {
+		if (Boolean.TRUE.equals(ruleRepository.existsByName(request.getRuleName()))) {
+			throw new FraudEngineException("Similar record already exists");
+		}
+		try {
 			ruleEntity.setName(request.getRuleName());
 			ruleEntity.setValueOneDataType(AppUtil.checkDataType(request.getFirstDataType()));
 			ruleEntity.setSourceValueOne(request.getFirstSourceVal());
 
 			// check the operator
-			ruleEntity.setOperatorOne(AppUtil.checkOperator(request.getFirstDataType(),request.getFirstOperator()));
+			ruleEntity.setOperatorOne(AppUtil.checkOperator(request.getFirstDataType(), request.getFirstOperator()));
 
-			if(AppUtil.isCompareValueValid(request.getFirstDataType(),request.getFirstCompareVal())){
+			if (AppUtil.isCompareValueValid(request.getFirstDataType(), request.getFirstCompareVal())) {
 				ruleEntity.setCompareValueOne(request.getFirstCompareVal());
-			}else {
+			} else {
 				throw new FraudEngineException("Invalid  first datatype and compare value ");
 			}
 			ruleEntity.setDataSourceValOne(AppUtil.checkDataSource(request.getFirstDataSourceVal()));
@@ -86,13 +91,13 @@ public class RuleService {
 
 			ruleEntity.setValueTwoDataType(AppUtil.checkDataType(request.getSecondDataType()));
 			// check operator
-			ruleEntity.setOperatorTwo(AppUtil.checkOperator(request.getSecondDataType(),request.getSecondOperator()));
-			if(AppUtil.isCompareValueValid(request.getSecondDataType(),request.getSecondCompareVal())){
+			ruleEntity.setOperatorTwo(AppUtil.checkOperator(request.getSecondDataType(), request.getSecondOperator()));
+			if (AppUtil.isCompareValueValid(request.getSecondDataType(), request.getSecondCompareVal())) {
 				ruleEntity.setCompareValueTwo(request.getSecondCompareVal());
 			}
 			ruleEntity.setDataSourceValTwo(AppUtil.checkDataSource(request.getSecondDataSourceVal()));
 			ruleEntity.setSuspicionLevel(request.getSuspicion());
-		    ruleEntity.setAction(AppUtil.getLevelAction(request.getSuspicion()));
+			ruleEntity.setAction(AppUtil.getLevelAction(request.getSuspicion()));
 			ruleEntity.setAuthorised(request.getAuthorised());
 			ruleEntity.setStatus(Boolean.TRUE);
 			ruleEntity.setCreatedBy(request.getCreatedBy());
@@ -100,18 +105,12 @@ public class RuleService {
 			ruleEntity.setEntityId(null);
 			ruleEntity.setRecordBefore(null);
 			ruleEntity.setRequestDump(request);
-	//	} catch (Exception ex) {
-	//		log.error("Error occurred while creating Rule entity object", ex);
-	//		throw new FraudEngineException(AppConstant.ERROR_SETTING_PROPERTY);
-	//	}
-		return saveRuleEntityToDatabase(ruleEntity);
+		} catch (Exception ex) {
+			log.error("Error occurred while creating Rule entity object", ex);
+			throw new FraudEngineException(AppConstant.ERROR_SETTING_PROPERTY);
+		}
 		
-		// save rule
-		// notify Super admin for approval
-			// on rejection, notify admin
-			// on approval, proceed
-		// If rule is statistical based, refresh corresponding redis server; pocket-moni
-		// refresh fraud engine redis server;
+		return saveRuleEntityToDatabase(ruleEntity);
 	}
 
 	public Rule updateRule(UpdateRuleRequest request) {
@@ -162,7 +161,8 @@ public class RuleService {
 		return outputUpdatedRuleResponse(saveRuleEntityToDatabase(ruleEntity));
 	}
 
-	private Rule saveRuleEntityToDatabase(Rule ruleEntity) {
+	@Transactional(rollbackFor = Exception.class)
+	public Rule saveRuleEntityToDatabase(Rule ruleEntity) {
 		Rule persistedRuleEntity;
 		try {
 			persistedRuleEntity = ruleRepository.save(ruleEntity);
@@ -170,11 +170,12 @@ public class RuleService {
 			log.error("Error occurred while saving Rule entity to database" , ex);
 			throw new FraudEngineException(AppConstant.ERROR_SAVING_TO_DATABASE);
 		}
-		//saveRuleEntityToRedis(persistedRuleEntity);
+		saveRuleEntityToRedis(persistedRuleEntity);
 		return persistedRuleEntity;
 	}
 	
-	private void saveRuleEntityToRedis(Rule alreadyPersistedRuleEntity) {
+	//@Transactional(rollbackFor = Exception.class)
+	public void saveRuleEntityToRedis(Rule alreadyPersistedRuleEntity) {
 		try {
 			ruleRedisRepository.setHashOperations(redisTemplate);
 			ruleRedisRepository.update(alreadyPersistedRuleEntity);

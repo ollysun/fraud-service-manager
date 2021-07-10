@@ -5,38 +5,43 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
-import com.etz.fraudeagleeyemanager.dto.request.*;
-import com.etz.fraudeagleeyemanager.dto.response.ProductServiceResponse;
-import com.etz.fraudeagleeyemanager.entity.ProductDatasetId;
-import com.etz.fraudeagleeyemanager.entity.ProductServiceEntity;
-import com.etz.fraudeagleeyemanager.redisrepository.ProductServiceRedisRepository;
-import com.etz.fraudeagleeyemanager.repository.ProductServiceRepository;
-import com.etz.fraudeagleeyemanager.util.AppUtil;
-import com.etz.fraudeagleeyemanager.util.PageRequestUtil;
 import org.springframework.beans.BeanUtils;
 import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.etz.fraudeagleeyemanager.constant.AppConstant;
-import com.etz.fraudeagleeyemanager.dto.response.ServiceDataSetResponse;
+import com.etz.fraudeagleeyemanager.dto.request.CreateProductRequest;
+import com.etz.fraudeagleeyemanager.dto.request.CreateProductServiceDto;
+import com.etz.fraudeagleeyemanager.dto.request.DatasetProductRequest;
+import com.etz.fraudeagleeyemanager.dto.request.UpdateDataSetRequest;
+import com.etz.fraudeagleeyemanager.dto.request.UpdateProductRequest;
+import com.etz.fraudeagleeyemanager.dto.request.UpdateProductServiceDto;
 import com.etz.fraudeagleeyemanager.dto.response.ProductResponse;
-import com.etz.fraudeagleeyemanager.entity.ServiceDataSet;
+import com.etz.fraudeagleeyemanager.dto.response.ProductServiceResponse;
+import com.etz.fraudeagleeyemanager.dto.response.ServiceDataSetResponse;
+import com.etz.fraudeagleeyemanager.entity.ProductDatasetId;
 import com.etz.fraudeagleeyemanager.entity.ProductEntity;
+import com.etz.fraudeagleeyemanager.entity.ProductServiceEntity;
+import com.etz.fraudeagleeyemanager.entity.ServiceDataSet;
 import com.etz.fraudeagleeyemanager.exception.FraudEngineException;
 import com.etz.fraudeagleeyemanager.exception.ResourceNotFoundException;
 import com.etz.fraudeagleeyemanager.redisrepository.ProductDatasetRedisRepository;
 import com.etz.fraudeagleeyemanager.redisrepository.ProductRedisRepository;
+import com.etz.fraudeagleeyemanager.redisrepository.ProductServiceRedisRepository;
 import com.etz.fraudeagleeyemanager.repository.ProductDataSetRepository;
 import com.etz.fraudeagleeyemanager.repository.ProductEntityRepository;
+import com.etz.fraudeagleeyemanager.repository.ProductServiceRepository;
+import com.etz.fraudeagleeyemanager.util.AppUtil;
 import com.etz.fraudeagleeyemanager.util.JsonConverter;
+import com.etz.fraudeagleeyemanager.util.PageRequestUtil;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.cache.annotation.Cacheable;
 
 @Slf4j
 @Service
@@ -51,7 +56,7 @@ public class ProductService {
 	private final ProductServiceRepository productServiceRepository;
 	private final ProductServiceRedisRepository productServiceRedisRepository;
 
-	@Transactional(propagation = Propagation.REQUIRES_NEW)
+	@Transactional(rollbackFor = Exception.class, propagation = Propagation.REQUIRED, readOnly = false)
 	@CacheEvict(value = "product", allEntries=true)
 	public ProductResponse createProduct(CreateProductRequest request) {
 		ProductEntity productEntity = new ProductEntity();
@@ -74,15 +79,15 @@ public class ProductService {
 			productEntity.setRecordBefore(null);
 			productEntity.setRequestDump(request);
 
-
 		} catch (Exception ex) {
 			log.error("Error occurred while creating product entity object", ex);
 			throw new FraudEngineException(AppConstant.ERROR_SETTING_PROPERTY);
 		}
 		return outputProductResponse(saveProductEntityToDatabase(productEntity));
 	}
-
-	private ProductEntity saveProductEntityToDatabase(ProductEntity accountEntity) {
+	
+	//@Transactional(rollbackFor = Exception.class, propagation = Propagation.REQUIRED, readOnly = false)
+	public ProductEntity saveProductEntityToDatabase(ProductEntity accountEntity) {
 		ProductEntity persistedProductEntity;
 		try {
 			persistedProductEntity = productEntityRepository.save(accountEntity);
@@ -90,11 +95,12 @@ public class ProductService {
 			log.error("Error occurred while saving product entity to database", ex);
 			throw new FraudEngineException(AppConstant.ERROR_SAVING_TO_DATABASE);
 		}
-		//saveProductEntityToRedis(persistedProductEntity);
+		saveProductEntityToRedis(persistedProductEntity);
 		return persistedProductEntity;
 	}
 
-	private void saveProductEntityToRedis(ProductEntity alreadyPersistedProductEntity) {
+	//@Transactional(rollbackFor = Exception.class, propagation = Propagation.REQUIRED, readOnly = false)
+	public void saveProductEntityToRedis(ProductEntity alreadyPersistedProductEntity) {
 		try {
 			productRedisRepository.setHashOperations(redisTemplate);
 			productRedisRepository.update(alreadyPersistedProductEntity);
@@ -105,14 +111,14 @@ public class ProductService {
 		}
 	}
 
-	private ProductResponse outputProductResponse(ProductEntity productEntity) {
+	public ProductResponse outputProductResponse(ProductEntity productEntity) {
 		ProductResponse productResponse = new ProductResponse();
 		BeanUtils.copyProperties(productEntity, productResponse,
 				"productDataset, productRules, products, productLists");
 		return productResponse;
 	}
 
-	@Transactional(readOnly=true)
+	//@Transactional(readOnly=true)
 	@Cacheable(value="product")
 	public List<ProductResponse> getProduct(String productCode) {
 		if (Objects.isNull(productCode)) {
@@ -203,7 +209,7 @@ public class ProductService {
 		return productEntityOptional;
 	}
 
-	@Transactional(propagation = Propagation.REQUIRES_NEW)
+	//@Transactional(propagation = Propagation.REQUIRES_NEW)
 	public ServiceDataSet createServiceDataset(DatasetProductRequest request) {
 		//check for the code before creating the dataset
 		findByCode(request.getProductCode());
@@ -235,7 +241,7 @@ public class ProductService {
 		return productResponse;
 	}
 
-	@Transactional(readOnly = true)
+	//@Transactional(readOnly = true)
 	public Page<ServiceDataSetResponse> getServiceDataset(String productCode, Long serviceId) {
 		Page<ServiceDataSetResponse> serviceDataSetResponsePage;
 		List<ServiceDataSet> serviceDataSetList = new ArrayList<>();
@@ -251,7 +257,7 @@ public class ProductService {
 		return serviceDataSetResponsePage;
 	}
 
-	@Transactional(propagation = Propagation.REQUIRED)
+	//@Transactional(propagation = Propagation.REQUIRED)
 	public List<ServiceDataSetResponse> updateServiceDataset(UpdateDataSetRequest request) {
 		List<ServiceDataSet> serviceDataSetList = productDataSetRepository.findByServiceId(request.getServiceId());
 		if (serviceDataSetList.isEmpty()) {
@@ -340,7 +346,7 @@ public class ProductService {
 			log.error("Error occurred while saving product entity to database", ex);
 			throw new FraudEngineException(AppConstant.ERROR_SAVING_TO_DATABASE);
 		}
-		//saveServiceDatasetEntityToRedis(persistedServiceDatasetEntity);
+		saveServiceDatasetEntityToRedis(persistedServiceDatasetEntity);
 		return persistedServiceDatasetEntity;
 	}
 
@@ -355,7 +361,7 @@ public class ProductService {
 		}
 	}
 
-	@Transactional(propagation = Propagation.REQUIRES_NEW)
+	//@Transactional(propagation = Propagation.REQUIRES_NEW)
 	public ProductServiceResponse createProductService(CreateProductServiceDto request) {
 		Optional<ProductEntity> productEntityOptional = productEntityRepository.findByCodeAndDeletedFalse(request.getProductCode());
 		if (!productEntityOptional.isPresent()) {
@@ -380,7 +386,8 @@ public class ProductService {
 			throw new FraudEngineException(AppConstant.ERROR_SAVING_TO_REDIS);
 		}
 	}
-	@Transactional(propagation = Propagation.REQUIRES_NEW)
+	
+	//@Transactional(propagation = Propagation.REQUIRES_NEW)
 	public ProductServiceResponse updateProductService(UpdateProductServiceDto request) {
 		Optional<ProductEntity> productEntityOptional = productEntityRepository.findByCodeAndDeletedFalse(request.getProductCode());
 		if (!productEntityOptional.isPresent()) {
@@ -406,7 +413,8 @@ public class ProductService {
 		productServiceRepository.deleteById(serviceId);
 		return true;
 	}
-	@Transactional(readOnly = true)
+	
+	//@Transactional(readOnly = true)
 	public Page<ProductServiceEntity> queryAllProductService(String productCode){
 		Page<ProductServiceEntity> productServiceEntityPage;
 		if (!Objects.isNull(productCode)) {

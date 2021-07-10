@@ -6,6 +6,8 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.ToString;
+
 import org.hibernate.Hibernate;
 import org.hibernate.annotations.ResultCheckStyle;
 import org.hibernate.annotations.SQLDelete;
@@ -80,6 +82,7 @@ public class Rule extends BaseAuditEntity implements Serializable {
 			cascade = CascadeType.ALL, orphanRemoval = true)
 	@JsonManagedReference
 	@JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+	@ToString.Exclude
 	private Set<ServiceRule> serviceRule;
 
 	@Override
