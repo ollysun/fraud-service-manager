@@ -38,11 +38,17 @@ spring:
 
   redis:
     client-type: jedis
+<<<<<<< HEAD
 #    host: 172.17.10.16
     host: 127.0.0.1
+=======
+    host: 172.17.10.16
+    #host: 127.0.0.1
+>>>>>>> cb0eba7b83b9f7703f5f9cbc3c5d24d263215786
     port: 6379
     database: 0
     password: 
+
 
   cloud:
     consul:
@@ -57,9 +63,9 @@ spring:
       type: web
 
   datasource:
-    username: root
-    password: root
-    url: jdbc:mysql://localhost:3306/eagle_eye?useLegacyDatetimeCode=false&serverTimezone=Africa/Lagos&createDatabaseIfNotExist=true
+    username: eagleeye_user
+    password: T@w!d2021
+    url: jdbc:mysql://172.17.10.83:3306/eagle_eye?createDatabaseIfNotExist=true&useLegacyDatetimeCode=false&serverTimezone=Africa/Lagos
     driverClassName: com.mysql.cj.jdbc.Driver
     initialization-mode: always
 
@@ -77,7 +83,7 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: create
+      ddl-auto: update
     properties:
       hibernate:
         dialect: org.hibernate.dialect.MySQL55Dialect
@@ -120,6 +126,8 @@ logging:
     org.hibernate: ERROR
     com.etz.fraudengine: INFO
     org.apache.kafka: WARN
+    org.springframework.orm.jpa: DEBUG
+    org.springframework.transaction: DEBUG
 
 hystrix:
   command:

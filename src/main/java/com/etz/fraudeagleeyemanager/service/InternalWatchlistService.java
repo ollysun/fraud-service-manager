@@ -22,6 +22,7 @@ import com.etz.fraudeagleeyemanager.util.PageRequestUtil;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
 @Service
@@ -31,7 +32,8 @@ public class InternalWatchlistService {
 	private final RedisTemplate<String, Object> redisTemplate;
 	private final InternalWatchlistRepository internalWatchlistRepository;
 	private final InternalWatchlistRedisRepository internalWatchlistRedisRepository;
-		
+
+	@Transactional(rollbackFor = Throwable.class)
 	public InternalWatchlist createInternalWatchlist(InternalWatchlistRequest request){
 		InternalWatchlist internalWatchlist = new InternalWatchlist();
 		try {
@@ -52,11 +54,12 @@ public class InternalWatchlistService {
 		return saveInternalWatchlistEntityToDatabase(internalWatchlist);
 	}
 
-	public InternalWatchlist updateInternalWatchlist(UpdateInternalWatchlistRequest request, Long watchId){
-		InternalWatchlist internalWatchlist = findById(watchId).get();
+	@Transactional(rollbackFor = Throwable.class)
+	public InternalWatchlist updateInternalWatchlist(UpdateInternalWatchlistRequest request){
+		InternalWatchlist internalWatchlist = findById(request.getWatchId()).get();
 		try {
 			// for auditing purpose for UPDATE
-			internalWatchlist.setEntityId(String.valueOf(watchId));
+			internalWatchlist.setEntityId(String.valueOf(request.getWatchId()));
 			internalWatchlist.setRecordBefore(JsonConverter.objectToJson(internalWatchlist));
 			internalWatchlist.setRequestDump(request);
 
@@ -79,6 +82,7 @@ public class InternalWatchlistService {
 		return internalWatchlistOptional;
 	}
 
+	@Transactional(readOnly = true)
 	public Page<InternalWatchlist> getInternalWatchlist(Long watchId){
 		if (Objects.isNull(watchId)) {
 			return internalWatchlistRepository.findAll(PageRequestUtil.getPageRequest());
@@ -86,7 +90,8 @@ public class InternalWatchlistService {
 		Optional<InternalWatchlist> internalWatchlistOptional = findById(watchId);
 		return internalWatchlistRepository.findAll(Example.of(internalWatchlistOptional.get()), PageRequestUtil.getPageRequest());
 	}
-	
+
+	@Transactional(rollbackFor = Throwable.class)
 	public boolean deleteInternalWatchlist(Long watchId) {
 		InternalWatchlist internalWatchlist = findById(watchId).get();
 		// for auditing purpose for DELETE

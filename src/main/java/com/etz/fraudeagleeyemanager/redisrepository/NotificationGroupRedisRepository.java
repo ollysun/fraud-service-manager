@@ -2,6 +2,8 @@ package com.etz.fraudeagleeyemanager.redisrepository;
 
 import java.util.Map;
 
+import com.etz.fraudeagleeyemanager.exception.FraudEngineException;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.HashOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Repository;
@@ -9,19 +11,43 @@ import org.springframework.stereotype.Repository;
 import com.etz.fraudeagleeyemanager.entity.NotificationGroup;
 import com.etz.fraudeagleeyemanager.enums.FraudRedisKey;
 import com.etz.fraudeagleeyemanager.repository.RedisRepository;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
+@Slf4j
 @Repository
 public class NotificationGroupRedisRepository implements RedisRepository<NotificationGroup, Long> {
 	
     private HashOperations<String, Long, Object> hashOperations;
-	
-    public void setHashOperations(RedisTemplate<String, Object> redisTemplate){
+	private RedisTemplate<String, Object> redisTemplateField;
+
+	public void setHashOperations(RedisTemplate<String, Object> redisTemplate){
         this.hashOperations = redisTemplate.opsForHash();
-    }
+		redisTemplateField = redisTemplate;
+	}
 		
 	@Override
 	public void create(NotificationGroup model) {
-		hashOperations.put(FraudRedisKey.NOTIFICATIONGROUP.name(), model.getId(), toJsonString(model));
+
+		try {
+			// start the transaction
+			redisTemplateField.multi();
+
+			// register synchronisation
+			if (TransactionSynchronizationManager.isActualTransactionActive()) {
+				TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+					@Override
+					public void afterCommit() {
+						TransactionSynchronization.super.afterCommit();
+						hashOperations.put(FraudRedisKey.NOTIFICATIONGROUP.name(), model.getId(), toJsonString(model));
+					}
+				});
+			}
+		}catch(Exception ex){
+			log.debug("error connecting to redis");
+			throw new FraudEngineException("error connecting to redis " + ex.getMessage());
+		}
+
 	}
 
 	@Override

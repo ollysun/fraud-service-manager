@@ -35,7 +35,7 @@ public class ParameterService {
 	private final ParameterRedisRepository parameterRedisRepository;
 	private final ParameterRepository parameterRepository;
 
-	@Transactional(propagation = Propagation.REQUIRES_NEW)
+	@Transactional(rollbackFor = Throwable.class)
 	public Parameter createParameter(CreateParameterRequest request) {
 		if (Boolean.TRUE.equals(parameterRepository.existsByNameAndOperator(request.getName(), request.getOperator()))){
 			throw new FraudEngineException("The name and operator already exists in Parameter table ");
@@ -61,6 +61,7 @@ public class ParameterService {
 		return saveInternalWatchlistEntityToDatabase(parameterEntity);
 	}
 
+	@Transactional(rollbackFor = Throwable.class)
 	public Parameter updateParameter(UpdateParameterRequest request) {
 		Parameter parameterEntity = findById(request.getParamId()).get();
 		try {
@@ -82,6 +83,7 @@ public class ParameterService {
 	}
 
 	// todo disable parameter
+	@Transactional(rollbackFor = Throwable.class)
 	public boolean deleteParameter(Long parameterId) {
 		log.info("Delete parameter ID: INFO >>>>>>>>>>>>>> {}", parameterId);
 		if(Objects.isNull(parameterId)){
@@ -112,6 +114,7 @@ public class ParameterService {
 		return Boolean.TRUE;
 	}
 
+	@Transactional(readOnly = true, rollbackFor = Throwable.class)
 	public Page<Parameter> getParameter(Long paramId) {
 		log.info("Query parameter ID: INFO >>>>>>>>>>>>>> {}", paramId);
 		if (Objects.isNull(paramId)) {
@@ -120,7 +123,8 @@ public class ParameterService {
 		Optional<Parameter> parameterEntityOptional  = findById(paramId);
 		return parameterRepository.findAll(Example.of(parameterEntityOptional.get()), PageRequestUtil.getPageRequest());
 	}
-	
+
+	@Transactional(readOnly = true)
 	private Optional<Parameter> findById(Long paramId) {
 		Optional<Parameter> parameterEntityOptional = parameterRepository.findById(paramId);
 		if(!parameterEntityOptional.isPresent()) {
@@ -137,7 +141,7 @@ public class ParameterService {
 			log.error("Error occurred while saving Internal Watchlist entity to database" , ex);
 			throw new FraudEngineException(AppConstant.ERROR_SAVING_TO_DATABASE);
 		}
-		//saveParameterEntityToRedis(persistedParameterEntity);
+		saveParameterEntityToRedis(persistedParameterEntity);
 		return persistedParameterEntity;
 	}
 	

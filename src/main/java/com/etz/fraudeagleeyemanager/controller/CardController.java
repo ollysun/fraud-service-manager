@@ -39,7 +39,7 @@ public class CardController {
 	}
 		
 	@GetMapping
-	public PageResponse<CardResponse> queryCard(@RequestParam Long cardId){
+	public PageResponse<CardResponse> queryCard(@RequestParam(required = false) Long cardId){
 		return new PageResponse<>(cardService.getCards(cardId));
 	}
 		

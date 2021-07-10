@@ -11,6 +11,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.TypedQuery;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.data.domain.Example;
@@ -63,24 +64,24 @@ public class RuleService {
 	@PersistenceContext
 	private final EntityManager em;
 
-	//@Transactional//(rollbackFor = Exception.class)
 	@CacheEvict(value = "product", allEntries=true)
+	@Transactional(rollbackFor = Throwable.class)
 	public Rule createRule(CreateRuleRequest request) {
 		Rule ruleEntity = new Rule();
-		if (Boolean.TRUE.equals(ruleRepository.existsByName(request.getRuleName()))) {
-			throw new FraudEngineException("Similar record already exists");
-		}
-		try {
+			if (Boolean.TRUE.equals(ruleRepository.existsByName(request.getRuleName()))){
+				throw new FraudEngineException("Similar record already exists");
+			}
+		//try {
 			ruleEntity.setName(request.getRuleName());
 			ruleEntity.setValueOneDataType(AppUtil.checkDataType(request.getFirstDataType()));
 			ruleEntity.setSourceValueOne(request.getFirstSourceVal());
 
 			// check the operator
-			ruleEntity.setOperatorOne(AppUtil.checkOperator(request.getFirstDataType(), request.getFirstOperator()));
+			ruleEntity.setOperatorOne(AppUtil.checkOperator(request.getFirstDataType(),request.getFirstOperator()));
 
-			if (AppUtil.isCompareValueValid(request.getFirstDataType(), request.getFirstCompareVal())) {
+			if(AppUtil.isCompareValueValid(request.getFirstDataType(),request.getFirstCompareVal())){
 				ruleEntity.setCompareValueOne(request.getFirstCompareVal());
-			} else {
+			}else {
 				throw new FraudEngineException("Invalid  first datatype and compare value ");
 			}
 			ruleEntity.setDataSourceValOne(AppUtil.checkDataSource(request.getFirstDataSourceVal()));
@@ -91,13 +92,13 @@ public class RuleService {
 
 			ruleEntity.setValueTwoDataType(AppUtil.checkDataType(request.getSecondDataType()));
 			// check operator
-			ruleEntity.setOperatorTwo(AppUtil.checkOperator(request.getSecondDataType(), request.getSecondOperator()));
-			if (AppUtil.isCompareValueValid(request.getSecondDataType(), request.getSecondCompareVal())) {
+			ruleEntity.setOperatorTwo(AppUtil.checkOperator(request.getSecondDataType(),request.getSecondOperator()));
+			if(AppUtil.isCompareValueValid(request.getSecondDataType(),request.getSecondCompareVal())){
 				ruleEntity.setCompareValueTwo(request.getSecondCompareVal());
 			}
 			ruleEntity.setDataSourceValTwo(AppUtil.checkDataSource(request.getSecondDataSourceVal()));
 			ruleEntity.setSuspicionLevel(request.getSuspicion());
-			ruleEntity.setAction(AppUtil.getLevelAction(request.getSuspicion()));
+		    ruleEntity.setAction(AppUtil.getLevelAction(request.getSuspicion()));
 			ruleEntity.setAuthorised(request.getAuthorised());
 			ruleEntity.setStatus(Boolean.TRUE);
 			ruleEntity.setCreatedBy(request.getCreatedBy());
@@ -105,14 +106,21 @@ public class RuleService {
 			ruleEntity.setEntityId(null);
 			ruleEntity.setRecordBefore(null);
 			ruleEntity.setRequestDump(request);
-		} catch (Exception ex) {
-			log.error("Error occurred while creating Rule entity object", ex);
-			throw new FraudEngineException(AppConstant.ERROR_SETTING_PROPERTY);
-		}
-		
+	//	} catch (Exception ex) {
+	//		log.error("Error occurred while creating Rule entity object", ex);
+	//		throw new FraudEngineException(AppConstant.ERROR_SETTING_PROPERTY);
+	//	}
 		return saveRuleEntityToDatabase(ruleEntity);
+		
+		// save rule
+		// notify Super admin for approval
+			// on rejection, notify admin
+			// on approval, proceed
+		// If rule is statistical based, refresh corresponding redis server; pocket-moni
+		// refresh fraud engine redis server;
 	}
 
+	@Transactional(rollbackFor = Throwable.class)
 	public Rule updateRule(UpdateRuleRequest request) {
 
 		Optional<Rule> ruleEntityOptional = ruleRepository.findById(request.getRuleId());
@@ -161,8 +169,7 @@ public class RuleService {
 		return outputUpdatedRuleResponse(saveRuleEntityToDatabase(ruleEntity));
 	}
 
-	@Transactional(rollbackFor = Exception.class)
-	public Rule saveRuleEntityToDatabase(Rule ruleEntity) {
+	private Rule saveRuleEntityToDatabase(Rule ruleEntity) {
 		Rule persistedRuleEntity;
 		try {
 			persistedRuleEntity = ruleRepository.save(ruleEntity);
@@ -174,8 +181,7 @@ public class RuleService {
 		return persistedRuleEntity;
 	}
 	
-	//@Transactional(rollbackFor = Exception.class)
-	public void saveRuleEntityToRedis(Rule alreadyPersistedRuleEntity) {
+	private void saveRuleEntityToRedis(Rule alreadyPersistedRuleEntity) {
 		try {
 			ruleRedisRepository.setHashOperations(redisTemplate);
 			ruleRedisRepository.update(alreadyPersistedRuleEntity);
@@ -193,6 +199,7 @@ public class RuleService {
 		return updatedRuleResponse;
 	}
 
+	@Transactional(rollbackFor = Throwable.class)
 	public boolean deleteRule(Long ruleId) {
 		List<ServiceRule> prodRuleEntity = serviceRuleRepository.findByRuleId(ruleId);
 		if (!(prodRuleEntity.isEmpty())){
@@ -233,6 +240,7 @@ public class RuleService {
 		return Boolean.TRUE;
 	}
 
+	@Transactional(readOnly = true)
 	public Page<RuleResponse> getRule(Long ruleId) {
 		List<RuleResponse> ruleResponseList;
 		if (Objects.isNull(ruleId)) {
@@ -247,6 +255,7 @@ public class RuleService {
 		return AppUtil.listConvertToPage(ruleResponseList, PageRequestUtil.getPageRequest());
 	}
 
+	@Transactional(rollbackFor = Throwable.class)
 	public ServiceRule mapRuleToService(MapRuleToServiceRequest request) {
 		Optional<ProductServiceEntity> productServiceEntityOptional = productServiceRepository.findById(request.getServiceId());
 		if (!productServiceEntityOptional.isPresent()){
@@ -283,6 +292,7 @@ public class RuleService {
 		return saveRuleServiceEntityToDatabase(serviceRuleEntity);
 	}
 
+	@Transactional(rollbackFor = Throwable.class)
 	public List<ProductRuleResponse> updateServiceRule(UpdateMapRuleToServiceRequest request) {
 		List<ServiceRule> prodRuleEntityList = serviceRuleRepository.findByRuleId(request.getServiceRuleId());
 		if(prodRuleEntityList.isEmpty()){
@@ -316,7 +326,8 @@ public class RuleService {
 		return outputProductRuleResponseList(updatedServiceRuleEntity);
 	}
 
-	public boolean deleteServiceRule(Long ruleId, Long serviceId) {
+	@Transactional(rollbackFor = Throwable.class)
+	public boolean deleteServiceRule(Long ruleId, String serviceId) {
 		if (Objects.isNull(ruleId) && Objects.isNull(serviceId)){
 			throw new FraudEngineException("Please enter value for serviceId and ruleId");
 		}
@@ -350,10 +361,11 @@ public class RuleService {
 	}
 
 
-	public List<RuleProductResponse> getRuleService(Long serviceId) {
+	@Transactional(rollbackFor = Throwable.class)
+	public List<RuleProductResponse> getRuleService(String serviceId) {
 		List<RuleProductResponse> ruleProductResponseList = new ArrayList<>();
 		TypedQuery<RuleProductResponse> ruleProductResponseTypedQuery;
-		if (serviceId != null) {
+		if (StringUtils.isNotBlank(serviceId)) {
 			String sqlString = " SELECT NEW com.etz.fraudeagleeyemanager.dto.response.RuleProductResponse(" +
 					"rl.id,rl.name,rl.sourceValueOne,rl.valueOneDataType, rl.operatorOne, rl.compareValueOne, rl.dataSourceValOne," +
 					"rl.logicOperator,rl.sourceValueTwo,rl.operatorTwo,rl.compareValueTwo, rl.dataSourceValTwo, rl.valueTwoDataType," +

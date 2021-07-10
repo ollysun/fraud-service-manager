@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 
 import javax.validation.Valid;
+import javax.validation.constraints.NotBlank;
 
 @RestController
 @RequiredArgsConstructor
@@ -20,6 +21,13 @@ import javax.validation.Valid;
 public class ProductServiceController {
 
    private final ProductService productService;
+
+    @GetMapping("/{serviceId}/code/{code}")
+    public ResponseEntity<ModelResponse<ProductServiceResponse>> getProductService(@Valid @NotBlank @PathVariable(value = "code") String code,
+                                                                                   @Valid @NotBlank @PathVariable(value = "serviceId") String serviceId){
+        ModelResponse<ProductServiceResponse> response = new ModelResponse<>(productService.getServiceByCodeAndServiceId(code,serviceId), HttpStatus.OK);
+        return ResponseEntity.status(HttpStatus.valueOf(response.getStatus())).body(response);
+    }
 
     @PostMapping
     public ResponseEntity<ModelResponse<ProductServiceResponse>> createProductService(@Valid @RequestBody CreateProductServiceDto request, @ApiIgnore @RequestAttribute(AppConstant.USERNAME) String username){
@@ -36,7 +44,7 @@ public class ProductServiceController {
     }
 
     @DeleteMapping("/{serviceId}")
-    public BooleanResponse deactivateProductService(@PathVariable Long serviceId){
+    public BooleanResponse deactivateProductService(@PathVariable String serviceId){
         return new BooleanResponse(productService.deactivateProductService(serviceId));
     }
 
@@ -55,8 +63,15 @@ public class ProductServiceController {
 
     @GetMapping("/dataset")
     public PageResponse<ServiceDataSetResponse> queryServiceDataset(@RequestParam(required = false) String code,
-                                                                    @RequestParam(required = false) Long serviceId){
+                                                                    @RequestParam(required = false) String serviceId){
         return new PageResponse<>(productService.getServiceDataset(code, serviceId));
+    }
+
+    @GetMapping("/dataset/{datasetId}/code/{code}/service/{serviceId}")
+    public ResponseEntity<ServiceDataSetResponse> queryServiceDatasetByIds(@PathVariable String code,
+                                                                           @PathVariable String serviceId,
+                                                                           @PathVariable Long datasetId){
+        return ResponseEntity.ok(productService.getServiceDatasetByIds(datasetId,code, serviceId));
     }
 
     @PutMapping("/dataset")
@@ -67,7 +82,7 @@ public class ProductServiceController {
     }
 
     @DeleteMapping("/dataset/{serviceId}")
-    public BooleanResponse deleteServiceDataset(@PathVariable Long serviceId){
+    public BooleanResponse deleteServiceDataset(@PathVariable String serviceId){
         return new BooleanResponse(productService.deleteServiceDataset(serviceId));
     }
 

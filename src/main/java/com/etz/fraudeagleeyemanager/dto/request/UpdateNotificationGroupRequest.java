@@ -1,6 +1,7 @@
 package com.etz.fraudeagleeyemanager.dto.request;
 
 import java.io.Serializable;
+import java.util.List;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
@@ -10,17 +11,17 @@ import lombok.Data;
 @Data
 public class UpdateNotificationGroupRequest implements Serializable{
 	private static final long serialVersionUID = 1L;
-
+	@NotNull(message = "Please enter the groupId")
 	private Long groupId;
 	
 	@NotBlank(message = "Please enter the group name")
 	private String name;
 	
-	@NotBlank(message = "Please enter comma separated list of email addresses")
-	private String emails;
+	@NotNull(message = "Please list of email addresses")
+	private List<String> emails;
 	
-	@NotBlank(message = "Please enter comma separated list of phone numbers")
-	private String phoneNos;
+	@NotNull(message = "Please list of phone numbers")
+	private List<String> phoneNos;
 	
 	@NotNull(message = "Please indicate true/false for mailAlert")
 	private Boolean mailAlert;

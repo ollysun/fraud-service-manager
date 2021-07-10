@@ -4,21 +4,22 @@ package com.etz.fraudeagleeyemanager.service;
 import java.util.Objects;
 import java.util.Optional;
 
-import org.springframework.beans.BeanUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.Page;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.etz.fraudeagleeyemanager.constant.AppConstant;
 import com.etz.fraudeagleeyemanager.dto.request.NotificationGroupRequest;
 import com.etz.fraudeagleeyemanager.dto.request.UpdateNotificationGroupRequest;
-import com.etz.fraudeagleeyemanager.dto.response.NotificationGroupResponse;
 import com.etz.fraudeagleeyemanager.entity.NotificationGroup;
 import com.etz.fraudeagleeyemanager.exception.FraudEngineException;
 import com.etz.fraudeagleeyemanager.exception.ResourceNotFoundException;
 import com.etz.fraudeagleeyemanager.redisrepository.NotificationGroupRedisRepository;
 import com.etz.fraudeagleeyemanager.repository.NotificationGroupRepository;
+import com.etz.fraudeagleeyemanager.util.AppUtil;
 import com.etz.fraudeagleeyemanager.util.JsonConverter;
 import com.etz.fraudeagleeyemanager.util.PageRequestUtil;
 
@@ -33,13 +34,14 @@ public class NotificationGroupService {
 	private final RedisTemplate<String, Object> redisTemplate;
 	private final NotificationGroupRepository notificationGroupRepository;
 	private final NotificationGroupRedisRepository notificationGroupRedisRepository;
-		
+
+	@Transactional(rollbackFor = Throwable.class)
 	public NotificationGroup createNotificationGroup(NotificationGroupRequest request){
 		NotificationGroup notificationGroup = new NotificationGroup();
 		try {
 			notificationGroup.setGroupName(request.getName());
-			notificationGroup.setEmails(request.getEmails());
-			notificationGroup.setPhones(request.getPhoneNos());
+			notificationGroup.setEmails(AppUtil.ListToString(request.getEmails()));
+			notificationGroup.setPhones(AppUtil.ListToString(request.getPhoneNos()));
 			notificationGroup.setEmailAlert(request.getMailAlert());
 			notificationGroup.setSmsAlert(request.getSmsAlert());
 			notificationGroup.setAuthorised(false);
@@ -57,20 +59,21 @@ public class NotificationGroupService {
 		return saveNotificationGroupEntityToDatabase(notificationGroup);
 	}
 
-	public NotificationGroup updateNotificationGroup(UpdateNotificationGroupRequest request, Long groupId){
-		Optional<NotificationGroup> notificationGroupOptional = notificationGroupRepository.findById(groupId);
+	@Transactional(rollbackFor = Throwable.class)
+	public NotificationGroup updateNotificationGroup(UpdateNotificationGroupRequest request){
+		Optional<NotificationGroup> notificationGroupOptional = notificationGroupRepository.findById(request.getGroupId());
 		if(!notificationGroupOptional.isPresent()) {
-			throw new ResourceNotFoundException("Notification group not found for group ID " + groupId);
+			throw new ResourceNotFoundException("Notification group not found for group ID " + request.getGroupId());
 		}
 		NotificationGroup notificationGroup = notificationGroupOptional.get();
 		try {
 			// for auditing purpose for UPDATE
-			notificationGroup.setEntityId(String.valueOf(groupId));
+			notificationGroup.setEntityId(String.valueOf(request.getGroupId()));
 			notificationGroup.setRecordBefore(JsonConverter.objectToJson(notificationGroup));
 			notificationGroup.setRequestDump(request);
 
-			notificationGroup.setEmails(request.getEmails());
-			notificationGroup.setPhones(request.getPhoneNos());
+			notificationGroup.setEmails(AppUtil.ListToString(request.getEmails()));
+			notificationGroup.setPhones(AppUtil.ListToString(request.getPhoneNos()));
 			notificationGroup.setEmailAlert(request.getMailAlert());
 			notificationGroup.setSmsAlert(request.getSmsAlert());
 			notificationGroup.setStatus(request.getStatus());
@@ -82,12 +85,13 @@ public class NotificationGroupService {
 		return saveNotificationGroupEntityToDatabase(notificationGroup);
 	}
 
+	@Transactional(readOnly = true)
 	public Page<NotificationGroup> getNotificationGroup(Long groupId, String groupName){
-		if (Objects.isNull(groupId) && Objects.isNull(groupName)) {
+		if (Objects.isNull(groupId) && StringUtils.isBlank(groupName)) {
 			return notificationGroupRepository.findAll(PageRequestUtil.getPageRequest());
 		}
 		Optional<NotificationGroup> notificationGroupOptional;
-		if (Objects.isNull(groupId) && !groupName.isEmpty()) {
+		if (Objects.isNull(groupId) && StringUtils.isNotBlank(groupName) ){
 			notificationGroupOptional = notificationGroupRepository.findByGroupName(groupName);
 			if(!notificationGroupOptional.isPresent()) {
 				throw new ResourceNotFoundException("Notification Group Not found for group name " + groupName);
@@ -127,13 +131,6 @@ public class NotificationGroupService {
 			log.error("Error occurred while saving NotificationGroup entity to Redis" , ex);
 			throw new FraudEngineException(AppConstant.ERROR_SAVING_TO_REDIS);
 		}
-	}
-	
-	@SuppressWarnings("unused")
-	private NotificationGroupResponse outputNotificationGroupResponse(NotificationGroup notificationGroup) {
-		NotificationGroupResponse notificationGroupResponse = new NotificationGroupResponse();
-		BeanUtils.copyProperties(notificationGroup, notificationGroupResponse);
-		return notificationGroupResponse;
 	}
 	
 }

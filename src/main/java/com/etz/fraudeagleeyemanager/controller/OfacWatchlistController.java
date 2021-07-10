@@ -4,16 +4,10 @@ package com.etz.fraudeagleeyemanager.controller;
 
 import javax.validation.Valid;
 
+import com.etz.fraudeagleeyemanager.constant.AppConstant;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import com.etz.fraudeagleeyemanager.dto.request.OfacWatchlistRequest;
 import com.etz.fraudeagleeyemanager.dto.request.UpdateOfacWatchlistRequest;
@@ -24,6 +18,7 @@ import com.etz.fraudeagleeyemanager.entity.OfacWatchlist;
 import com.etz.fraudeagleeyemanager.service.OfacWatchlistService;
 
 import lombok.RequiredArgsConstructor;
+import springfox.documentation.annotations.ApiIgnore;
 
 @RestController
 @RequiredArgsConstructor
@@ -33,18 +28,22 @@ public class OfacWatchlistController {
 	private final OfacWatchlistService ofacWatchlistService;
 
 	@PostMapping
-	public ResponseEntity<ModelResponse<OfacWatchlist>> createOfac(@Valid @RequestBody  OfacWatchlistRequest request){
+	public ResponseEntity<ModelResponse<OfacWatchlist>> createOfac(@Valid @RequestBody  OfacWatchlistRequest request,
+																   @ApiIgnore @RequestAttribute(AppConstant.USERNAME) String username){
+		request.setCreatedBy(username);
 		ModelResponse<OfacWatchlist> response = new ModelResponse<>(ofacWatchlistService.createOfacWatchlist(request), HttpStatus.CREATED);
 		return ResponseEntity.status(HttpStatus.valueOf(response.getStatus())).body(response);
 	}
 		
-	@PutMapping("/{ofacId}")
-	public ModelResponse<OfacWatchlist> updateOfac(@PathVariable Long ofacId, @RequestBody @Valid UpdateOfacWatchlistRequest request){
-		return new ModelResponse<>(ofacWatchlistService.updateOfacWatchlist(request, ofacId));
+	@PutMapping
+	public ModelResponse<OfacWatchlist> updateOfac(@RequestBody @Valid UpdateOfacWatchlistRequest request,
+												   @ApiIgnore @RequestAttribute(AppConstant.USERNAME) String username){
+		request.setUpdatedBy(username);
+		return new ModelResponse<>(ofacWatchlistService.updateOfacWatchlist(request));
 	}
 	
 	@GetMapping
-	public PageResponse<OfacWatchlist> queryOfac(Long ofacId){
+	public PageResponse<OfacWatchlist> queryOfac(@RequestParam(required = false) Long ofacId){
 		return new PageResponse<>(ofacWatchlistService.getOfacWatchlist(ofacId));
 	}
 	

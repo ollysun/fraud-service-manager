@@ -2,7 +2,7 @@ package com.etz.fraudeagleeyemanager.util;
 
 import com.etz.fraudeagleeyemanager.constant.LevelAction;
 import com.etz.fraudeagleeyemanager.exception.FraudEngineException;
-import io.netty.util.internal.StringUtil;
+import org.apache.commons.lang3.StringUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
@@ -17,6 +17,7 @@ import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.Month;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Slf4j
 public class AppUtil {
@@ -52,9 +53,9 @@ public class AppUtil {
     public static String checkLogicOperator(String text){
         List<String> dataSourceVal = Arrays.asList("AND", "OR");
         String output = "";
-        if(!(StringUtil.isNullOrEmpty(text))){
+        if(StringUtils.isNotBlank(text)){
             output = dataSourceVal.stream()
-                    .filter(bl -> bl.toUpperCase().equalsIgnoreCase(text))
+                    .filter(bl -> bl.equalsIgnoreCase(text))
                     .findFirst()
                     .orElseThrow(() ->
                             new FraudEngineException("cannot found this logic operator " + text + " can be any of " + dataSourceVal.toString()));
@@ -65,9 +66,9 @@ public class AppUtil {
     public static String checkDataSource(String text) {
         List<String> dataSourceVal = Arrays.asList("TRANSACTIONAL", "STATISTICS");
         String output = "";
-        if(!(StringUtil.isNullOrEmpty(text))){
+        if(StringUtils.isNotBlank(text)){
             output = dataSourceVal.stream()
-                    .filter(bl -> bl.toUpperCase().equalsIgnoreCase(text))
+                    .filter(bl -> bl.equalsIgnoreCase(text))
                     .findFirst()
                     .orElseThrow(() ->
                             new FraudEngineException("cannot found this data source " + text + " can be any " + dataSourceVal.toString()));
@@ -78,9 +79,9 @@ public class AppUtil {
     private static String checkBoolean(String dataType, String operatorRequest){
         List<String> allowedOperators = Arrays.asList("==","!=");
         String operator = "";
-        if (!(StringUtil.isNullOrEmpty(dataType)) && !(StringUtil.isNullOrEmpty(operatorRequest)) && dataType.equalsIgnoreCase("BOOLEAN")){
+        if (StringUtils.isNotBlank(dataType) && StringUtils.isNotBlank(operatorRequest) && dataType.equalsIgnoreCase("BOOLEAN")){
             operator = allowedOperators.stream()
-                      .filter(bl -> bl.toUpperCase().equalsIgnoreCase(operatorRequest))
+                      .filter(bl -> bl.equalsIgnoreCase(operatorRequest))
                       .findFirst()
                       .orElseThrow(() ->
                             new FraudEngineException("operator Not found for this Datatype " + dataType + operatorRequest +
@@ -92,9 +93,9 @@ public class AppUtil {
     private static String checkNumber(String dataType, String operatorRequest){
         List<String> allowedOperators = Arrays.asList("==","!=", "<", ">", "<=", ">=");
         String operator = "";
-        if (!(StringUtil.isNullOrEmpty(operatorRequest)) && !(StringUtil.isNullOrEmpty(dataType)) && dataType.equalsIgnoreCase("NUMBER")){
+        if (StringUtils.isNotBlank(operatorRequest) && StringUtils.isNotBlank(dataType) && dataType.equalsIgnoreCase("NUMBER")){
             operator = allowedOperators.stream()
-                    .filter(bl -> bl.toUpperCase().equalsIgnoreCase(operatorRequest))
+                    .filter(bl -> bl.equalsIgnoreCase(operatorRequest))
                     .findFirst()
                     .orElseThrow(() ->
                             new FraudEngineException("operator Not found for this Datatype " + dataType + operatorRequest +
@@ -106,9 +107,9 @@ public class AppUtil {
     private static String checkString(String dataType, String operatorRequest){
         List<String> allowedOperators = Arrays.asList("==", "CHANGE");
         String operator = "";
-        if (!(StringUtil.isNullOrEmpty(dataType)) && !(StringUtil.isNullOrEmpty(operatorRequest)) && dataType.equalsIgnoreCase("STRING")){
+        if (StringUtils.isNotBlank(dataType) && StringUtils.isNotBlank(operatorRequest) && dataType.equalsIgnoreCase("STRING")){
             operator = allowedOperators.stream()
-                    .filter(bl -> bl.toUpperCase().equalsIgnoreCase(operatorRequest))
+                    .filter(bl -> bl.equalsIgnoreCase(operatorRequest))
                     .findFirst()
                     .orElseThrow(() ->
                             new FraudEngineException("operator Not found for this Datatype " + dataType + operatorRequest +
@@ -127,7 +128,7 @@ public class AppUtil {
      */
     public static boolean isCompareValueValid(String datatypeAllowed, String compareValue){
 
-	    if (!(StringUtil.isNullOrEmpty(datatypeAllowed)) && !(StringUtil.isNullOrEmpty(compareValue))) {
+	    if (StringUtils.isNotBlank(datatypeAllowed) && StringUtils.isNotBlank(compareValue)) {
             if (datatypeAllowed.equalsIgnoreCase("BOOLEAN") && !("True".equalsIgnoreCase(compareValue) || "False".equalsIgnoreCase(compareValue))) {
                 log.error("compare value '{}' is not a boolean value", compareValue);
                 return false;
@@ -165,7 +166,7 @@ public class AppUtil {
     public static String checkTimeSourceValue(String datatype, String sourceRequest){
         List<String> allowedOperators = Arrays.asList("DAY","HOUR", "MINUTE", "SECONDS");
         String operator = "";
-        if (!(StringUtil.isNullOrEmpty(datatype)) && !(StringUtil.isNullOrEmpty(sourceRequest)) && datatype.equalsIgnoreCase("TIME")){
+        if (StringUtils.isNotBlank(datatype) && StringUtils.isNotBlank(sourceRequest) && datatype.equalsIgnoreCase("TIME")){
             operator = allowedOperators.stream()
                     .filter(bl -> bl.equalsIgnoreCase(sourceRequest))
                     .findFirst()
@@ -180,9 +181,9 @@ public class AppUtil {
     private static String checkDate(String dataType, String operatorRequest){
         List<String> allowedOperators = Arrays.asList("==","!=", "<", ">", "<=", ">=");
         String operator = "";
-        if (!(StringUtil.isNullOrEmpty(dataType))  && !(StringUtil.isNullOrEmpty(operatorRequest)) && dataType.equalsIgnoreCase("DATE")){
+        if (StringUtils.isNotBlank(dataType)  && StringUtils.isNotBlank(operatorRequest) && dataType.equalsIgnoreCase("DATE")){
             operator = allowedOperators.stream()
-                    .filter(bl -> bl.toUpperCase().equalsIgnoreCase(operatorRequest))
+                    .filter(bl -> bl.equalsIgnoreCase(operatorRequest))
                     .findFirst()
                     .orElseThrow(() ->
                             new FraudEngineException("operator Not found for this Datatype " + dataType + operatorRequest +
@@ -194,9 +195,9 @@ public class AppUtil {
     private static String checkTime(String dataType, String operatorRequest){
         List<String> allowedOperators = Arrays.asList("==","!=", "<", ">", "<=", ">=");
         String operator = "";
-        if (!(StringUtil.isNullOrEmpty(dataType)) && !(StringUtil.isNullOrEmpty(operatorRequest)) && dataType.equalsIgnoreCase("TIME")){
+        if (StringUtils.isNotBlank(dataType) && StringUtils.isNotBlank(operatorRequest) && dataType.equalsIgnoreCase("TIME")){
             operator = allowedOperators.stream()
-                    .filter(bl -> bl.toUpperCase().equalsIgnoreCase(operatorRequest))
+                    .filter(bl -> bl.equalsIgnoreCase(operatorRequest))
                     .findFirst()
                     .orElseThrow(() ->
                             new FraudEngineException("operator Not found for this Datatype " + dataType + operatorRequest +
@@ -208,9 +209,9 @@ public class AppUtil {
     public static String checkParameterOperator(String operatorRequest){
         List<String> allowedOperators = Arrays.asList("==","!=", "<", ">", "<=", ">=", "change");
         String operator = "";
-        if (!(StringUtil.isNullOrEmpty(operatorRequest))) {
+        if (StringUtils.isNotBlank(operatorRequest)) {
             operator = allowedOperators.stream()
-                    .filter(bl -> bl.toUpperCase().equalsIgnoreCase(operatorRequest))
+                    .filter(bl -> bl.equalsIgnoreCase(operatorRequest))
                     .findFirst()
                     .orElseThrow(() ->
                             new FraudEngineException("operator Not found " + operatorRequest +
@@ -221,7 +222,7 @@ public class AppUtil {
     }
     public static String checkOperator(String datatype, String operatorRequest){
         String output = "";
-        if (!(StringUtil.isNullOrEmpty(datatype)) && !(StringUtil.isNullOrEmpty(operatorRequest))) {
+        if (StringUtils.isNotBlank(datatype) && StringUtils.isNotBlank(operatorRequest)) {
             switch (datatype.toUpperCase()) {
                 case "BOOLEAN":
                     output = checkBoolean(datatype, operatorRequest);
@@ -248,9 +249,9 @@ public class AppUtil {
     public static String checkCardType(String operatorRequest){
         List<String> operators = Arrays.asList("CREDIT", "DEBIT", "ATM", "CHARGE");
         String output = "";
-        if (!(StringUtil.isNullOrEmpty(operatorRequest))) {
+        if (StringUtils.isNotBlank(operatorRequest)) {
             output = operators.stream()
-                    .filter(bl -> bl.toUpperCase().equalsIgnoreCase(operatorRequest))
+                    .filter(bl -> bl.equalsIgnoreCase(operatorRequest))
                     .findFirst()
                     .orElseThrow(() ->
                             new FraudEngineException("Not found this Card Type " + operatorRequest +
@@ -263,9 +264,9 @@ public class AppUtil {
         List<String> operators = Arrays.asList("MasterCard", "Visa", "Verve");
 
         String output = "";
-        if (!(StringUtil.isNullOrEmpty(operatorRequest))) {
+        if (StringUtils.isNotBlank(operatorRequest)) {
             output = operators.stream()
-                    .filter(bl -> bl.toUpperCase().equalsIgnoreCase(operatorRequest))
+                    .filter(bl -> bl.equalsIgnoreCase(operatorRequest))
                     .findFirst()
                     .orElseThrow(() ->
                             new FraudEngineException("Not found this Card Brand " + operatorRequest +
@@ -276,7 +277,7 @@ public class AppUtil {
 
     public static String getLevelAction(Integer val){
         String output = "";
-        if (!(StringUtil.isNullOrEmpty(val.toString()))) {
+        if (StringUtils.isNotBlank(val.toString())) {
             switch(val){
                 case 1:
                     output = LevelAction.PASS.name();
@@ -305,15 +306,20 @@ public class AppUtil {
         List<String> operators = Arrays.asList("Boolean", "Number", "String", "Date", "Time");
 
         String output = "";
-        if (!(StringUtil.isNullOrEmpty(operatorRequest))) {
+        if (StringUtils.isNotBlank(operatorRequest)) {
             output = operators.stream()
-                    .filter(bl -> bl.toUpperCase().equalsIgnoreCase(operatorRequest))
+                    .filter(bl -> bl.equalsIgnoreCase(operatorRequest))
                     .findFirst()
                     .orElseThrow(() ->
                             new FraudEngineException("Not found this Data Type " + operatorRequest +
                                     " can be any of " + operators.toString()));
         }
         return output;
+    }
+
+    public static String ListToString(List<String> listVal){
+        return  listVal.stream().map(Object::toString)
+                .collect(Collectors.joining(","));
     }
 
     public static Integer getLength(Integer cvv){

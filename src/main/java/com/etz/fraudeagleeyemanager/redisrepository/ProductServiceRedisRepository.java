@@ -3,32 +3,56 @@ package com.etz.fraudeagleeyemanager.redisrepository;
 import com.etz.fraudeagleeyemanager.entity.ProductServiceEntity;
 import com.etz.fraudeagleeyemanager.entity.ServiceRule;
 import com.etz.fraudeagleeyemanager.enums.FraudRedisKey;
+import com.etz.fraudeagleeyemanager.exception.FraudEngineException;
 import com.etz.fraudeagleeyemanager.repository.RedisRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.Cursor;
 import org.springframework.data.redis.core.HashOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ScanOptions;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-
+@Slf4j
 @Repository
 public class ProductServiceRedisRepository implements RedisRepository<ProductServiceEntity, String> {
 	
     private HashOperations<String, String, Object> hashOperations;
-	
-    public void setHashOperations(RedisTemplate<String, Object> redisTemplate){
+	private RedisTemplate<String, Object> redisTemplateField;
+
+	public void setHashOperations(RedisTemplate<String, Object> redisTemplate){
         this.hashOperations = redisTemplate.opsForHash();
-    }
+		redisTemplateField = redisTemplate;
+	}
     
 	@Override
 	public void create(ProductServiceEntity model) {
-		String hashKey = model.getServiceId() + ":" + model.getProductCode();
-		hashOperations.put(FraudRedisKey.PRODUCTSERVICE.name(), hashKey, toJsonString(model));
+
+		try {
+			// start the transaction
+			redisTemplateField.multi();
+
+			// register synchronisation
+			if(TransactionSynchronizationManager.isActualTransactionActive()) {
+				TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+					@Override
+					public void afterCommit() {
+						TransactionSynchronization.super.afterCommit();
+						String hashKey = model.getServiceId().toUpperCase() + ":" + model.getProductCode().toUpperCase();
+						hashOperations.put(FraudRedisKey.PRODUCTSERVICE.name(), hashKey, toJsonString(model));
+					}
+				});
+			}
+		}catch(Exception ex){
+			log.debug("error connecting to redis");
+			throw new FraudEngineException("error connecting to redis " + ex.getMessage());
+		}
 	}
 
 	@Override

@@ -27,7 +27,7 @@ public class ServiceRule extends BaseAuditVersionEntity<ProductRuleId> implement
 
 	@Id
 	@Column(name = "service_id")
-	private Long serviceId;
+	private String serviceId;
 
 	@Column(name = "email_group_id")
 	private Long emailGroupId;

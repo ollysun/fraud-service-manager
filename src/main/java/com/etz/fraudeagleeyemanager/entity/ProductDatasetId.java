@@ -13,11 +13,11 @@ import java.io.*;
 public class ProductDatasetId implements Serializable{
 	private static final long serialVersionUID = 1L;
 
-	private Long id;
+	private Long datasetId;
 
     @NotNull
     private String productCode;
 
     @NotNull
-    private Long serviceId;
+    private String serviceId;
 }

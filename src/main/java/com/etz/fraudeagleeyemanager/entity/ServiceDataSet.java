@@ -9,7 +9,8 @@ import java.util.Objects;
 
 
 @Entity
-@Table(name = "service_dataset")
+@Table(name = "service_dataset",
+		indexes = {@Index(name = "serviceNameUniqueIndex", columnList = "service_id, datasetId, product_code")})
 @Getter
 @Setter
 @AllArgsConstructor
@@ -21,7 +22,7 @@ public class ServiceDataSet extends BaseAuditVersionEntity<ProductDatasetId> imp
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
-	private Long id;
+	private Long datasetId;
 
 	@Id
 	@Column(name = "product_code", nullable = false, columnDefinition="VARCHAR(100)")
@@ -29,7 +30,7 @@ public class ServiceDataSet extends BaseAuditVersionEntity<ProductDatasetId> imp
 
 	@Id
 	@Column(name = "service_id",  nullable = false)
-	private Long serviceId;
+	private String serviceId;
 
 	@Column(name = "field_name",  nullable = false, columnDefinition="VARCHAR(250)")
 	private String fieldName;
@@ -57,7 +58,7 @@ public class ServiceDataSet extends BaseAuditVersionEntity<ProductDatasetId> imp
 
 	@Override
 	public ProductDatasetId getId() {
-		return new ProductDatasetId(id, productCode, serviceId);
+		return new ProductDatasetId(datasetId, productCode, serviceId);
 	}
 
 	@Override
@@ -66,14 +67,14 @@ public class ServiceDataSet extends BaseAuditVersionEntity<ProductDatasetId> imp
 		if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
 		ServiceDataSet that = (ServiceDataSet) o;
 
-		if (!Objects.equals(id, that.id)) return false;
+		if (!Objects.equals(datasetId, that.datasetId)) return false;
 		if (!Objects.equals(productCode, that.productCode)) return false;
 		return Objects.equals(serviceId, that.serviceId);
 	}
 
 	@Override
 	public int hashCode() {
-		int result = Objects.hashCode(id);
+		int result = Objects.hashCode(datasetId);
 		result = 31 * result + (Objects.hashCode(productCode));
 		result = 31 * result + (Objects.hashCode(serviceId));
 		return result;

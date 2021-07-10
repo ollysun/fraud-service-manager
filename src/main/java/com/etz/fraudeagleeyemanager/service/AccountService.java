@@ -8,6 +8,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.BeanUtils;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.Page;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -33,6 +34,8 @@ import com.etz.fraudeagleeyemanager.util.PageRequestUtil;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
 @Service
@@ -46,6 +49,8 @@ public class AccountService {
 	private final AccountRedisRepository accountRedisRepository;
 	private final AccountProductRedisRepository accountProductRedisRepository;
 
+	@CacheEvict(value = "account", allEntries=true)
+	@Transactional(rollbackFor = Throwable.class)
 	public Account createAccount(AddAccountRequest request){
 		Account accountEntity = new Account();
 		try {
@@ -71,6 +76,7 @@ public class AccountService {
 	}
 
 	// update account to increment suspicious count
+	@Transactional(propagation = Propagation.REQUIRED, rollbackFor = Throwable.class)
 	public Account updateAccount(UpdateAccountRequestDto updateAccountRequestDto){
 		Optional<Account> accountOptional = accountRepository.findByAccountNo(updateAccountRequestDto.getAccountNumber());
 		if(!accountOptional.isPresent()) {
@@ -116,7 +122,8 @@ public class AccountService {
 			throw new FraudEngineException(AppConstant.ERROR_SAVING_TO_REDIS);
 		}
 	}
-	
+
+	@Transactional(readOnly = true)
 	public Page<Account> getAccount(Long accountId){
 		if (Objects.isNull(accountId)) {
 			return accountRepository.findAll(PageRequestUtil.getPageRequest());
@@ -125,7 +132,8 @@ public class AccountService {
 		account.setId(accountId);
 		return accountRepository.findAll(Example.of(account), PageRequestUtil.getPageRequest());		
 	}
-	
+
+	@Transactional(propagation = Propagation.REQUIRED, rollbackFor = Throwable.class)
 	public AccountProduct mapAccountProduct(AccountToProductRequest request) {
 		
 		if(!productRepository.findByCodeAndDeletedFalse(request.getProductCode()).isPresent()){
@@ -153,7 +161,8 @@ public class AccountService {
 		}
 		return saveAccountProductEntityToDatabase(accountProductEntity);
 	}
-		
+
+	@Transactional(propagation = Propagation.REQUIRED, rollbackFor = Throwable.class)
 	public List<AccountProductResponse> updateAccountProduct(UpdateAccountProductRequest request) {
 		List<AccountProduct> accountProdLst = accountProductRepository.findByAccountId(request.getAccountId());
 		if (accountProdLst.isEmpty()){

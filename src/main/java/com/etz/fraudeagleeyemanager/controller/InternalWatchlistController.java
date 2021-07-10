@@ -4,16 +4,10 @@ package com.etz.fraudeagleeyemanager.controller;
 
 import javax.validation.Valid;
 
+import com.etz.fraudeagleeyemanager.constant.AppConstant;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import com.etz.fraudeagleeyemanager.dto.request.InternalWatchlistRequest;
 import com.etz.fraudeagleeyemanager.dto.request.UpdateInternalWatchlistRequest;
@@ -24,6 +18,7 @@ import com.etz.fraudeagleeyemanager.entity.InternalWatchlist;
 import com.etz.fraudeagleeyemanager.service.InternalWatchlistService;
 
 import lombok.RequiredArgsConstructor;
+import springfox.documentation.annotations.ApiIgnore;
 
 @RestController
 @RequiredArgsConstructor
@@ -33,19 +28,23 @@ public class InternalWatchlistController {
 	private final InternalWatchlistService internalWatchlistService;
 
 	@PostMapping
-	public ResponseEntity<ModelResponse<InternalWatchlist>> createOfac(@Valid @RequestBody  InternalWatchlistRequest request){
+	public ResponseEntity<ModelResponse<InternalWatchlist>> createOfac(@Valid @RequestBody  InternalWatchlistRequest request,
+																	   @ApiIgnore @RequestAttribute(AppConstant.USERNAME) String username){
+		request.setCreatedBy(username);
 		ModelResponse<InternalWatchlist> response = new ModelResponse<>(internalWatchlistService.createInternalWatchlist(request), HttpStatus.CREATED);
 		return ResponseEntity.status(HttpStatus.valueOf(response.getStatus())).body(response);
 	}
 		
-	@PutMapping("/{watchId}")
-	public ModelResponse<InternalWatchlist> updateOfac(@PathVariable Long watchId,
-			@RequestBody @Valid UpdateInternalWatchlistRequest request){
-		return new ModelResponse<>(internalWatchlistService.updateInternalWatchlist(request, watchId));
+	@PutMapping
+	public ModelResponse<InternalWatchlist> updateOfac(
+			@RequestBody @Valid UpdateInternalWatchlistRequest request,
+													   @ApiIgnore @RequestAttribute(AppConstant.USERNAME) String username){
+		request.setUpdatedBy(username);
+		return new ModelResponse<>(internalWatchlistService.updateInternalWatchlist(request));
 	}
 	
 	@GetMapping
-	public PageResponse<InternalWatchlist> queryOfac(Long watchId){
+	public PageResponse<InternalWatchlist> queryOfac(@RequestParam(required = false) Long watchId){
 		return new PageResponse<>(internalWatchlistService.getInternalWatchlist(watchId));
 	}
 	

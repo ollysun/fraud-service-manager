@@ -11,6 +11,8 @@ import javax.validation.constraints.NotBlank;
 @AllArgsConstructor
 @NoArgsConstructor
 public class CreateProductServiceDto  {
+    @NotBlank(message = "Please enter the serviceId")
+    private String serviceId;
     @NotBlank(message = "Please enter the product code")
     private String productCode;
     @NotBlank(message = "please enter the service name")
