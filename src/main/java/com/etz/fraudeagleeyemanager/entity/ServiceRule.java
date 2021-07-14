@@ -29,8 +29,8 @@ public class ServiceRule extends BaseAuditVersionEntity<ProductRuleId> implement
 	@Column(name = "service_id")
 	private String serviceId;
 
-	@Column(name = "email_group_id")
-	private Long emailGroupId;
+	@Column(name = "notification_group_id")
+	private Long notificationGroupId;
 	
 	@Column(name = "notify_admin", columnDefinition = "TINYINT", length = 1)
 	private Boolean notifyAdmin;
@@ -46,10 +46,10 @@ public class ServiceRule extends BaseAuditVersionEntity<ProductRuleId> implement
 
 	@JsonBackReference
 	@OneToOne(fetch = FetchType.LAZY)
-	@MapsId("emailGroupId")
-	@JoinColumn(name = "email_group_id", foreignKey = @ForeignKey(name = "FK_PRODUCT_RULE_EMAIL_GROUP_ID"))
+	@MapsId("notificationGroupId")
+	@JoinColumn(name = "notification_group_id", foreignKey = @ForeignKey(name = "FK_PRODUCT_RULE_NOTIFICATION_GROUP_ID"))
 	@ToString.Exclude
-	private EmailGroup emailGroup;
+	private NotificationGroup notificationGroup;
 
 
 	@JsonBackReference

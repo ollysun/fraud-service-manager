@@ -69,16 +69,10 @@ spring:
     mapper:
       accept-case-insensitive-properties: true
 
-#  flyway:
-#    user: root
-#    password: root
-#    locations: classpath:db/migration
-#    baseline-on-migrate: true
-#    check-location: true
 
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: create
     properties:
       hibernate:
         dialect: org.hibernate.dialect.MySQL55Dialect

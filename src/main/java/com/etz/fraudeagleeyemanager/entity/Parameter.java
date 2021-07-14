@@ -4,6 +4,7 @@ import lombok.*;
 import org.hibernate.Hibernate;
 import org.hibernate.annotations.ResultCheckStyle;
 import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.Where;
 
 import javax.persistence.*;
 import java.io.Serializable;
@@ -13,7 +14,8 @@ import java.util.Objects;
 @Table(name = "parameter", 
 uniqueConstraints = @UniqueConstraint(
 		columnNames = {"name", "operator"}, name = "UC_Parameter"))
-@SQLDelete(sql = "UPDATE parameter SET deleted = true, status=0 WHERE id = ?", check = ResultCheckStyle.COUNT)
+@SQLDelete(sql = "UPDATE parameter SET deleted = true WHERE id = ?", check = ResultCheckStyle.COUNT)
+@Where(clause = "deleted=false")
 @Getter
 @Setter
 @ToString

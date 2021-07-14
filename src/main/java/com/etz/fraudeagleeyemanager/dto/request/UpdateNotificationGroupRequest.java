@@ -6,6 +6,7 @@ import java.util.List;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 
 @Data
@@ -32,6 +33,6 @@ public class UpdateNotificationGroupRequest implements Serializable{
 	@NotNull(message = "Please enter a status")
 	private Boolean status;
 	
-	@NotBlank(message = "Please enter your username")
+	@JsonIgnore
 	private String updatedBy;
 }

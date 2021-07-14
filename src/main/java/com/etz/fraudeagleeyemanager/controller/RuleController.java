@@ -83,4 +83,6 @@ public class RuleController {
 		return new CollectionResponse<>(ruleService.getRuleService(serviceId));
 	}
 
+
+
 }

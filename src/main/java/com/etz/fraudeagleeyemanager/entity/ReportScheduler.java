@@ -1,5 +1,7 @@
 package com.etz.fraudeagleeyemanager.entity;
 
+import com.etz.fraudeagleeyemanager.enums.ExportType;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import lombok.*;
 import javax.persistence.*;
 
@@ -10,7 +12,7 @@ import java.io.Serializable;
 @Entity
 @Table(name = "report_scheduler",
 		uniqueConstraints = @UniqueConstraint(
-				columnNames = {"report_id", "email_group"}, name = "UC_REPORT_EMAIL"))
+				columnNames = {"report_id", "notification_group"}, name = "UC_REPORT_EMAIL"))
 @Getter
 @Setter
 @ToString
@@ -25,10 +27,17 @@ public class ReportScheduler extends BaseAuditEntity implements Serializable {
 
 	@Column(name = "interval_value")
 	private Integer intervalValue;
+
+	@Column(name = "notification_group_id")
+	private Long notificationGroupId;
 	
 	@Column(name = "interval_type", nullable = false,  columnDefinition = "VARCHAR(45)", length = 20)
 	@Enumerated(EnumType.STRING)
 	private IntervalType intervalType;
+
+	@Column(name = "export_type", nullable = false,  columnDefinition = "VARCHAR(45)", length = 20)
+	@Enumerated(EnumType.STRING)
+	private ExportType exportType;
 	
 	@Column(nullable = false, name = "report_loop", columnDefinition = "TINYINT", length = 1)
 	private Boolean reportLoop;
@@ -41,10 +50,13 @@ public class ReportScheduler extends BaseAuditEntity implements Serializable {
 	@JoinColumn(name = "report_id", referencedColumnName="id", nullable = false)
 	private Report report;
 
-	@ToString.Exclude
+	@JsonBackReference
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "email_group", nullable = false)
-	private EmailGroup emailGroup;
+	@MapsId("notificationGroupId")
+	@JoinColumn(name = "notification_group", foreignKey = @ForeignKey(name = "FK_REPORT_SCHEDULER_NOTIFICATION_GROUP_ID"))
+	@ToString.Exclude
+	private NotificationGroup notificationGroup;
+
 
 	@Override
 	public boolean equals(Object o) {
