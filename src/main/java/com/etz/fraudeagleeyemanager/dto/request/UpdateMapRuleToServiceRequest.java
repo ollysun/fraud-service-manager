@@ -1,5 +1,6 @@
 package com.etz.fraudeagleeyemanager.dto.request;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -14,13 +15,13 @@ public class UpdateMapRuleToServiceRequest implements Serializable {
 	@Positive(message="Please enter Number")
 	private Long serviceRuleId;
 	private Boolean notifyAdmin;
-	private Long emailGroupId;
+	private Long notificationGroupId;
 	private Boolean notifyCustomer;
 	@NotNull(message="authorised cannot be empty")
 	private Boolean authorised;
 	@NotNull(message="status cannot be empty")
 	private Boolean status;
-	@NotNull(message="updatedBy cannot be empty")
+	@JsonIgnore
 	private String updatedBy;
 
 }

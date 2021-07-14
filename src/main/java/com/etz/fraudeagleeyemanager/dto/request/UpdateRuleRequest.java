@@ -32,7 +32,7 @@ public class UpdateRuleRequest implements Serializable {
     private String secondDataSource;
     @NotNull(message="suspicion cannot be empty")
     private Integer suspicion;
-    @NotNull(message="action cannot be empty")
+    @JsonIgnore
     private String action;
     @JsonIgnore
     private String updatedBy;

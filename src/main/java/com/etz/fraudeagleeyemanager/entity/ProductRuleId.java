@@ -13,7 +13,7 @@ import java.io.Serializable;
 public class ProductRuleId implements Serializable {
 	private static final long serialVersionUID = 1L;
 
-	private Long ruleId;
+	private Long serviceRuleId;
 
     private String serviceId;
 }

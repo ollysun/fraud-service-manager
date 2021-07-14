@@ -9,6 +9,8 @@ import lombok.Setter;
 import org.hibernate.Hibernate;
 import org.hibernate.annotations.ResultCheckStyle;
 import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.Where;
+
 import javax.persistence.*;
 import java.io.Serializable;
 import java.util.Objects;
@@ -18,6 +20,7 @@ import java.util.Set;
 @Table(name = "rule",uniqueConstraints = @UniqueConstraint(name="UQ_RULE",
 		columnNames = {"rule_name"}))
 @SQLDelete(sql = "UPDATE rule SET deleted = true, status=0 WHERE id = ?", check = ResultCheckStyle.COUNT)
+@Where(clause = "deleted=false")
 @Getter
 @Setter
 @AllArgsConstructor
