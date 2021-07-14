@@ -262,11 +262,11 @@ public class RuleService {
 		for(String name: datasetList) {
 			if (ruleEntityOptional.get().getDataSourceValOne().equalsIgnoreCase("Transactional")
 			   && !(name.equalsIgnoreCase(ruleEntityOptional.get().getSourceValueOne()))) {
-				throw new FraudEngineException("The first source value is not in the dataset " + ruleEntityOptional.get().getSourceValueOne());
+				throw new FraudEngineException("The first source value not found in the dataset " + ruleEntityOptional.get().getSourceValueOne());
 			}
 			if ((StringUtils.isNotBlank(ruleEntityOptional.get().getDataSourceValTwo()) && ruleEntityOptional.get().getDataSourceValTwo().equalsIgnoreCase("Transactional")) &&
 					!(name.equalsIgnoreCase(ruleEntityOptional.get().getSourceValueTwo()))) {
-				throw new FraudEngineException("The Second source value is not in the dataset " + ruleEntityOptional.get().getSourceValueTwo());
+				throw new FraudEngineException("The Second source value not found in the dataset " + ruleEntityOptional.get().getSourceValueTwo());
 			}
 		}
 
@@ -320,7 +320,9 @@ public class RuleService {
 				prodRuleEntity.setRequestDump(request);
 
 				prodRuleEntity.setNotifyAdmin(request.getNotifyAdmin());
-				prodRuleEntity.setNotificationGroupId(request.getNotificationGroupId());
+				if (Boolean.TRUE.equals(request.getNotifyAdmin())){
+					prodRuleEntity.setNotificationGroupId(request.getNotificationGroupId());
+				}
 				prodRuleEntity.setNotifyCustomer(request.getNotifyCustomer());
 				prodRuleEntity.setStatus(request.getStatus());
 				prodRuleEntity.setAuthorised(request.getAuthorised());
