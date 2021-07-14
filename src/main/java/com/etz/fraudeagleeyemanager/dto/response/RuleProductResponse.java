@@ -54,5 +54,5 @@ public class RuleProductResponse implements Serializable {
 
     private String serviceId;
 
-    private Long productRuleId;
+    private Long serviceRuleId;
 }
