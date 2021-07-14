@@ -52,7 +52,7 @@ public class RuleProductResponse implements Serializable {
 
     private Boolean authorised;
 
-    private Long serviceId;
+    private String serviceId;
 
-    private Long productRuleId;
+    private Long serviceRuleId;
 }

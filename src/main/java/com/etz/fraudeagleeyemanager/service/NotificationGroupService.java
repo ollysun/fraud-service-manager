@@ -73,6 +73,7 @@ public class NotificationGroupService {
 			notificationGroup.setRequestDump(request);
 
 			notificationGroup.setEmails(AppUtil.ListToString(request.getEmails()));
+			notificationGroup.setGroupName(request.getName());
 			notificationGroup.setPhones(AppUtil.ListToString(request.getPhoneNos()));
 			notificationGroup.setEmailAlert(request.getMailAlert());
 			notificationGroup.setSmsAlert(request.getSmsAlert());

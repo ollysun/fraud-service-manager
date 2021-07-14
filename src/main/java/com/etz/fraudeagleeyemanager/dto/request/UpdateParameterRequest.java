@@ -1,5 +1,6 @@
 package com.etz.fraudeagleeyemanager.dto.request;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -20,7 +21,7 @@ public class UpdateParameterRequest implements Serializable {
 	private String operator;
 	@NotNull(message = "Please set the requiredValue")
 	private Boolean requireValue;
-	@NotBlank(message = "createdBy cannot be empty")
+	@JsonIgnore
 	private String updatedBy;
 	@NotNull(message = "Authorised cannot be empty")
 	private Boolean authorised;

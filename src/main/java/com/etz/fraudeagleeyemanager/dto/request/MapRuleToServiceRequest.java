@@ -5,6 +5,7 @@ import java.io.Serializable;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 
 @Data
@@ -16,11 +17,11 @@ public class MapRuleToServiceRequest implements Serializable {
 	@NotNull(message="ruleId cannot be empty")
 	private Long ruleId;
 	private Boolean notifyAdmin;
-	private Long emailGroupId;
+	private Long notificationGroupId;
 	private Boolean notifyCustomer;
 	@NotNull(message="authorised cannot be empty")
 	private Boolean authorised;
-	@NotNull(message="createdBy cannot be empty")
+	@JsonIgnore
 	private String createdBy;
 
 }
