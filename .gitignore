@@ -32,6 +32,4 @@ build/
 
 ### VS Code ###
 .vscode/
-
-# Ignore application configuration
-/resources/application.yml
+.idea/
