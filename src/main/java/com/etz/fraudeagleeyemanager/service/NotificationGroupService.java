@@ -38,24 +38,20 @@ public class NotificationGroupService {
 	@Transactional(rollbackFor = Throwable.class)
 	public NotificationGroup createNotificationGroup(NotificationGroupRequest request){
 		NotificationGroup notificationGroup = new NotificationGroup();
-		try {
-			notificationGroup.setGroupName(request.getName());
-			notificationGroup.setEmails(AppUtil.ListToString(request.getEmails()));
-			notificationGroup.setPhones(AppUtil.ListToString(request.getPhoneNos()));
-			notificationGroup.setEmailAlert(request.getMailAlert());
-			notificationGroup.setSmsAlert(request.getSmsAlert());
-			notificationGroup.setAuthorised(false);
-			notificationGroup.setStatus(false);
-			notificationGroup.setCreatedBy(request.getCreatedBy());
-			
-			// for auditing purpose for CREATE
-			notificationGroup.setEntityId(null);
-			notificationGroup.setRecordBefore(null);
-			notificationGroup.setRequestDump(request);
-		} catch(Exception ex){
-			log.error("Error occurred while creating NotificationGroup entity object", ex);
-			throw new FraudEngineException(AppConstant.ERROR_SETTING_PROPERTY);
-		}
+		notificationGroup.setGroupName(request.getName());
+		notificationGroup.setEmails(AppUtil.listEmailToString(request.getEmails()));
+		notificationGroup.setPhones(AppUtil.listPhoneToString(request.getPhoneNos()));
+		notificationGroup.setEmailAlert(request.getMailAlert());
+		notificationGroup.setSmsAlert(request.getSmsAlert());
+		notificationGroup.setAuthorised(false);
+		notificationGroup.setStatus(false);
+		notificationGroup.setCreatedBy(request.getCreatedBy());
+
+		// for auditing purpose for CREATE
+		notificationGroup.setEntityId(null);
+		notificationGroup.setRecordBefore(null);
+		notificationGroup.setRequestDump(request);
+
 		return saveNotificationGroupEntityToDatabase(notificationGroup);
 	}
 
@@ -72,9 +68,9 @@ public class NotificationGroupService {
 			notificationGroup.setRecordBefore(JsonConverter.objectToJson(notificationGroup));
 			notificationGroup.setRequestDump(request);
 
-			notificationGroup.setEmails(AppUtil.ListToString(request.getEmails()));
+			notificationGroup.setEmails(AppUtil.listEmailToString(request.getEmails()));
 			notificationGroup.setGroupName(request.getName());
-			notificationGroup.setPhones(AppUtil.ListToString(request.getPhoneNos()));
+			notificationGroup.setPhones(AppUtil.listPhoneToString(request.getPhoneNos()));
 			notificationGroup.setEmailAlert(request.getMailAlert());
 			notificationGroup.setSmsAlert(request.getSmsAlert());
 			notificationGroup.setStatus(request.getStatus());

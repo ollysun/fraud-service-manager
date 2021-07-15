@@ -4,6 +4,7 @@ package com.etz.fraudeagleeyemanager.service;
 import java.util.Objects;
 import java.util.Optional;
 
+import com.etz.fraudeagleeyemanager.util.AppUtil;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.Page;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -38,7 +39,7 @@ public class OfacWatchlistService {
 		OfacWatchlist ofacWatchlist = new OfacWatchlist();
 		try {
 			ofacWatchlist.setFullName(request.getFullName());
-			ofacWatchlist.setCategory(request.getCategory());
+			ofacWatchlist.setCategory(AppUtil.checkCategory(request.getCategory()));
 			ofacWatchlist.setComments(request.getComments());
 			ofacWatchlist.setStatus(false);
 			ofacWatchlist.setAuthorised(false);
@@ -65,7 +66,7 @@ public class OfacWatchlistService {
 		ofacWatchlist.setRequestDump(request);
 		
 		ofacWatchlist.setFullName(request.getFullName());
-		ofacWatchlist.setCategory(request.getCategory());
+		ofacWatchlist.setCategory(AppUtil.checkCategory(request.getCategory()));
 		ofacWatchlist.setComments(request.getComments());
 		ofacWatchlist.setStatus(request.getStatus());
 		ofacWatchlist.setUpdatedBy(request.getUpdatedBy());

@@ -1,5 +1,8 @@
 package com.etz.fraudeagleeyemanager.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
 import org.hibernate.Hibernate;
 import org.hibernate.annotations.ResultCheckStyle;
@@ -54,11 +57,15 @@ public class NotificationGroup extends BaseAuditEntity implements Serializable {
 	@ToString.Exclude
 	@OneToOne(mappedBy = "notificationGroup", fetch = FetchType.LAZY,
 			cascade = CascadeType.ALL)
+	@JsonManagedReference
+	@JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
 	private ServiceRule serviceRule;
 
+	@ToString.Exclude
 	@OneToMany(mappedBy = "notificationGroup", fetch = FetchType.LAZY,
 			cascade = {CascadeType.MERGE,CascadeType.PERSIST}, orphanRemoval = true)
-	@ToString.Exclude
+	@JsonManagedReference
+	@JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
 	private Set<ReportScheduler> reportSchedulers;
 
 	@Override

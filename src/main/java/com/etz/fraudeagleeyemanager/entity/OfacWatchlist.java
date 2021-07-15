@@ -36,8 +36,7 @@ public class OfacWatchlist extends BaseAuditEntity implements Serializable {
 	private String fullName;
 
 	@Column(name = "category")
-	@Enumerated(EnumType.STRING)
-	private UserCategory category;
+	private String category;
 
 	@Column(name = "comments")
 	private String comments;

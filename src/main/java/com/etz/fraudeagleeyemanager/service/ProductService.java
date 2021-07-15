@@ -208,24 +208,26 @@ public class ProductService {
 		//check for the code before creating the dataset
 		findByCode(request.getProductCode());
 
-		ServiceDataSet prodDatasetEntity = new ServiceDataSet();
-		try {
-			prodDatasetEntity.setProductCode(request.getProductCode());
-			prodDatasetEntity.setServiceId(request.getServiceId());
-			prodDatasetEntity.setFieldName(request.getFieldName());
-			prodDatasetEntity.setDataType(request.getDataType());
-			prodDatasetEntity.setMandatory(request.getCompulsory());
-			prodDatasetEntity.setAuthorised(request.getAuthorised());
-			prodDatasetEntity.setCreatedBy(request.getCreatedBy());
-
-			// for auditing purpose for CREATE
-			prodDatasetEntity.setEntityId(null);
-			prodDatasetEntity.setRecordBefore(null);
-			prodDatasetEntity.setRequestDump(request);
-		} catch (Exception ex) {
-			log.error("Error occurred while creating product dataset entity object", ex);
-			throw new FraudEngineException(AppConstant.ERROR_SETTING_PROPERTY);
+		//check for the serviceId
+		Optional<ProductServiceEntity> productServiceEntity = productServiceRepository.findById(request.getServiceId());
+		if (!productServiceEntity.isPresent()) {
+			throw new ResourceNotFoundException("Product service not found for this id " + request.getServiceId());
 		}
+
+		ServiceDataSet prodDatasetEntity = new ServiceDataSet();
+		prodDatasetEntity.setProductCode(request.getProductCode());
+		prodDatasetEntity.setServiceId(request.getServiceId());
+		prodDatasetEntity.setFieldName(request.getFieldName());
+		prodDatasetEntity.setDataType(AppUtil.checkDataType(request.getDataType()));
+		prodDatasetEntity.setMandatory(request.getCompulsory());
+		prodDatasetEntity.setAuthorised(request.getAuthorised());
+		prodDatasetEntity.setCreatedBy(request.getCreatedBy());
+
+		// for auditing purpose for CREATE
+		prodDatasetEntity.setEntityId(null);
+		prodDatasetEntity.setRecordBefore(null);
+		prodDatasetEntity.setRequestDump(request);
+
 		return outputCreatedServiceDataset(saveServiceDatasetEntityToDatabase(prodDatasetEntity));
 	}
 
