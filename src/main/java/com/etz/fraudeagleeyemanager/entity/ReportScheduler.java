@@ -50,11 +50,11 @@ public class ReportScheduler extends BaseAuditEntity implements Serializable {
 	@JoinColumn(name = "report_id", referencedColumnName="id", nullable = false)
 	private Report report;
 
+	@ToString.Exclude
 	@JsonBackReference
 	@ManyToOne(fetch = FetchType.LAZY)
 	@MapsId("notificationGroupId")
 	@JoinColumn(name = "notification_group", foreignKey = @ForeignKey(name = "FK_REPORT_SCHEDULER_NOTIFICATION_GROUP_ID"))
-	@ToString.Exclude
 	private NotificationGroup notificationGroup;
 
 

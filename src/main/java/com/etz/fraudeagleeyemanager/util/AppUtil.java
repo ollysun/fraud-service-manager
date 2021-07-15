@@ -2,6 +2,9 @@ package com.etz.fraudeagleeyemanager.util;
 
 import com.etz.fraudeagleeyemanager.constant.LevelAction;
 import com.etz.fraudeagleeyemanager.exception.FraudEngineException;
+import com.google.i18n.phonenumbers.NumberParseException;
+import com.google.i18n.phonenumbers.PhoneNumberUtil;
+import com.google.i18n.phonenumbers.Phonenumber;
 import org.apache.commons.lang3.StringUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanWrapper;
@@ -17,12 +20,13 @@ import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.Month;
 import java.util.*;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 @Slf4j
 public class AppUtil {
 
-	private AppUtil() {}
+    private AppUtil() {}
 	
     public static boolean isBlank(String text) {
         return text == null || text.trim().length() == 0;
@@ -71,7 +75,7 @@ public class AppUtil {
                     .filter(bl -> bl.equalsIgnoreCase(text))
                     .findFirst()
                     .orElseThrow(() ->
-                            new FraudEngineException("cannot found this data source " + text + " can be any " + dataSourceVal.toString()));
+                            new FraudEngineException("cannot found this data source " + text + " can be any of " + dataSourceVal.toString()));
         }
         return output;
     }
@@ -275,6 +279,20 @@ public class AppUtil {
         return output;
     }
 
+    public static String checkCategory(String operatorRequest){
+        List<String> operators = Arrays.asList("BUSINESS", "INDIVIDUAL");
+        String output = "";
+        if (StringUtils.isNotBlank(operatorRequest)) {
+            output = operators.stream()
+                    .filter(bl -> bl.equalsIgnoreCase(operatorRequest))
+                    .findFirst()
+                    .orElseThrow(() ->
+                            new FraudEngineException("Not found this Category type " + operatorRequest +
+                                    " can be any of " + operators.toString()));
+        }
+        return output;
+    }
+
     public static String getLevelAction(Integer val){
         String output = "";
         if (StringUtils.isNotBlank(val.toString())) {
@@ -317,9 +335,43 @@ public class AppUtil {
         return output;
     }
 
-    public static String ListToString(List<String> listVal){
+    public static String listEmailToString(List<String> listVal){
+        for (String email : listVal){
+            if(Boolean.FALSE.equals(isValidEmail(email))){
+                throw new FraudEngineException("Wrong email entered " + email);
+            }
+        }
         return  listVal.stream().map(Object::toString)
                 .collect(Collectors.joining(","));
+    }
+
+    public static String listPhoneToString(List<String> listVal){
+        PhoneNumberUtil pnu = PhoneNumberUtil.getInstance();
+        try {
+            for (String phoneString : listVal) {
+                Phonenumber.PhoneNumber pn = pnu.parse(phoneString, "NG");
+                if(!pnu.isValidNumber(pn)){
+                    throw new FraudEngineException("Invalid phone number " + phoneString);
+                }
+            }
+        }catch(NumberParseException ex){
+            throw new FraudEngineException("Wrong mobile number: " + ex.getMessage());
+        }
+        return  listVal.stream().map(Object::toString)
+                .collect(Collectors.joining(","));
+    }
+
+
+    private static Boolean isValidEmail(String email){
+        String emailRegex = "^[a-zA-Z0-9_+&*-]+(?:\\."+
+                "[a-zA-Z0-9_+&*-]+)*@" +
+                "(?:[a-zA-Z0-9-]+\\.)+[a-z" +
+                "A-Z]{2,7}$";
+
+        Pattern pat = Pattern.compile(emailRegex);
+        if (email == null)
+            return false;
+        return pat.matcher(email).matches();
     }
 
     public static Integer getLength(Integer cvv){
