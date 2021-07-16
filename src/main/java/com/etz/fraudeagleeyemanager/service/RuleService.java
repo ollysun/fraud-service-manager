@@ -261,12 +261,12 @@ public class RuleService {
 
 		for(String name: datasetList) {
 			if (ruleEntityOptional.get().getDataSourceValOne().equalsIgnoreCase("Transactional")
-			   && !(name.equalsIgnoreCase(ruleEntityOptional.get().getSourceValueOne()))) {
-				throw new FraudEngineException("The first source value not found in the dataset " + ruleEntityOptional.get().getSourceValueOne());
+					&& !(name.equalsIgnoreCase(ruleEntityOptional.get().getSourceValueOne()))) {
+				throw new FraudEngineException("The first source value: "  + ruleEntityOptional.get().getSourceValueOne() + "  not found in the dataset fieldName created on rule with name : " + ruleEntityOptional.get().getName());
 			}
 			if ((StringUtils.isNotBlank(ruleEntityOptional.get().getDataSourceValTwo()) && ruleEntityOptional.get().getDataSourceValTwo().equalsIgnoreCase("Transactional")) &&
 					!(name.equalsIgnoreCase(ruleEntityOptional.get().getSourceValueTwo()))) {
-				throw new FraudEngineException("The Second source value not found in the dataset " + ruleEntityOptional.get().getSourceValueTwo());
+				throw new FraudEngineException("The Second source value: "  + ruleEntityOptional.get().getSourceValueTwo() + "   not found in the dataset fieldName created on rule with name : " + ruleEntityOptional.get().getName());
 			}
 		}
 
