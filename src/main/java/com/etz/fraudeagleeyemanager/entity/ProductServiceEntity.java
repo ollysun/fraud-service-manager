@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
 import org.hibernate.annotations.ResultCheckStyle;
 import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.Where;
 
 import javax.persistence.*;
 import java.io.Serializable;
@@ -16,6 +17,7 @@ import java.util.Set;
         columnNames = {"product_code","service_name", "service_id" }),
         indexes = {@Index(name = "serviceNameUniqueIndex", columnList = "service_id, service_name, product_code")})
 @SQLDelete(sql = "UPDATE product_service SET deleted = true, status=0 WHERE service_id = ?", check = ResultCheckStyle.COUNT)
+@Where(clause = "deleted=false")
 @Getter
 @Setter
 @ToString
