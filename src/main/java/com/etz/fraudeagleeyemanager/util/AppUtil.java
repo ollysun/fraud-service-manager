@@ -347,16 +347,17 @@ public class AppUtil {
 
     public static String listPhoneToString(List<String> listVal){
         PhoneNumberUtil pnu = PhoneNumberUtil.getInstance();
-        try {
-            for (String phoneString : listVal) {
-                Phonenumber.PhoneNumber pn = pnu.parse(phoneString, "NG");
+
+        listVal.forEach(phone ->{
+            try{
+                Phonenumber.PhoneNumber pn = pnu.parse(phone, "NG");
                 if(!pnu.isValidNumber(pn)){
-                    throw new FraudEngineException("Invalid phone number " + phoneString);
+                    throw new FraudEngineException("Invalid phone number " + phone);
                 }
+            }catch(NumberParseException ex){
+                throw new FraudEngineException("Wrong mobile number: " + phone);
             }
-        }catch(NumberParseException ex){
-            throw new FraudEngineException("Wrong mobile number: " + ex.getMessage());
-        }
+        });
         return  listVal.stream().map(Object::toString)
                 .collect(Collectors.joining(","));
     }

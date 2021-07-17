@@ -2,6 +2,7 @@ package com.etz.fraudeagleeyemanager.service;
 
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -223,17 +224,25 @@ public class RuleService {
 	}
 
 	@Transactional(readOnly = true)
-	public Page<RuleResponse> getRule(Long ruleId) {
-		List<RuleResponse> ruleResponseList;
-		if (Objects.isNull(ruleId)) {
-			ruleResponseList = outputRuleResponseList(ruleRepository.findAll());
+	public Page<RuleResponse> getRule(Long ruleId, String name) {
+		List<Rule> ruleList = ruleRepository.findAll();
+		List<RuleResponse> ruleResponseList = new ArrayList<>();
+		if (Objects.isNull(ruleId) && StringUtils.isBlank(name)) {
+			ruleResponseList = outputRuleResponseList(ruleList);
 			return AppUtil.listConvertToPage(ruleResponseList, PageRequestUtil.getPageRequest());
+
+		}else if(StringUtils.isNotBlank(name) && Objects.isNull(ruleId)){
+			List<Rule> listRuleName = ruleList.parallelStream()
+					.filter(sd -> sd.getName().equalsIgnoreCase(name))
+					.collect(Collectors.toList());
+			ruleResponseList = outputRuleResponseList(listRuleName);
+			return AppUtil.listConvertToPage(ruleResponseList, PageRequestUtil.getPageRequest());
+		}else if(ruleId != null &&  StringUtils.isBlank(name)){
+			List<Rule> listRuleId = ruleList.parallelStream()
+					.filter(sd -> Objects.equals(sd.getId(),ruleId))
+					.collect(Collectors.toList());
+			ruleResponseList = outputRuleResponseList(listRuleId);
 		}
-		Optional<Rule> ruleEntityOptional = ruleRepository.findById(ruleId);
-		if (!ruleEntityOptional.isPresent()) {
-			throw new ResourceNotFoundException("Rule Not found for Id " + ruleId);
-		}
-		ruleResponseList = outputRuleResponseList(ruleRepository.findAll(Example.of(ruleEntityOptional.get())));
 		return AppUtil.listConvertToPage(ruleResponseList, PageRequestUtil.getPageRequest());
 	}
 

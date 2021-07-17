@@ -76,7 +76,7 @@ spring:
     properties:
       hibernate:
         dialect: org.hibernate.dialect.MySQL55Dialect
-    show-sql: true
+    show-sql: false
 
   kafka:
     bootstrap-servers: localhost:9092 #10.0.0.178:9092
