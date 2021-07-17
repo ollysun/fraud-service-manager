@@ -108,7 +108,6 @@ public class ParameterService {
 
 	@Transactional(readOnly = true, rollbackFor = Throwable.class)
 	public Page<Parameter> getParameter(Long paramId) {
-		log.info("Query parameter ID: INFO >>>>>>>>>>>>>> {}", paramId);
 		if (Objects.isNull(paramId)) {
 			return parameterRepository.findAll(PageRequestUtil.getPageRequest());
 		}

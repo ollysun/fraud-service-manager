@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import com.etz.fraudeagleeyemanager.dto.request.*;
 import com.etz.fraudeagleeyemanager.dto.response.ProductServiceResponse;
@@ -205,6 +206,8 @@ public class ProductService {
 
 	@Transactional(rollbackFor = Throwable.class)
 	public ServiceDataSet createServiceDataset(DatasetProductRequest request) {
+		List<ServiceDataSet> serviceDataSetList = new ArrayList<>();
+
 		//check for the code before creating the dataset
 		findByCode(request.getProductCode());
 
@@ -212,6 +215,15 @@ public class ProductService {
 		Optional<ProductServiceEntity> productServiceEntity = productServiceRepository.findById(request.getServiceId());
 		if (!productServiceEntity.isPresent()) {
 			throw new ResourceNotFoundException("Product service not found for this id " + request.getServiceId());
+		}
+
+		//check the fieldname before creating service dataset
+		Optional<ServiceDataSet> serviceDataSetOptional = productDataSetRepository.findById(new ProductDatasetId(null, request.getProductCode(), request.getServiceId()));
+		serviceDataSetOptional.ifPresent(serviceDataSetList::add);
+		for (ServiceDataSet sd: serviceDataSetList){
+			if(sd.getFieldName().equalsIgnoreCase(request.getFieldName())){
+				throw new FraudEngineException("fieldname : " + sd.getFieldName() + " has already bean created for this service with Id: " + sd.getServiceId());
+			}
 		}
 
 		ServiceDataSet prodDatasetEntity = new ServiceDataSet();
@@ -248,17 +260,28 @@ public class ProductService {
 
 	@Transactional(readOnly = true, rollbackFor = Throwable.class)
 	public Page<ServiceDataSetResponse> getServiceDataset(String productCode, String serviceId) {
-		Page<ServiceDataSetResponse> serviceDataSetResponsePage;
-		List<ServiceDataSet> serviceDataSetList = new ArrayList<>();
-		if (StringUtils.isNotBlank(productCode)) {
-			serviceDataSetResponsePage = AppUtil.listConvertToPage(outputServiceDatasetEntity(productDataSetRepository.findByProductCode(productCode)), PageRequestUtil.getPageRequest());
-		}else if (StringUtils.isBlank(serviceId) && StringUtils.isBlank(productCode)){
-			serviceDataSetResponsePage = AppUtil.listConvertToPage(outputServiceDatasetEntity(productDataSetRepository.findAll()), PageRequestUtil.getPageRequest());
-		}else{
-			Optional<ServiceDataSet> serviceDataSetOptional = productDataSetRepository.findById(new ProductDatasetId(null, productCode, serviceId));
-			serviceDataSetOptional.ifPresent(serviceDataSetList::add);
+		Page<ServiceDataSetResponse> serviceDataSetResponsePage = null;
+		List<ServiceDataSet> serviceDataSetList = productDataSetRepository.findAll();
+
+		if (StringUtils.isBlank(serviceId) && StringUtils.isBlank(productCode)){
 			serviceDataSetResponsePage = AppUtil.listConvertToPage(outputServiceDatasetEntity(serviceDataSetList), PageRequestUtil.getPageRequest());
+		}else if(StringUtils.isNotBlank(productCode) && StringUtils.isBlank(serviceId)){
+			List<ServiceDataSet> listProductCode = serviceDataSetList.parallelStream()
+											                         .filter(sd -> sd.getProductCode().equalsIgnoreCase(productCode))
+													                 .collect(Collectors.toList());
+			serviceDataSetResponsePage = AppUtil.listConvertToPage(outputServiceDatasetEntity(listProductCode), PageRequestUtil.getPageRequest());
+		}else if (StringUtils.isNotBlank(serviceId) && StringUtils.isBlank(productCode)){
+			List<ServiceDataSet> listServiceId = serviceDataSetList.parallelStream()
+					.filter(sd -> sd.getServiceId().equalsIgnoreCase(serviceId))
+					.collect(Collectors.toList());
+			serviceDataSetResponsePage = AppUtil.listConvertToPage(outputServiceDatasetEntity(listServiceId), PageRequestUtil.getPageRequest());
+		}else if(StringUtils.isNotBlank(productCode) && StringUtils.isNotBlank(serviceId)){
+			List<ServiceDataSet> listServiceIdAndProductCode = serviceDataSetList.parallelStream()
+					.filter(sd -> sd.getServiceId().equalsIgnoreCase(serviceId) && sd.getProductCode().equalsIgnoreCase(productCode))
+					.collect(Collectors.toList());
+			serviceDataSetResponsePage = AppUtil.listConvertToPage(outputServiceDatasetEntity(listServiceIdAndProductCode), PageRequestUtil.getPageRequest());
 		}
+
 		return serviceDataSetResponsePage;
 	}
 
@@ -424,10 +447,14 @@ public class ProductService {
 	@Transactional(readOnly = true)
 	public Page<ProductServiceEntity> queryAllProductService(String productCode){
 		Page<ProductServiceEntity> productServiceEntityPage;
+		List<ProductServiceEntity> productServiceEntityList = productServiceRepository.findAll();
 		if (StringUtils.isNotBlank(productCode)) {
-			productServiceEntityPage = productServiceRepository.findAllByProductCode(productCode, PageRequestUtil.getPageRequest());
+			List<ProductServiceEntity> listProductCode = productServiceEntityList.stream()
+					.filter(sd -> sd.getProductCode().equalsIgnoreCase(productCode))
+					.collect(Collectors.toList());
+			productServiceEntityPage = AppUtil.listConvertToPage(listProductCode,PageRequestUtil.getPageRequest());
 		}else{
-			productServiceEntityPage = productServiceRepository.findAllByDeletedFalse(PageRequestUtil.getPageRequest());
+			productServiceEntityPage = AppUtil.listConvertToPage(productServiceEntityList,PageRequestUtil.getPageRequest());
 		}
 		return productServiceEntityPage;
 	}
