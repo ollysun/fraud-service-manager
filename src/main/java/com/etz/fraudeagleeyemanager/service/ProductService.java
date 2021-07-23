@@ -286,32 +286,26 @@ public class ProductService {
 	}
 
 	@Transactional(rollbackFor = Throwable.class)
-	public List<ServiceDataSetResponse> updateServiceDataset(UpdateDataSetRequest request) {
-		List<ServiceDataSet> serviceDataSetList = productDataSetRepository.findByServiceId(request.getServiceId());
-		if (serviceDataSetList.isEmpty()) {
-			throw new ResourceNotFoundException("Service dataset details not found for this ServiceId " + request.getServiceId());
-		}
+	public ServiceDataSetResponse updateServiceDataset(UpdateDataSetRequest request) {
 
-		List<ServiceDataSet> updatedDatasetList = new ArrayList<>();
-		serviceDataSetList.forEach(productDataSet -> {
-			try {
-				// for auditing purpose for UPDATE
-				productDataSet.setEntityId(request.getServiceId());
-				productDataSet.setRecordBefore(JsonConverter.objectToJson(productDataSet));
-				productDataSet.setRequestDump(request);
+		ServiceDataSet serviceDataSet = productDataSetRepository.findByIds(request.getDatasetId(), request.getProductCode(),
+				request.getServiceId())
+				.orElseThrow(() -> new ResourceNotFoundException("Service Dataset Details not found"));
 
-				productDataSet.setDataType(request.getDataType());
-				productDataSet.setMandatory(request.getCompulsory());
-				productDataSet.setAuthorised(request.getAuthorised());
-				productDataSet.setUpdatedBy(request.getUpdatedBy());
-				productDataSet.setFieldName(request.getFieldName());
-			} catch (Exception ex) {
-				log.error("Error occurred while creating product dataset entity object", ex);
-				throw new FraudEngineException(AppConstant.ERROR_SETTING_PROPERTY);
-			}
-			updatedDatasetList.add(saveServiceDatasetEntityToDatabase(productDataSet));
-		});
-		return outputUpdatedProductDatasetResponse(updatedDatasetList);
+		// for auditing purpose for UPDATE
+		serviceDataSet.setEntityId(request.getProductCode() + ":" + request.getServiceId() + ":" + request.getDatasetId());
+		serviceDataSet.setRecordBefore(JsonConverter.objectToJson(serviceDataSet));
+		serviceDataSet.setRequestDump(request);
+
+		serviceDataSet.setDataType(AppUtil.checkDataType(request.getDataType()));
+		serviceDataSet.setMandatory(request.getCompulsory());
+		serviceDataSet.setAuthorised(request.getAuthorised());
+		serviceDataSet.setUpdatedBy(request.getUpdatedBy());
+		serviceDataSet.setFieldName(request.getFieldName());
+
+		ServiceDataSetResponse productDataSetResponse = new ServiceDataSetResponse();
+		BeanUtils.copyProperties(serviceDataSet, productDataSetResponse, "createdBy", "createdAt","productServiceEntity", "productEntity");
+		return productDataSetResponse;
 	}
 
 	private List<ServiceDataSetResponse> outputUpdatedProductDatasetResponse(List<ServiceDataSet> serviceDataSetList) {
@@ -325,33 +319,31 @@ public class ProductService {
 	}
 
 	@Transactional(rollbackFor = Throwable.class)
-	public boolean deleteServiceDataset(String serviceId) {
-		List<ServiceDataSet> serviceDatasetEntityList = productDataSetRepository.findByServiceId(serviceId);
-		if (serviceDatasetEntityList.isEmpty()) {
-			throw new ResourceNotFoundException("Service dataset details not found for this serviceId " + serviceId);
-		}
+	public boolean deleteServiceDataset(Long datasetId, String serviceId, String code) {
+		ServiceDataSet serviceDataSet = productDataSetRepository.findByIds(datasetId, code, serviceId)
+				.orElseThrow(() -> new ResourceNotFoundException("Service Dataset Details not found"));
+
+
 		productDatasetRedisRepository.setHashOperations(redisTemplate);
-		serviceDatasetEntityList.forEach(productDataset -> {
 			// for auditing purpose for DELETE
-			productDataset.setEntityId(serviceId);
-			productDataset.setRecordBefore(JsonConverter.objectToJson(productDataset));
-			productDataset.setRecordAfter(null);
-			productDataset.setRequestDump(serviceId);
+		serviceDataSet.setEntityId(serviceId);
+		serviceDataSet.setRecordBefore(JsonConverter.objectToJson(serviceDataSet));
+		serviceDataSet.setRecordAfter(null);
+		serviceDataSet.setRequestDump(serviceId);
 
 			try {
-				productDataSetRepository.delete(serviceId);
+				productDataSetRepository.delete(datasetId,code,serviceId);
 			} catch (Exception ex) {
 				log.error("Error occurred while deleting product dataset entity from database", ex);
 				throw new FraudEngineException(AppConstant.ERROR_DELETING_FROM_DATABASE);
 			}
 			try {
-				String redisId = productDataset.getProductCode() + ":" + productDataset.getId();
+				String redisId = code + ":" + datasetId + ":" + serviceId;
 				productDatasetRedisRepository.delete(redisId);
 			} catch (Exception ex) {
 				log.error("Error occurred while deleting product dataset entity from Redis", ex);
 				throw new FraudEngineException(AppConstant.ERROR_DELETING_FROM_REDIS);
 			}
-		});
 		return Boolean.TRUE;
 	}
 

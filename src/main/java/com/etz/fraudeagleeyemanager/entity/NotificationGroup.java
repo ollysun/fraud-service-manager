@@ -8,6 +8,8 @@ import org.hibernate.Hibernate;
 import org.hibernate.annotations.ResultCheckStyle;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.Type;
+import org.hibernate.annotations.Where;
+
 import javax.persistence.*;
 import java.io.Serializable;
 import java.util.Objects;
@@ -16,6 +18,7 @@ import java.util.Set;
 @Entity
 @Table(name = "notification_groups")
 @SQLDelete(sql = "UPDATE notification_groups SET deleted = true, status=0 WHERE id = ?", check = ResultCheckStyle.COUNT)
+@Where(clause = "deleted=false")
 @ToString
 @Getter
 @Setter
