@@ -62,23 +62,19 @@ public class NotificationGroupService {
 			throw new ResourceNotFoundException("Notification group not found for group ID " + request.getGroupId());
 		}
 		NotificationGroup notificationGroup = notificationGroupOptional.get();
-		try {
-			// for auditing purpose for UPDATE
-			notificationGroup.setEntityId(String.valueOf(request.getGroupId()));
-			notificationGroup.setRecordBefore(JsonConverter.objectToJson(notificationGroup));
-			notificationGroup.setRequestDump(request);
+		// for auditing purpose for UPDATE
+		notificationGroup.setEntityId(String.valueOf(request.getGroupId()));
+		notificationGroup.setRecordBefore(JsonConverter.objectToJson(notificationGroup));
+		notificationGroup.setRequestDump(request);
 
-			notificationGroup.setEmails(AppUtil.listEmailToString(request.getEmails()));
-			notificationGroup.setGroupName(request.getName());
-			notificationGroup.setPhones(AppUtil.listPhoneToString(request.getPhoneNos()));
-			notificationGroup.setEmailAlert(request.getMailAlert());
-			notificationGroup.setSmsAlert(request.getSmsAlert());
-			notificationGroup.setStatus(request.getStatus());
-			notificationGroup.setUpdatedBy(request.getUpdatedBy());
-		} catch(Exception ex){
-			log.error("Error occurred while creating NotificationGroup entity object", ex);
-			throw new FraudEngineException(AppConstant.ERROR_SETTING_PROPERTY);
-		}
+		notificationGroup.setEmails(AppUtil.listEmailToString(request.getEmails()));
+		notificationGroup.setGroupName(request.getName());
+		notificationGroup.setPhones(AppUtil.listPhoneToString(request.getPhoneNos()));
+		notificationGroup.setEmailAlert(request.getMailAlert());
+		notificationGroup.setSmsAlert(request.getSmsAlert());
+		notificationGroup.setStatus(request.getStatus());
+		notificationGroup.setUpdatedBy(request.getUpdatedBy());
+
 		return saveNotificationGroupEntityToDatabase(notificationGroup);
 	}
 

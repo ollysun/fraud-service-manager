@@ -36,41 +36,33 @@ public class InternalWatchlistService {
 	@Transactional(rollbackFor = Throwable.class)
 	public InternalWatchlist createInternalWatchlist(InternalWatchlistRequest request){
 		InternalWatchlist internalWatchlist = new InternalWatchlist();
-		try {
-			internalWatchlist.setBvn(request.getBvn());
-			internalWatchlist.setComments(request.getComments());
-			internalWatchlist.setStatus(false);
-			internalWatchlist.setAuthorised(false);
-			internalWatchlist.setCreatedBy(request.getCreatedBy());
-			
-			// for auditing purpose for CREATE
-			internalWatchlist.setEntityId(null);
-			internalWatchlist.setRecordBefore(null);
-			internalWatchlist.setRequestDump(request);
-		} catch(Exception ex){
-			log.error("Error occurred while creating Internal Watchlist entity object", ex);
-			throw new FraudEngineException(AppConstant.ERROR_SETTING_PROPERTY);
-		}
+		internalWatchlist.setBvn(request.getBvn());
+		internalWatchlist.setComments(request.getComments());
+		internalWatchlist.setStatus(false);
+		internalWatchlist.setAuthorised(false);
+		internalWatchlist.setCreatedBy(request.getCreatedBy());
+
+		// for auditing purpose for CREATE
+		internalWatchlist.setEntityId(null);
+		internalWatchlist.setRecordBefore(null);
+		internalWatchlist.setRequestDump(request);
+
 		return saveInternalWatchlistEntityToDatabase(internalWatchlist);
 	}
 
 	@Transactional(rollbackFor = Throwable.class)
 	public InternalWatchlist updateInternalWatchlist(UpdateInternalWatchlistRequest request){
 		InternalWatchlist internalWatchlist = findById(request.getWatchId()).get();
-		try {
-			// for auditing purpose for UPDATE
-			internalWatchlist.setEntityId(String.valueOf(request.getWatchId()));
-			internalWatchlist.setRecordBefore(JsonConverter.objectToJson(internalWatchlist));
-			internalWatchlist.setRequestDump(request);
+		// for auditing purpose for UPDATE
+		internalWatchlist.setEntityId(String.valueOf(request.getWatchId()));
+		internalWatchlist.setRecordBefore(JsonConverter.objectToJson(internalWatchlist));
+		internalWatchlist.setRequestDump(request);
 
-			internalWatchlist.setBvn(request.getBvn());
-			internalWatchlist.setComments(request.getComments());
-			internalWatchlist.setStatus(request.getStatus());
-			internalWatchlist.setUpdatedBy(request.getUpdatedBy());
-		} catch (Exception ex) {
-			log.error("Error occurred while creating Internal Watchlist entity object", ex);
-			throw new FraudEngineException(AppConstant.ERROR_SETTING_PROPERTY);
-		}
+		internalWatchlist.setBvn(request.getBvn());
+		internalWatchlist.setComments(request.getComments());
+		internalWatchlist.setStatus(request.getStatus());
+		internalWatchlist.setUpdatedBy(request.getUpdatedBy());
+
 		return saveInternalWatchlistEntityToDatabase(internalWatchlist);
 	}
 

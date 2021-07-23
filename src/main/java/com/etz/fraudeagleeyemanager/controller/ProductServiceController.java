@@ -75,15 +75,17 @@ public class ProductServiceController {
     }
 
     @PutMapping("/dataset")
-    public CollectionResponse<ServiceDataSetResponse> updateServiceDataset(@RequestBody UpdateDataSetRequest request,
+    public ResponseEntity<ServiceDataSetResponse> updateServiceDataset(@RequestBody UpdateDataSetRequest request,
                                                                            @ApiIgnore @RequestAttribute(AppConstant.USERNAME) String username){
         request.setUpdatedBy(username);
-        return new CollectionResponse<>(productService.updateServiceDataset(request));
+        return ResponseEntity.ok(productService.updateServiceDataset(request));
     }
 
-    @DeleteMapping("/dataset/{serviceId}")
-    public BooleanResponse deleteServiceDataset(@PathVariable String serviceId){
-        return new BooleanResponse(productService.deleteServiceDataset(serviceId));
+    @DeleteMapping("/dataset/{datasetId}/code/{code}/service/{serviceId}")
+    public BooleanResponse deleteServiceDatasetByIds(@PathVariable String code,
+                                                     @PathVariable String serviceId,
+                                                     @PathVariable Long datasetId){
+        return new BooleanResponse(productService.deleteServiceDataset(datasetId,serviceId,code));
     }
 
 }

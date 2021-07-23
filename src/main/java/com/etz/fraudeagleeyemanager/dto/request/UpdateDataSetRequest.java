@@ -11,8 +11,14 @@ import java.io.Serializable;
 public class UpdateDataSetRequest implements Serializable {
 	private static final long serialVersionUID = 1L;
 
+    @NotBlank(message="Please enter the product code")
+    private String productCode;
+
 	@NotBlank(message="Please enter the product serviceId")
     private String serviceId;
+
+    @NotNull(message="Please enter the datasetId")
+    private Long datasetId;
 
     @NotBlank(message="Please enter the data Type")
     private String dataType;

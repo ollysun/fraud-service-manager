@@ -19,6 +19,7 @@ import org.hibernate.annotations.Where;
 @Entity
 @Table(name = "internal_watchlist")
 @SQLDelete(sql = "UPDATE internal_watchlist SET deleted = true, status=0 WHERE id = ?", check = ResultCheckStyle.COUNT)
+@Where(clause = "deleted=false")
 @Getter
 @Setter
 @ToString
