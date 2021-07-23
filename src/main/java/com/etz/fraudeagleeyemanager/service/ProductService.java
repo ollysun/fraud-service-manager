@@ -305,6 +305,7 @@ public class ProductService {
 
 		ServiceDataSetResponse productDataSetResponse = new ServiceDataSetResponse();
 		BeanUtils.copyProperties(serviceDataSet, productDataSetResponse, "createdBy", "createdAt","productServiceEntity", "productEntity");
+		saveServiceDatasetEntityToRedis(serviceDataSet);
 		return productDataSetResponse;
 	}
 
