@@ -37,29 +37,25 @@ public class OfacWatchlistService {
 	@Transactional(rollbackFor = Throwable.class)
 	public OfacWatchlist createOfacWatchlist(OfacWatchlistRequest request){
 		OfacWatchlist ofacWatchlist = new OfacWatchlist();
-		try {
-			ofacWatchlist.setFullName(request.getFullName());
-			ofacWatchlist.setCategory(AppUtil.checkCategory(request.getCategory()));
-			ofacWatchlist.setComments(request.getComments());
-			ofacWatchlist.setStatus(false);
-			ofacWatchlist.setAuthorised(false);
-			ofacWatchlist.setCreatedBy(request.getCreatedBy());
-			
-			// for auditing purpose for CREATE
-			ofacWatchlist.setEntityId(null);
-			ofacWatchlist.setRecordBefore(null);
-			ofacWatchlist.setRequestDump(request);
-		} catch(Exception ex){
-			log.error("Error occurred while creating OfacWatchlist entity object", ex);
-			throw new FraudEngineException(AppConstant.ERROR_SETTING_PROPERTY);
-		}
+		ofacWatchlist.setFullName(request.getFullName());
+		ofacWatchlist.setCategory(AppUtil.checkCategory(request.getCategory()));
+		ofacWatchlist.setComments(request.getComments());
+		ofacWatchlist.setStatus(false);
+		ofacWatchlist.setAuthorised(false);
+		ofacWatchlist.setCreatedBy(request.getCreatedBy());
+
+		// for auditing purpose for CREATE
+		ofacWatchlist.setEntityId(null);
+		ofacWatchlist.setRecordBefore(null);
+		ofacWatchlist.setRequestDump(request);
+
 		return saveOfacWatchlistEntityToDatabase(ofacWatchlist);
 	}
 
 	@Transactional(rollbackFor = Throwable.class)
 	public OfacWatchlist updateOfacWatchlist(UpdateOfacWatchlistRequest request){
 		OfacWatchlist ofacWatchlist = findById(request.getOfacId()).get();
-		try {
+
 		// for auditing purpose for UPDATE
 		ofacWatchlist.setEntityId(String.valueOf(request.getOfacId()));
 		ofacWatchlist.setRecordBefore(JsonConverter.objectToJson(ofacWatchlist));
@@ -70,10 +66,7 @@ public class OfacWatchlistService {
 		ofacWatchlist.setComments(request.getComments());
 		ofacWatchlist.setStatus(request.getStatus());
 		ofacWatchlist.setUpdatedBy(request.getUpdatedBy());
-		} catch(Exception ex){
-			log.error("Error occurred while creating OfacWatchlist entity object", ex);
-			throw new FraudEngineException(AppConstant.ERROR_SETTING_PROPERTY);
-		}
+
 		return saveOfacWatchlistEntityToDatabase(ofacWatchlist);
 	}
 

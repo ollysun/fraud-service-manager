@@ -24,9 +24,11 @@ public interface ProductDataSetRepository extends JpaRepository<ServiceDataSet, 
 	Optional<ServiceDataSet> findByIds(Long id, String code, String serviceId);
 
 	//@Override
-	@Query("update #{#entityName} e set e.deleted=true where e.serviceId=?1")
+	@Query("Update #{#entityName} e set e.deleted=true where e.datasetId = ?1 and e.productCode = ?2 and e.serviceId=?3")
 	@Modifying
 	@Transactional
-	void delete(@Param("serviceId")String serviceId);
+	void delete(@Param("datasetId")Long datasetId,
+				@Param("productCode")String productCode,
+				@Param("serviceId")String serviceId);
 
 }

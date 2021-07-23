@@ -15,11 +15,13 @@ import lombok.*;
 import org.hibernate.annotations.ResultCheckStyle;
 import org.hibernate.annotations.SQLDelete;
 import com.etz.fraudeagleeyemanager.enums.UserCategory;
+import org.hibernate.annotations.Where;
 
 
 @Entity
 @Table(name = "ofac_watchlist")
 @SQLDelete(sql = "UPDATE ofac_watchlist SET deleted = true, status=0 WHERE id = ?", check = ResultCheckStyle.COUNT)
+@Where(clause = "deleted=false")
 @Getter
 @Setter
 @ToString
