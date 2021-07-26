@@ -4,6 +4,7 @@ package com.etz.fraudeagleeyemanager.service;
 import java.util.Objects;
 import java.util.Optional;
 
+import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.Page;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -21,14 +22,12 @@ import com.etz.fraudeagleeyemanager.util.AppUtil;
 import com.etz.fraudeagleeyemanager.util.JsonConverter;
 import com.etz.fraudeagleeyemanager.util.PageRequestUtil;
 
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
 @Service
-@RequiredArgsConstructor
+@AllArgsConstructor
 public class ParameterService {
 
 	private final RedisTemplate<String, Object> redisTemplate;
@@ -43,42 +42,35 @@ public class ParameterService {
 
 
 		Parameter parameterEntity = new Parameter();
-		try {
-			parameterEntity.setName(request.getName());
-			parameterEntity.setOperator(AppUtil.checkParameterOperator(request.getOperator()));
-			parameterEntity.setAuthorised(request.getAuthorised());
-			parameterEntity.setRequireValue(request.getRequireValue());
-			parameterEntity.setCreatedBy(request.getCreatedBy());
-			
-			// for auditing purpose for CREATE
-			parameterEntity.setEntityId(null);
-			parameterEntity.setRecordBefore(null);
-			parameterEntity.setRequestDump(request);
-		} catch (Exception ex) {
-			log.error("Error occurred while creating Parameter entity object", ex);
-			throw new FraudEngineException(AppConstant.ERROR_SETTING_PROPERTY);
-		}
+		parameterEntity.setName(request.getName());
+		parameterEntity.setOperator(AppUtil.checkParameterOperator(request.getOperator()));
+		parameterEntity.setAuthorised(request.getAuthorised());
+		parameterEntity.setRequireValue(request.getRequireValue());
+		parameterEntity.setCreatedBy(request.getCreatedBy());
+
+		// for auditing purpose for CREATE
+		parameterEntity.setEntityId(null);
+		parameterEntity.setRecordBefore(null);
+		parameterEntity.setRequestDump(request);
+
 		return saveInternalWatchlistEntityToDatabase(parameterEntity);
 	}
 
 	@Transactional(rollbackFor = Throwable.class)
 	public Parameter updateParameter(UpdateParameterRequest request) {
 		Parameter parameterEntity = findById(request.getParamId()).get();
-		try {
-			// for auditing purpose for UPDATE
-			parameterEntity.setEntityId(request.getParamId().toString());
-			parameterEntity.setRecordBefore(JsonConverter.objectToJson(parameterEntity));
-			parameterEntity.setRequestDump(request);
 
-			parameterEntity.setName(request.getName());
-			parameterEntity.setOperator(AppUtil.checkParameterOperator(request.getOperator()));
-			parameterEntity.setRequireValue(request.getRequireValue());
-			parameterEntity.setAuthorised(request.getAuthorised());
-			parameterEntity.setUpdatedBy(request.getUpdatedBy());
-		} catch (Exception ex) {
-			log.error("Error occurred while creating Parameter entity object", ex);
-			throw new FraudEngineException(AppConstant.ERROR_SETTING_PROPERTY);
-		}
+		// for auditing purpose for UPDATE
+		parameterEntity.setEntityId(request.getParamId().toString());
+		parameterEntity.setRecordBefore(JsonConverter.objectToJson(parameterEntity));
+		parameterEntity.setRequestDump(request);
+
+		parameterEntity.setName(request.getName());
+		parameterEntity.setOperator(AppUtil.checkParameterOperator(request.getOperator()));
+		parameterEntity.setRequireValue(request.getRequireValue());
+		parameterEntity.setAuthorised(request.getAuthorised());
+		parameterEntity.setUpdatedBy(request.getUpdatedBy());
+
 		return saveInternalWatchlistEntityToDatabase(parameterEntity);
 	}
 
@@ -116,7 +108,6 @@ public class ParameterService {
 
 	@Transactional(readOnly = true, rollbackFor = Throwable.class)
 	public Page<Parameter> getParameter(Long paramId) {
-		log.info("Query parameter ID: INFO >>>>>>>>>>>>>> {}", paramId);
 		if (Objects.isNull(paramId)) {
 			return parameterRepository.findAll(PageRequestUtil.getPageRequest());
 		}
@@ -124,7 +115,6 @@ public class ParameterService {
 		return parameterRepository.findAll(Example.of(parameterEntityOptional.get()), PageRequestUtil.getPageRequest());
 	}
 
-	@Transactional(readOnly = true)
 	private Optional<Parameter> findById(Long paramId) {
 		Optional<Parameter> parameterEntityOptional = parameterRepository.findById(paramId);
 		if(!parameterEntityOptional.isPresent()) {

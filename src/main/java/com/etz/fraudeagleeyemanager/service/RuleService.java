@@ -1,25 +1,6 @@
 package com.etz.fraudeagleeyemanager.service;
 
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
-
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
-import javax.persistence.TypedQuery;
-
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.BeanUtils;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.data.domain.Example;
-import org.springframework.data.domain.Page;
-import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import com.etz.fraudeagleeyemanager.constant.AppConstant;
 import com.etz.fraudeagleeyemanager.dto.request.CreateRuleRequest;
 import com.etz.fraudeagleeyemanager.dto.request.MapRuleToServiceRequest;
@@ -29,24 +10,31 @@ import com.etz.fraudeagleeyemanager.dto.response.ProductRuleResponse;
 import com.etz.fraudeagleeyemanager.dto.response.RuleProductResponse;
 import com.etz.fraudeagleeyemanager.dto.response.RuleResponse;
 import com.etz.fraudeagleeyemanager.dto.response.UpdatedRuleResponse;
-import com.etz.fraudeagleeyemanager.entity.ProductRuleId;
-import com.etz.fraudeagleeyemanager.entity.ProductServiceEntity;
-import com.etz.fraudeagleeyemanager.entity.Rule;
-import com.etz.fraudeagleeyemanager.entity.ServiceRule;
+import com.etz.fraudeagleeyemanager.entity.*;
 import com.etz.fraudeagleeyemanager.exception.FraudEngineException;
 import com.etz.fraudeagleeyemanager.exception.ResourceNotFoundException;
 import com.etz.fraudeagleeyemanager.redisrepository.ProductRuleRedisRepository;
 import com.etz.fraudeagleeyemanager.redisrepository.RuleRedisRepository;
-import com.etz.fraudeagleeyemanager.repository.EmailGroupRepository;
-import com.etz.fraudeagleeyemanager.repository.ProductServiceRepository;
-import com.etz.fraudeagleeyemanager.repository.RuleRepository;
-import com.etz.fraudeagleeyemanager.repository.ServiceRuleRepository;
+import com.etz.fraudeagleeyemanager.repository.*;
 import com.etz.fraudeagleeyemanager.util.AppUtil;
 import com.etz.fraudeagleeyemanager.util.JsonConverter;
 import com.etz.fraudeagleeyemanager.util.PageRequestUtil;
-
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.BeanUtils;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.data.domain.Page;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import javax.persistence.TypedQuery;
+import java.util.*;
+import java.util.stream.Collectors;
+
 
 @Slf4j
 @Service
@@ -55,11 +43,12 @@ public class RuleService {
 
 	private final RedisTemplate<String, Object> redisTemplate;
 	private final ServiceRuleRepository serviceRuleRepository;
-	private final EmailGroupRepository emailGroupRepository;
+	private final NotificationGroupRepository notificationGroupRepository;
 	private final RuleRepository ruleRepository;
 	private final RuleRedisRepository ruleRedisRepository;
 	private final ProductRuleRedisRepository productRuleRedisRepository;
 	private final ProductServiceRepository productServiceRepository;
+	private final ProductDataSetRepository productDataSetRepository;
 
 	@PersistenceContext
 	private final EntityManager em;
@@ -71,7 +60,6 @@ public class RuleService {
 			if (Boolean.TRUE.equals(ruleRepository.existsByName(request.getRuleName()))){
 				throw new FraudEngineException("Similar record already exists");
 			}
-		//try {
 			ruleEntity.setName(request.getRuleName());
 			ruleEntity.setValueOneDataType(AppUtil.checkDataType(request.getFirstDataType()));
 			ruleEntity.setSourceValueOne(request.getFirstSourceVal());
@@ -106,10 +94,7 @@ public class RuleService {
 			ruleEntity.setEntityId(null);
 			ruleEntity.setRecordBefore(null);
 			ruleEntity.setRequestDump(request);
-	//	} catch (Exception ex) {
-	//		log.error("Error occurred while creating Rule entity object", ex);
-	//		throw new FraudEngineException(AppConstant.ERROR_SETTING_PROPERTY);
-	//	}
+
 		return saveRuleEntityToDatabase(ruleEntity);
 		
 		// save rule
@@ -128,7 +113,6 @@ public class RuleService {
 			throw new ResourceNotFoundException("Rule Not found for Id " + request.getRuleId());
 		}
 		Rule ruleEntity = ruleEntityOptional.get();
-		try {
 			// for auditing purpose for UPDATE
 			ruleEntity.setEntityId(String.valueOf(request.getRuleId()));
 			ruleEntity.setRecordBefore(JsonConverter.objectToJson(ruleEntity));
@@ -162,10 +146,7 @@ public class RuleService {
 			ruleEntity.setAuthorised(request.getAuthorised());
 			ruleEntity.setStatus(request.getStatus());
 			ruleEntity.setUpdatedBy(request.getUpdatedBy());
-		} catch (Exception ex) {
-			log.error("Error occurred while creating Rule entity object", ex);
-			throw new FraudEngineException(AppConstant.ERROR_SETTING_PROPERTY);
-		}
+
 		return outputUpdatedRuleResponse(saveRuleEntityToDatabase(ruleEntity));
 	}
 
@@ -186,7 +167,6 @@ public class RuleService {
 			ruleRedisRepository.setHashOperations(redisTemplate);
 			ruleRedisRepository.update(alreadyPersistedRuleEntity);
 		} catch(Exception ex){
-			//TODO actually delete already saved entity from the database (NOT SOFT DELETE)
 			log.error("Error occurred while saving Rule entity to Redis" , ex);
 			throw new FraudEngineException(AppConstant.ERROR_SAVING_TO_REDIS);
 		}
@@ -241,33 +221,64 @@ public class RuleService {
 	}
 
 	@Transactional(readOnly = true)
-	public Page<RuleResponse> getRule(Long ruleId) {
-		List<RuleResponse> ruleResponseList;
-		if (Objects.isNull(ruleId)) {
-			ruleResponseList = outputRuleResponseList(ruleRepository.findAll());
+	public Page<RuleResponse> getRule(Long ruleId, String name) {
+		List<Rule> ruleList = ruleRepository.findAll();
+		List<RuleResponse> ruleResponseList = new ArrayList<>();
+		if (Objects.isNull(ruleId) && StringUtils.isBlank(name)) {
+			ruleResponseList = outputRuleResponseList(ruleList);
 			return AppUtil.listConvertToPage(ruleResponseList, PageRequestUtil.getPageRequest());
+
+		}else if(StringUtils.isNotBlank(name) && Objects.isNull(ruleId)){
+			List<Rule> listRuleName = ruleList.parallelStream()
+					.filter(sd -> sd.getName().equalsIgnoreCase(name))
+					.collect(Collectors.toList());
+			ruleResponseList = outputRuleResponseList(listRuleName);
+			return AppUtil.listConvertToPage(ruleResponseList, PageRequestUtil.getPageRequest());
+		}else if(ruleId != null &&  StringUtils.isBlank(name)){
+			List<Rule> listRuleId = ruleList.parallelStream()
+					.filter(sd -> Objects.equals(sd.getId(),ruleId))
+					.collect(Collectors.toList());
+			ruleResponseList = outputRuleResponseList(listRuleId);
 		}
-		Optional<Rule> ruleEntityOptional = ruleRepository.findById(ruleId);
-		if (!ruleEntityOptional.isPresent()) {
-			throw new ResourceNotFoundException("Rule Not found for Id " + ruleId);
-		}
-		ruleResponseList = outputRuleResponseList(ruleRepository.findAll(Example.of(ruleEntityOptional.get())));
 		return AppUtil.listConvertToPage(ruleResponseList, PageRequestUtil.getPageRequest());
 	}
 
 	@Transactional(rollbackFor = Throwable.class)
 	public ServiceRule mapRuleToService(MapRuleToServiceRequest request) {
+		List<String> datasetList = new ArrayList<>();
 		Optional<ProductServiceEntity> productServiceEntityOptional = productServiceRepository.findById(request.getServiceId());
 		if (!productServiceEntityOptional.isPresent()){
 			throw new ResourceNotFoundException("Product Service  not found for serviceId " + request.getServiceId());
 		}
+
+		// verify the dataset on rule
+		List<ServiceDataSet> serviceDataSetList = productDataSetRepository.findByServiceId(request.getServiceId());
+		if (serviceDataSetList.isEmpty()){
+			throw new ResourceNotFoundException("Service Dataset  not found for serviceId " + request.getServiceId());
+		}
+		for (ServiceDataSet sd: serviceDataSetList){
+			datasetList.add(sd.getFieldName());
+		}
+
 		Optional<Rule> ruleEntityOptional = ruleRepository.findById(request.getRuleId());
 		if (!ruleEntityOptional.isPresent()) {
 			throw new ResourceNotFoundException("Rule Not found for Id " + request.getRuleId());
 		}
+
+		for(String name: datasetList) {
+			if (ruleEntityOptional.get().getDataSourceValOne().equalsIgnoreCase("Transactional")
+					&& !(name.equalsIgnoreCase(ruleEntityOptional.get().getSourceValueOne()))) {
+				throw new FraudEngineException("The first source value: "  + ruleEntityOptional.get().getSourceValueOne() + "  not found in the dataset fieldName created on rule with name : " + ruleEntityOptional.get().getName());
+			}
+			if ((StringUtils.isNotBlank(ruleEntityOptional.get().getDataSourceValTwo()) && ruleEntityOptional.get().getDataSourceValTwo().equalsIgnoreCase("Transactional")) &&
+					!(name.equalsIgnoreCase(ruleEntityOptional.get().getSourceValueTwo()))) {
+				throw new FraudEngineException("The Second source value: "  + ruleEntityOptional.get().getSourceValueTwo() + "   not found in the dataset fieldName created on rule with name : " + ruleEntityOptional.get().getName());
+			}
+		}
+
 		
-		if (!Objects.isNull(request.getEmailGroupId()) && !emailGroupRepository.findById(request.getEmailGroupId()).isPresent()) {
-			throw new ResourceNotFoundException("Email Group Id Not found for Id " + request.getEmailGroupId());
+		if (!Objects.isNull(request.getNotificationGroupId()) && !notificationGroupRepository.findById(request.getNotificationGroupId()).isPresent()) {
+			throw new ResourceNotFoundException("Notification Group Id Not found for Id " + request.getNotificationGroupId());
 		}
 
 		ServiceRule serviceRuleEntity = new ServiceRule();
@@ -275,7 +286,9 @@ public class RuleService {
 			serviceRuleEntity.setServiceId(request.getServiceId());
 			serviceRuleEntity.setRuleId(request.getRuleId());
 			serviceRuleEntity.setNotifyAdmin(request.getNotifyAdmin());
-			serviceRuleEntity.setEmailGroupId(request.getEmailGroupId());
+			if (Boolean.TRUE.equals(request.getNotifyAdmin())){
+				serviceRuleEntity.setNotificationGroupId(request.getNotificationGroupId());
+			}
 			serviceRuleEntity.setNotifyCustomer(request.getNotifyCustomer());
 			serviceRuleEntity.setStatus(Boolean.TRUE);
 			serviceRuleEntity.setAuthorised(request.getAuthorised());
@@ -299,9 +312,10 @@ public class RuleService {
 			throw new FraudEngineException("ServiceRule Not found for Id " + request.getServiceRuleId());
 		}
 		
-		if (!Objects.isNull(request.getEmailGroupId()) && !emailGroupRepository.findById(request.getEmailGroupId()).isPresent()) {
-			throw new ResourceNotFoundException("Email Group Id Not found for Id " + request.getEmailGroupId());
+		if (!Objects.isNull(request.getNotificationGroupId()) && !notificationGroupRepository.findById(request.getNotificationGroupId()).isPresent()) {
+			throw new ResourceNotFoundException("Notification Group Id Not found for Id " + request.getNotificationGroupId());
 		}
+
 
 		List<ServiceRule> updatedServiceRuleEntity = new ArrayList<>();
 		for (ServiceRule prodRuleEntity:prodRuleEntityList) {
@@ -312,7 +326,9 @@ public class RuleService {
 				prodRuleEntity.setRequestDump(request);
 
 				prodRuleEntity.setNotifyAdmin(request.getNotifyAdmin());
-				prodRuleEntity.setEmailGroupId(request.getEmailGroupId());
+				if (Boolean.TRUE.equals(request.getNotifyAdmin())){
+					prodRuleEntity.setNotificationGroupId(request.getNotificationGroupId());
+				}
 				prodRuleEntity.setNotifyCustomer(request.getNotifyCustomer());
 				prodRuleEntity.setStatus(request.getStatus());
 				prodRuleEntity.setAuthorised(request.getAuthorised());
@@ -369,7 +385,7 @@ public class RuleService {
 			String sqlString = " SELECT NEW com.etz.fraudeagleeyemanager.dto.response.RuleProductResponse(" +
 					"rl.id,rl.name,rl.sourceValueOne,rl.valueOneDataType, rl.operatorOne, rl.compareValueOne, rl.dataSourceValOne," +
 					"rl.logicOperator,rl.sourceValueTwo,rl.operatorTwo,rl.compareValueTwo, rl.dataSourceValTwo, rl.valueTwoDataType," +
-					"rl.suspicionLevel, rl.action, rl.status, rl.authorised,sr.serviceId as serviceId, sr.ruleId as productRuleId)"
+					"rl.suspicionLevel, rl.action, rl.status, rl.authorised,sr.serviceId as serviceId, sr.ruleId as serviceRuleId)"
 					+ " FROM Rule rl inner JOIN rl.serviceRule sr "
 					+ " WHERE sr.serviceId = :serviceId";
 			ruleProductResponseTypedQuery =  em.createQuery(sqlString.trim(), RuleProductResponse.class)

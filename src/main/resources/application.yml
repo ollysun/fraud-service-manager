@@ -38,13 +38,8 @@ spring:
 
   redis:
     client-type: jedis
-<<<<<<< HEAD
-#    host: 172.17.10.16
-    host: 127.0.0.1
-=======
     host: 172.17.10.16
     #host: 127.0.0.1
->>>>>>> cb0eba7b83b9f7703f5f9cbc3c5d24d263215786
     port: 6379
     database: 0
     password: 
@@ -74,12 +69,6 @@ spring:
     mapper:
       accept-case-insensitive-properties: true
 
-#  flyway:
-#    user: root
-#    password: root
-#    locations: classpath:db/migration
-#    baseline-on-migrate: true
-#    check-location: true
 
   jpa:
     hibernate:
@@ -87,7 +76,7 @@ spring:
     properties:
       hibernate:
         dialect: org.hibernate.dialect.MySQL55Dialect
-    show-sql: true
+    show-sql: false
 
   kafka:
     bootstrap-servers: localhost:9092 #10.0.0.178:9092

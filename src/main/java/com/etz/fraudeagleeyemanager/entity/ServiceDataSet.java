@@ -3,6 +3,8 @@ package com.etz.fraudeagleeyemanager.entity;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import lombok.*;
 import org.hibernate.Hibernate;
+import org.hibernate.annotations.Where;
+
 import javax.persistence.*;
 import java.io.Serializable;
 import java.util.Objects;
@@ -15,6 +17,7 @@ import java.util.Objects;
 @Setter
 @AllArgsConstructor
 @ToString(exclude = { "productEntity" })
+@Where(clause = "deleted=false")
 @IdClass(ProductDatasetId.class)
 @NoArgsConstructor
 public class ServiceDataSet extends BaseAuditVersionEntity<ProductDatasetId> implements Serializable {

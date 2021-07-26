@@ -15,11 +15,13 @@ import lombok.*;
 import org.hibernate.annotations.ResultCheckStyle;
 import org.hibernate.annotations.SQLDelete;
 import com.etz.fraudeagleeyemanager.enums.UserCategory;
+import org.hibernate.annotations.Where;
 
 
 @Entity
 @Table(name = "ofac_watchlist")
 @SQLDelete(sql = "UPDATE ofac_watchlist SET deleted = true, status=0 WHERE id = ?", check = ResultCheckStyle.COUNT)
+@Where(clause = "deleted=false")
 @Getter
 @Setter
 @ToString
@@ -36,8 +38,7 @@ public class OfacWatchlist extends BaseAuditEntity implements Serializable {
 	private String fullName;
 
 	@Column(name = "category")
-	@Enumerated(EnumType.STRING)
-	private UserCategory category;
+	private String category;
 
 	@Column(name = "comments")
 	private String comments;

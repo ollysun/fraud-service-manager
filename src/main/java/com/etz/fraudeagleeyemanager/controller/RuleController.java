@@ -54,8 +54,9 @@ public class RuleController {
 	}
 	
 	@GetMapping
-	public PageResponse<RuleResponse> queryRule(@RequestParam(required = false) Long ruleId){
-		return new PageResponse<>(ruleService.getRule(ruleId));
+	public PageResponse<RuleResponse> queryRule(@RequestParam(required = false) Long ruleId,
+												@RequestParam(required = false) String ruleName){
+		return new PageResponse<>(ruleService .getRule(ruleId,ruleName));
 	}
 	
 	@PostMapping("/service")
@@ -82,5 +83,7 @@ public class RuleController {
 	public CollectionResponse<RuleProductResponse> getRuleService(@PathVariable @NotBlank @Positive String serviceId){
 		return new CollectionResponse<>(ruleService.getRuleService(serviceId));
 	}
+
+
 
 }

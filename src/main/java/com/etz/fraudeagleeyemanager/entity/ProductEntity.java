@@ -1,37 +1,24 @@
 package com.etz.fraudeagleeyemanager.entity;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+import lombok.*;
+import org.hibernate.Hibernate;
+import org.hibernate.annotations.ResultCheckStyle;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.Where;
+
+import javax.persistence.*;
 import java.io.Serializable;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
-
-//<<<<<<< HEAD
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.Id;
-import javax.persistence.Index;
-import javax.persistence.OneToMany;
-import javax.persistence.Table;
-
-import org.hibernate.Hibernate;
-import org.hibernate.annotations.ResultCheckStyle;
-import org.hibernate.annotations.SQLDelete;
-
-import com.fasterxml.jackson.annotation.JsonManagedReference;
-
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
 
 @Entity
 @Table(name = "product", indexes = {
         @Index(name = "uniqueProductIndex", columnList = "code, name", unique = true)
 })
 @SQLDelete(sql = "UPDATE product SET deleted = true, status=0 WHERE code = ?", check = ResultCheckStyle.COUNT)
+@Where(clause = "deleted=false")
 @Getter
 @Setter
 @AllArgsConstructor

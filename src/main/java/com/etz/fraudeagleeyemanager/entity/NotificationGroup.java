@@ -1,17 +1,24 @@
 package com.etz.fraudeagleeyemanager.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
 import org.hibernate.Hibernate;
 import org.hibernate.annotations.ResultCheckStyle;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.Type;
+import org.hibernate.annotations.Where;
+
 import javax.persistence.*;
 import java.io.Serializable;
 import java.util.Objects;
+import java.util.Set;
 
 @Entity
 @Table(name = "notification_groups")
-@SQLDelete(sql = "UPDATE account SET deleted = true, status=0 WHERE id = ?", check = ResultCheckStyle.COUNT)
+@SQLDelete(sql = "UPDATE notification_groups SET deleted = true, status=0 WHERE id = ?", check = ResultCheckStyle.COUNT)
+@Where(clause = "deleted=false")
 @ToString
 @Getter
 @Setter
@@ -22,7 +29,6 @@ public class NotificationGroup extends BaseAuditEntity implements Serializable {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	@Column(name = "id", updatable = false, nullable = false)
 	private Long id;
 
 	@Column(name = "group_name", unique = true)
@@ -50,6 +56,20 @@ public class NotificationGroup extends BaseAuditEntity implements Serializable {
 	
 	@Column(name = "status", nullable = false, columnDefinition = "TINYINT", length = 1)
 	private Boolean status;
+
+	@ToString.Exclude
+	@OneToOne(mappedBy = "notificationGroup", fetch = FetchType.LAZY,
+			cascade = CascadeType.ALL)
+	@JsonManagedReference
+	@JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+	private ServiceRule serviceRule;
+
+	@ToString.Exclude
+	@OneToMany(mappedBy = "notificationGroup", fetch = FetchType.LAZY,
+			cascade = {CascadeType.MERGE,CascadeType.PERSIST}, orphanRemoval = true)
+	@JsonManagedReference
+	@JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+	private Set<ReportScheduler> reportSchedulers;
 
 	@Override
 	public boolean equals(Object o) {

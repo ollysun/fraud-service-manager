@@ -16,8 +16,8 @@ public class OfacWatchlistRequest implements Serializable {
 	@NotBlank(message="Please enter the full name")
 	private String fullName;
 
-	@NotNull(message="Please enter the Category")
-	private UserCategory category;
+	@NotBlank(message="Please enter the Category")
+	private String category;
 
 	@NotBlank(message="Please enter the Comments")
 	private String comments;
