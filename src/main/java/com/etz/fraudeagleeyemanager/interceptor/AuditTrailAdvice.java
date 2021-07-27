@@ -63,7 +63,7 @@ public class AuditTrailAdvice {
 			baseAuditEntity.setEntity(entity.getClass().getSimpleName());
 			baseAuditEntity.setEventDescription(eventDescription);
 			baseAuditEntity.setEndpoint(RequestUtil.getSourceURL());
-			baseAuditEntity.setUserId(0L); // Long.valueOf(RequestUtil.getAccessTokenClaim("user_id")));
+			baseAuditEntity.setUserId(0L);//Long.valueOf(RequestUtil.getAccessTokenClaim("userId")));
 			baseAuditEntity.setEventType(eventType);
 
 			if (baseAuditEntity.getRecordAfter() != null) {

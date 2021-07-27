@@ -90,6 +90,7 @@ public class RuleService {
 			ruleEntity.setAuthorised(request.getAuthorised());
 			ruleEntity.setStatus(Boolean.TRUE);
 			ruleEntity.setCreatedBy(request.getCreatedBy());
+			
 			// for auditing purpose for CREATE
 			ruleEntity.setEntityId(null);
 			ruleEntity.setRecordBefore(null);

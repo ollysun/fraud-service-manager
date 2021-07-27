@@ -124,7 +124,6 @@ public class InternalWatchlistService {
 			internalWatchlistRedisRepository.setHashOperations(redisTemplate);
 			internalWatchlistRedisRepository.update(alreadyPersistedInternalWatchlistEntity);
 		} catch(Exception ex){
-			//TODO actually delete already saved entity from the database (NOT SOFT DELETE)
 			log.error("Error occurred while saving Internal Watchlist entity to Redis" , ex);
 			throw new FraudEngineException(AppConstant.ERROR_SAVING_TO_REDIS);
 		}

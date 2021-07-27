@@ -3,6 +3,8 @@ package com.etz.fraudeagleeyemanager.entity;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import lombok.*;
 import org.hibernate.Hibernate;
+import org.hibernate.annotations.ResultCheckStyle;
+import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.Where;
 
 import javax.persistence.*;
@@ -17,6 +19,7 @@ import java.util.Objects;
 @Setter
 @AllArgsConstructor
 @ToString(exclude = { "productEntity" })
+@SQLDelete(sql = "UPDATE service_dataset SET deleted = true WHERE dataset_id = ? AND product_code = ? AND service_id = ?", check = ResultCheckStyle.COUNT)
 @Where(clause = "deleted=false")
 @IdClass(ProductDatasetId.class)
 @NoArgsConstructor

@@ -324,16 +324,16 @@ public class ProductService {
 		ServiceDataSet serviceDataSet = productDataSetRepository.findByIds(datasetId, code, serviceId)
 				.orElseThrow(() -> new ResourceNotFoundException("Service Dataset Details not found"));
 
-
-		productDatasetRedisRepository.setHashOperations(redisTemplate);
+			productDatasetRedisRepository.setHashOperations(redisTemplate);
+		
 			// for auditing purpose for DELETE
-		serviceDataSet.setEntityId(serviceId);
-		serviceDataSet.setRecordBefore(JsonConverter.objectToJson(serviceDataSet));
-		serviceDataSet.setRecordAfter(null);
-		serviceDataSet.setRequestDump(serviceId);
+			serviceDataSet.setEntityId(serviceId);
+			serviceDataSet.setRecordBefore(JsonConverter.objectToJson(serviceDataSet));
+			serviceDataSet.setRecordAfter(null);
+			serviceDataSet.setRequestDump(serviceId);
 
 			try {
-				productDataSetRepository.delete(datasetId,code,serviceId);
+				productDataSetRepository.delete(serviceDataSet);
 			} catch (Exception ex) {
 				log.error("Error occurred while deleting product dataset entity from database", ex);
 				throw new FraudEngineException(AppConstant.ERROR_DELETING_FROM_DATABASE);
@@ -405,11 +405,18 @@ public class ProductService {
 			productService.setCreatedBy(request.getCreatedBy());
 			productService.setDescription(request.getDescription());
 			productService.setProductEntity(productEntityOptional.get());
+
+			// for auditing purpose for CREATE
+			productService.setEntityId(null);
+			productService.setRecordBefore(null);
+			productService.setRequestDump(request);
+			
 			return outputCreatedProductService(productServiceRepository.save(productService));
 		} catch (Exception ex) {
-			throw new FraudEngineException(AppConstant.ERROR_SAVING_TO_REDIS);
+			throw new FraudEngineException(AppConstant.ERROR_SAVING_TO_DATABASE);
 		}
 	}
+	
 	@Transactional(rollbackFor = Throwable.class)
 	public ProductServiceResponse updateProductService(UpdateProductServiceDto request) {
 		Optional<ProductEntity> productEntityOptional = productEntityRepository.findByCodeAndDeletedFalse(request.getProductCode());
@@ -417,23 +424,43 @@ public class ProductService {
 			throw new ResourceNotFoundException("Product not found for Code " + request.getProductCode());
 		}
 		return	productServiceRepository.findById(request.getServiceId()).map(productServiceEntity -> {
-				productServiceEntity.setServiceName(request.getServiceName());
-				productServiceEntity.setStatus(request.getStatus());
-				productServiceEntity.setDescription(request.getDescription());
-				productServiceEntity.setUpdatedBy(request.getUpdatedBy());
-				productServiceEntity.setCallbackUrl(request.getCallback());
-				productServiceEntity.setProductEntity(productEntityOptional.get());
+			// for auditing purpose for UPDATE
+			productServiceEntity.setEntityId(request.getServiceId());
+			productServiceEntity.setRecordBefore(JsonConverter.objectToJson(productServiceEntity));
+			productServiceEntity.setRequestDump(request);
+
+			productServiceEntity.setServiceName(request.getServiceName());
+			productServiceEntity.setStatus(request.getStatus());
+			productServiceEntity.setDescription(request.getDescription());
+			productServiceEntity.setUpdatedBy(request.getUpdatedBy());
+			productServiceEntity.setCallbackUrl(request.getCallback());
+			productServiceEntity.setProductEntity(productEntityOptional.get());
+				
 			return outputCreatedProductService(productServiceRepository.save(productServiceEntity));
 			}).orElseThrow(()  -> new ResourceNotFoundException("Product service not found for this id " + request.getServiceId()));
 	}
 
 	@Transactional(rollbackFor = Throwable.class)
 	public Boolean deactivateProductService(String serviceId){
-		Optional<ProductServiceEntity> productServiceEntity = productServiceRepository.findById(serviceId);
-		if (!productServiceEntity.isPresent()) {
+		Optional<ProductServiceEntity> productServiceEntityOptional = productServiceRepository.findById(serviceId);
+		if (!productServiceEntityOptional.isPresent()) {
 			throw new ResourceNotFoundException("Product service not found for this id " + serviceId);
 		}
-		productServiceRepository.deleteById(serviceId);
+
+		ProductServiceEntity productServiceEntity = productServiceEntityOptional.get();
+		// for auditing purpose for DELETE
+		productServiceEntity.setEntityId(serviceId);
+		productServiceEntity.setRecordBefore(JsonConverter.objectToJson(productServiceEntity));
+		productServiceEntity.setRecordAfter(null);
+		productServiceEntity.setRequestDump(serviceId);
+		
+		try {
+			productServiceRepository.delete(productServiceEntity);
+			//productServiceRepository.deleteById(serviceId)
+		} catch (Exception ex) {
+			log.error("Error occurred while deleting product service entity from database", ex);
+			throw new FraudEngineException(AppConstant.ERROR_DELETING_FROM_DATABASE);
+		}
 		return true;
 	}
 
