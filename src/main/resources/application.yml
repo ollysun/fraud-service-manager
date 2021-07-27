@@ -38,8 +38,8 @@ spring:
 
   redis:
     client-type: jedis
-    #host: 172.17.10.16
-    host: 127.0.0.1
+    host: 172.17.10.16
+    #host: 127.0.0.1
     port: 6379
     database: 0
     password: 
@@ -58,12 +58,9 @@ spring:
       type: web
 
   datasource:
-    #username: eagleeye_user
-    #password: T@w!d2021
-    username: root
-    password: root
-    #url: jdbc:mysql://172.17.10.83:3306/eagle_eye?createDatabaseIfNotExist=true&useLegacyDatetimeCode=false&serverTimezone=Africa/Lagos
-    url: jdbc:mysql://localhost:3306/eagle_eye?createDatabaseIfNotExist=true&useLegacyDatetimeCode=false&serverTimezone=Africa/Lagos
+    username: eagleeye_user
+    password: T@w!d2021
+    url: jdbc:mysql://172.17.10.83:3306/eagle_eye?createDatabaseIfNotExist=true&useLegacyDatetimeCode=false&serverTimezone=Africa/Lagos
     driverClassName: com.mysql.cj.jdbc.Driver
     initialization-mode: always
 
