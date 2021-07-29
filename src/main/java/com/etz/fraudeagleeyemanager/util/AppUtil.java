@@ -330,7 +330,37 @@ public class AppUtil {
                     .findFirst()
                     .orElseThrow(() ->
                             new FraudEngineException("Not found this Data Type " + operatorRequest +
-                                    " can be any of " + operators.toString()));
+                                    " can be any of " + operators));
+        }
+        return output;
+    }
+
+    public static String checkExportType(String operatorRequest){
+        List<String> operators = Arrays.asList("EXCEL", "PDF", "CSV");
+
+        String output = "";
+        if (StringUtils.isNotBlank(operatorRequest)) {
+            output = operators.stream()
+                    .filter(bl -> bl.equalsIgnoreCase(operatorRequest))
+                    .findFirst()
+                    .orElseThrow(() ->
+                            new FraudEngineException("Not found this Export Type " + operatorRequest +
+                                    " can be any of " + operators));
+        }
+        return output;
+    }
+
+    public static String checkIntervalType(String operatorRequest){
+        List<String> operators = Arrays.asList("MINUTE", "HOUR", "DAY","WEEK","MONTH", "YEAR");
+
+        String output = "";
+        if (StringUtils.isNotBlank(operatorRequest)) {
+            output = operators.stream()
+                    .filter(bl -> bl.equalsIgnoreCase(operatorRequest))
+                    .findFirst()
+                    .orElseThrow(() ->
+                            new FraudEngineException("Not found this Interval Type " + operatorRequest +
+                                    " can be any of " + operators));
         }
         return output;
     }

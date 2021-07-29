@@ -27,9 +27,6 @@ public class ReportScheduler extends BaseAuditEntity implements Serializable {
 
 	@Column(name = "interval_value")
 	private Integer intervalValue;
-
-	@Column(name = "notification_group_id")
-	private Long notificationGroupId;
 	
 	@Column(name = "interval_type", nullable = false,  columnDefinition = "VARCHAR(45)", length = 20)
 	@Enumerated(EnumType.STRING)
@@ -53,7 +50,6 @@ public class ReportScheduler extends BaseAuditEntity implements Serializable {
 	@ToString.Exclude
 	@JsonBackReference
 	@ManyToOne(fetch = FetchType.LAZY)
-	@MapsId("notificationGroupId")
 	@JoinColumn(name = "notification_group", foreignKey = @ForeignKey(name = "FK_REPORT_SCHEDULER_NOTIFICATION_GROUP_ID"))
 	private NotificationGroup notificationGroup;
 
