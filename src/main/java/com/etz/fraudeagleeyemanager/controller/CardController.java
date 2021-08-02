@@ -5,6 +5,7 @@ import javax.validation.Valid;
 import com.etz.fraudeagleeyemanager.constant.AppConstant;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import com.etz.fraudeagleeyemanager.dto.request.CardRequest;
@@ -26,6 +27,7 @@ import springfox.documentation.annotations.ApiIgnore;
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/v1/card")
+@Validated
 public class CardController {
 
 	private final CardService cardService;

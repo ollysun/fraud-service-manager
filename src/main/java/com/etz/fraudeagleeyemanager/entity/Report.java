@@ -1,5 +1,6 @@
 package com.etz.fraudeagleeyemanager.entity;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
 
 import javax.persistence.*;
@@ -33,6 +34,7 @@ public class Report extends BaseAuditEntity implements Serializable {
 	@ToString.Exclude
 	@OneToMany(mappedBy = "report", fetch = FetchType.EAGER,
 			cascade = CascadeType.ALL)
+	@JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
 	private Set<ReportScheduler> reportSchedulers = new HashSet<>();
 
 	@Override
