@@ -6,6 +6,7 @@ import javax.validation.Valid;
 import com.etz.fraudeagleeyemanager.constant.AppConstant;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import com.etz.fraudeagleeyemanager.dto.request.AccountToProductRequest;
@@ -28,11 +29,11 @@ import springfox.documentation.annotations.ApiIgnore;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/v1/account")
+@Validated
 public class AccountController {
 
 	private final AccountService accountService;
 	
-	//TODO set pre-authorize permission
 	@PostMapping
 	public ResponseEntity<ModelResponse<Account>> createAccount(@RequestBody @Valid AddAccountRequest request,
 																@ApiIgnore @RequestAttribute(AppConstant.USERNAME) String username) {

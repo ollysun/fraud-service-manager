@@ -32,6 +32,18 @@ spring:
   security:
       user:
         password: password
+  ## MailProperties
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: ollysun@gmail.com
+    password:
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
 
   cache:
     type: none

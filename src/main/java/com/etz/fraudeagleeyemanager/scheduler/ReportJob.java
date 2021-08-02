@@ -1,4 +1,15 @@
 package com.etz.fraudeagleeyemanager.scheduler;
 
-public class ReportJob {
+import org.quartz.Job;
+import org.quartz.JobExecutionContext;
+import org.quartz.JobExecutionException;
+
+public class ReportJob  implements Job {
+
+
+    @Override
+    public void execute(JobExecutionContext jobExecutionContext) throws JobExecutionException {
+        // create query
+        // generate report
+    }
 }
