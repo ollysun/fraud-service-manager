@@ -3,6 +3,7 @@ package com.etz.fraudeagleeyemanager.controller;
 
 
 import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
 
 import com.etz.fraudeagleeyemanager.constant.AppConstant;
 import org.springframework.http.HttpStatus;
@@ -48,7 +49,7 @@ public class ProductController {
 	}
 	
 	@DeleteMapping("/{code}")
-	public BooleanResponse deleteProduct(@PathVariable String code){
+	public BooleanResponse deleteProduct(@PathVariable @NotNull String code){
 		return new BooleanResponse(productService.deleteProduct(code));
 	}
 	

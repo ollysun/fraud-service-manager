@@ -60,7 +60,7 @@ public class CardController {
 
 	
 	@PutMapping("/product")
-	public CollectionResponse<CardProductResponse> updateCardProduct(@RequestBody UpdateCardProductRequest request,
+	public CollectionResponse<CardProductResponse> updateCardProduct(@RequestBody @Valid UpdateCardProductRequest request,
 																	 @ApiIgnore @RequestAttribute(AppConstant.USERNAME) String username){
 		request.setUpdatedBy(username);
 		return new CollectionResponse<>(cardService.updateCardProduct(request));

@@ -51,7 +51,7 @@ public class RuleController {
 	}
 	
 	@DeleteMapping("/{ruleId}")
-	public BooleanResponse deleteRule(@PathVariable Long ruleId){
+	public BooleanResponse deleteRule(@PathVariable @NotNull @Positive Long ruleId){
 		return new BooleanResponse(ruleService.deleteRule(ruleId));
 	}
 	
@@ -77,12 +77,12 @@ public class RuleController {
 	}
 
 	@DeleteMapping("/service/{serviceId}/ruleId/{ruleId}")
-	public BooleanResponse deleteServiceRule(@PathVariable @NotNull @Positive Long ruleId, @PathVariable @NotNull @Positive String serviceId){
+	public BooleanResponse deleteServiceRule(@PathVariable @NotNull @Positive Long ruleId, @PathVariable @NotNull String serviceId){
 		return new BooleanResponse(ruleService.deleteServiceRule(ruleId, serviceId));
 	}
 
 	@GetMapping("/service/{serviceId}")
-	public CollectionResponse<RuleProductResponse> getRuleService(@PathVariable @NotBlank @Positive String serviceId){
+	public CollectionResponse<RuleProductResponse> getRuleService(@PathVariable @NotBlank String serviceId){
 		return new CollectionResponse<>(ruleService.getRuleService(serviceId));
 	}
 

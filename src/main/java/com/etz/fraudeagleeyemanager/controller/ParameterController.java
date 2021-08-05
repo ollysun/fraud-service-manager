@@ -1,6 +1,7 @@
 package com.etz.fraudeagleeyemanager.controller;
 
 import javax.validation.Valid;
+import javax.validation.constraints.Positive;
 
 import com.etz.fraudeagleeyemanager.constant.AppConstant;
 import org.springframework.http.HttpStatus;
@@ -42,7 +43,7 @@ public class ParameterController {
 	}
 	
 	@DeleteMapping("/{id}")
-	public BooleanResponse deleteParameter(@PathVariable Long id){
+	public BooleanResponse deleteParameter(@PathVariable @Positive Long id){
 		return new BooleanResponse(parameterService.deleteParameter(id));
 	}
 	

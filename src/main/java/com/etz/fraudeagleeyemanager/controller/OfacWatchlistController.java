@@ -3,6 +3,7 @@ package com.etz.fraudeagleeyemanager.controller;
 
 
 import javax.validation.Valid;
+import javax.validation.constraints.Positive;
 
 import com.etz.fraudeagleeyemanager.constant.AppConstant;
 import org.springframework.http.HttpStatus;
@@ -50,7 +51,7 @@ public class OfacWatchlistController {
 	}
 	
 	@DeleteMapping("/{ofacId}")
-	public BooleanResponse deleteOfac(@PathVariable Long ofacId){
+	public BooleanResponse deleteOfac(@PathVariable @Positive Long ofacId){
 		return new BooleanResponse(ofacWatchlistService.deleteOfacWatchlist(ofacId));
 	}
 }
