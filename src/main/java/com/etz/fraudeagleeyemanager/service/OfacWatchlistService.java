@@ -35,7 +35,7 @@ public class OfacWatchlistService {
 	private final OfacWatchlistRedisRepository ofacWatchlistRedisRepository;
 
 	@Transactional(rollbackFor = Throwable.class)
-	public OfacWatchlist createOfacWatchlist(OfacWatchlistRequest request){
+	public OfacWatchlist addOfacWatchlist(OfacWatchlistRequest request){
 		OfacWatchlist ofacWatchlist = new OfacWatchlist();
 		ofacWatchlist.setFullName(request.getFullName());
 		ofacWatchlist.setCategory(AppUtil.checkCategory(request.getCategory()));
@@ -49,7 +49,7 @@ public class OfacWatchlistService {
 		ofacWatchlist.setRecordBefore(null);
 		ofacWatchlist.setRequestDump(request);
 
-		return saveOfacWatchlistEntityToDatabase(ofacWatchlist);
+		return addOfacWatchlistEntityToDatabase(ofacWatchlist);
 	}
 
 	@Transactional(rollbackFor = Throwable.class)
@@ -67,7 +67,7 @@ public class OfacWatchlistService {
 		ofacWatchlist.setStatus(request.getStatus());
 		ofacWatchlist.setUpdatedBy(request.getUpdatedBy());
 
-		return saveOfacWatchlistEntityToDatabase(ofacWatchlist);
+		return addOfacWatchlistEntityToDatabase(ofacWatchlist);
 	}
 
 	private Optional<OfacWatchlist> findById(Long ofacId) {
@@ -100,32 +100,32 @@ public class OfacWatchlistService {
 		try {
 			ofacWatchlistRepository.delete(ofacWatchlist);
 		} catch (Exception ex) {
-			log.error("Error occurred while deleting OfacWatchlist entity from the database", ex);
+		//	log.error("Error occurred while deleting OfacWatchlist entity from the database", ex);
 			throw new FraudEngineException(AppConstant.ERROR_DELETING_FROM_DATABASE);
 		}
 		try {
 			ofacWatchlistRedisRepository.setHashOperations(redisTemplate);
 			ofacWatchlistRedisRepository.delete(ofacId);
 		} catch (Exception ex) {
-			log.error("Error occurred while deleting OfacWatchlist entity from Redis", ex);
+		//	log.error("Error occurred while deleting OfacWatchlist entity from Redis", ex);
 			throw new FraudEngineException(AppConstant.ERROR_DELETING_FROM_REDIS);
 		}
 		return Boolean.TRUE;
 	}
 	
-	private OfacWatchlist saveOfacWatchlistEntityToDatabase(OfacWatchlist ofacWatchlistEntity) {
+	private OfacWatchlist addOfacWatchlistEntityToDatabase(OfacWatchlist ofacWatchlistEntity) {
 		OfacWatchlist persistedOfacWatchlistEntity;
 		try {
 			persistedOfacWatchlistEntity = ofacWatchlistRepository.save(ofacWatchlistEntity);
 		} catch(Exception ex){
-			log.error("Error occurred while saving OfacWatchlist entity to database" , ex);
+		//	log.error("Error occurred while saving OfacWatchlist entity to database" , ex);
 			throw new FraudEngineException(AppConstant.ERROR_SAVING_TO_DATABASE);
 		}
-		saveOfacWatchlistEntityToRedis(persistedOfacWatchlistEntity);
+		addOfacWatchlistEntityToRedis(persistedOfacWatchlistEntity);
 		return persistedOfacWatchlistEntity;
 	}
 	
-	private void saveOfacWatchlistEntityToRedis(OfacWatchlist alreadyPersistedOfacWatchlistEntity) {
+	private void addOfacWatchlistEntityToRedis(OfacWatchlist alreadyPersistedOfacWatchlistEntity) {
 		try {
 			ofacWatchlistRedisRepository.setHashOperations(redisTemplate);
 			ofacWatchlistRedisRepository.update(alreadyPersistedOfacWatchlistEntity);

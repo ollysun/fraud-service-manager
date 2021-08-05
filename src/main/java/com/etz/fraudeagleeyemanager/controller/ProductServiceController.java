@@ -9,6 +9,7 @@ import com.etz.fraudeagleeyemanager.service.ProductService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 
@@ -18,6 +19,7 @@ import javax.validation.constraints.NotBlank;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/v1/product/service")
+@Validated
 public class ProductServiceController {
 
    private final ProductService productService;
@@ -30,9 +32,9 @@ public class ProductServiceController {
     }
 
     @PostMapping
-    public ResponseEntity<ModelResponse<ProductServiceResponse>> createProductService(@Valid @RequestBody CreateProductServiceDto request, @ApiIgnore @RequestAttribute(AppConstant.USERNAME) String username){
+    public ResponseEntity<ModelResponse<ProductServiceResponse>> addProductService(@Valid @RequestBody CreateProductServiceDto request, @ApiIgnore @RequestAttribute(AppConstant.USERNAME) String username){
         request.setCreatedBy(username);
-        ModelResponse<ProductServiceResponse> response = new ModelResponse<>(productService.createProductService(request), HttpStatus.CREATED);
+        ModelResponse<ProductServiceResponse> response = new ModelResponse<>(productService.addProductService(request), HttpStatus.CREATED);
         return ResponseEntity.status(HttpStatus.valueOf(response.getStatus())).body(response);
     }
 
@@ -57,7 +59,7 @@ public class ProductServiceController {
     public ResponseEntity<ModelResponse<ServiceDataSet>> addServiceDataset(@RequestBody @Valid DatasetProductRequest request,
                                                                            @ApiIgnore @RequestAttribute(AppConstant.USERNAME) String username){
         request.setCreatedBy(username);
-        ModelResponse<ServiceDataSet> response = new ModelResponse<>(productService.createServiceDataset(request), HttpStatus.CREATED);
+        ModelResponse<ServiceDataSet> response = new ModelResponse<>(productService.addServiceDataset(request), HttpStatus.CREATED);
         return ResponseEntity.status(HttpStatus.valueOf(response.getStatus())).body(response);
     }
 

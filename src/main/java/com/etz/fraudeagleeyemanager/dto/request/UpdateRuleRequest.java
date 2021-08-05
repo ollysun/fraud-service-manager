@@ -25,7 +25,6 @@ public class UpdateRuleRequest implements Serializable {
     private String firstDataSource;
     private String logicOperator;
     private String secondSourceVal;
-    @NotBlank(message="secondDataType cannot be empty")
     private String secondDataType;
     private String secondOperator;
     private String secondCompareVal;

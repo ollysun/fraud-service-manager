@@ -7,6 +7,7 @@ import javax.validation.Valid;
 import com.etz.fraudeagleeyemanager.constant.AppConstant;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import com.etz.fraudeagleeyemanager.dto.request.NotificationGroupRequest;
@@ -22,15 +23,16 @@ import springfox.documentation.annotations.ApiIgnore;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/v1/utility/notifyGroup")
+@Validated
 public class NotificationGroupController {
 
 	private final NotificationGroupService notificationGroupService;
 
 	@PostMapping
-	public ResponseEntity<ModelResponse<NotificationGroup>> createNotificationGroup(@Valid @RequestBody  NotificationGroupRequest request,
+	public ResponseEntity<ModelResponse<NotificationGroup>> addNotificationGroup(@Valid @RequestBody  NotificationGroupRequest request,
 																					@ApiIgnore @RequestAttribute(AppConstant.USERNAME) String username){
 		request.setCreatedBy(username);
-		ModelResponse<NotificationGroup> response = new ModelResponse<>(notificationGroupService.createNotificationGroup(request), HttpStatus.CREATED);
+		ModelResponse<NotificationGroup> response = new ModelResponse<>(notificationGroupService.addNotificationGroup(request), HttpStatus.CREATED);
 		return ResponseEntity.status(HttpStatus.valueOf(response.getStatus())).body(response);
 	}
 		
