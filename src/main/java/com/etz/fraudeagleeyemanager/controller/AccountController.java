@@ -35,10 +35,10 @@ public class AccountController {
 	private final AccountService accountService;
 	
 	@PostMapping
-	public ResponseEntity<ModelResponse<Account>> createAccount(@RequestBody @Valid AddAccountRequest request,
+	public ResponseEntity<ModelResponse<Account>> addAccount(@RequestBody @Valid AddAccountRequest request,
 																@ApiIgnore @RequestAttribute(AppConstant.USERNAME) String username) {
 		request.setCreatedBy(username);
-		ModelResponse<Account> response = new ModelResponse<>(accountService.createAccount(request), HttpStatus.CREATED);
+		ModelResponse<Account> response = new ModelResponse<>(accountService.addAccount(request), HttpStatus.CREATED);
 		return ResponseEntity.status(HttpStatus.valueOf(response.getStatus())).body(response);
 	}
 

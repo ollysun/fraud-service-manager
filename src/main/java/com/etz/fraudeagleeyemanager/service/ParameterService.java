@@ -35,7 +35,7 @@ public class ParameterService {
 	private final ParameterRepository parameterRepository;
 
 	@Transactional(rollbackFor = Throwable.class)
-	public Parameter createParameter(CreateParameterRequest request) {
+	public Parameter addParameter(CreateParameterRequest request) {
 		if (Boolean.TRUE.equals(parameterRepository.existsByNameAndOperator(request.getName(), request.getOperator()))){
 			throw new FraudEngineException("The name and operator already exists in Parameter table ");
 		}
@@ -53,7 +53,7 @@ public class ParameterService {
 		parameterEntity.setRecordBefore(null);
 		parameterEntity.setRequestDump(request);
 
-		return saveInternalWatchlistEntityToDatabase(parameterEntity);
+		return addInternalWatchlistEntityToDatabase(parameterEntity);
 	}
 
 	@Transactional(rollbackFor = Throwable.class)
@@ -71,7 +71,7 @@ public class ParameterService {
 		parameterEntity.setAuthorised(request.getAuthorised());
 		parameterEntity.setUpdatedBy(request.getUpdatedBy());
 
-		return saveInternalWatchlistEntityToDatabase(parameterEntity);
+		return addInternalWatchlistEntityToDatabase(parameterEntity);
 	}
 
 	// todo disable parameter
@@ -92,17 +92,17 @@ public class ParameterService {
 		try {
 			parameterRepository.delete(parameter);
 		} catch (Exception ex) {
-			log.error("Error occurred while deleting Parameter entity from the database", ex);
+		//	log.error("Error occurred while deleting Parameter entity from the database", ex);
 			throw new FraudEngineException(AppConstant.ERROR_DELETING_FROM_DATABASE);
 		}
 		try {
 			parameterRedisRepository.setHashOperations(redisTemplate);
 			parameterRedisRepository.delete(parameterId);
 		} catch (Exception ex) {
-			log.error("Error occurred while deleting Parameter entity from Redis", ex);
+		//	log.error("Error occurred while deleting Parameter entity from Redis", ex);
 			throw new FraudEngineException(AppConstant.ERROR_DELETING_FROM_REDIS);
 		}
-		log.info("Parameter ID deleted: INFO >>>>>>>>>>> {}", parameterId);
+		//log.info("Parameter ID deleted: INFO >>>>>>>>>>> {}", parameterId);
 		return Boolean.TRUE;
 	}
 
@@ -123,25 +123,25 @@ public class ParameterService {
 		return parameterEntityOptional;
 	}
 	
-	private Parameter saveInternalWatchlistEntityToDatabase(Parameter parameterEntity) {
+	private Parameter addInternalWatchlistEntityToDatabase(Parameter parameterEntity) {
 		Parameter persistedParameterEntity;
 		try {
 			persistedParameterEntity = parameterRepository.save(parameterEntity);
 		} catch(Exception ex){
-			log.error("Error occurred while saving Internal Watchlist entity to database" , ex);
+		//	log.error("Error occurred while saving Internal Watchlist entity to database" , ex);
 			throw new FraudEngineException(AppConstant.ERROR_SAVING_TO_DATABASE);
 		}
-		saveParameterEntityToRedis(persistedParameterEntity);
+		addParameterEntityToRedis(persistedParameterEntity);
 		return persistedParameterEntity;
 	}
 	
-	private void saveParameterEntityToRedis(Parameter alreadyPersistedParameterEntity) {
+	private void addParameterEntityToRedis(Parameter alreadyPersistedParameterEntity) {
 		try {
 			parameterRedisRepository.setHashOperations(redisTemplate);
 			parameterRedisRepository.update(alreadyPersistedParameterEntity);
 		} catch(Exception ex){
 			//TODO actually delete already saved entity from the database (NOT SOFT DELETE)
-			log.error("Error occurred while saving Internal Watchlist entity to Redis" , ex);
+			//log.error("Error occurred while saving Internal Watchlist entity to Redis" , ex);
 			throw new FraudEngineException(AppConstant.ERROR_SAVING_TO_REDIS);
 		}
 	}

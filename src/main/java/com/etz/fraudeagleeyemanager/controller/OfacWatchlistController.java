@@ -30,10 +30,10 @@ public class OfacWatchlistController {
 	private final OfacWatchlistService ofacWatchlistService;
 
 	@PostMapping
-	public ResponseEntity<ModelResponse<OfacWatchlist>> createOfac(@Valid @RequestBody  OfacWatchlistRequest request,
+	public ResponseEntity<ModelResponse<OfacWatchlist>> addOfac(@Valid @RequestBody  OfacWatchlistRequest request,
 																   @ApiIgnore @RequestAttribute(AppConstant.USERNAME) String username){
 		request.setCreatedBy(username);
-		ModelResponse<OfacWatchlist> response = new ModelResponse<>(ofacWatchlistService.createOfacWatchlist(request), HttpStatus.CREATED);
+		ModelResponse<OfacWatchlist> response = new ModelResponse<>(ofacWatchlistService.addOfacWatchlist(request), HttpStatus.CREATED);
 		return ResponseEntity.status(HttpStatus.valueOf(response.getStatus())).body(response);
 	}
 		

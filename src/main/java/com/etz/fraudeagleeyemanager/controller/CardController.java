@@ -33,10 +33,10 @@ public class CardController {
 	private final CardService cardService;
 	
 	@PostMapping
-	public ResponseEntity<ModelResponse<CardResponse>> createCard(@RequestBody @Valid CardRequest request,
+	public ResponseEntity<ModelResponse<CardResponse>> addCard(@RequestBody @Valid CardRequest request,
 																  @ApiIgnore @RequestAttribute(AppConstant.USERNAME) String username){
 		request.setCreatedBy(username);
-		ModelResponse<CardResponse> response = new ModelResponse<>(cardService.createCard(request), HttpStatus.CREATED);
+		ModelResponse<CardResponse> response = new ModelResponse<>(cardService.addCard(request), HttpStatus.CREATED);
 		return ResponseEntity.status(HttpStatus.valueOf(response.getStatus())).body(response);
 	}
 		

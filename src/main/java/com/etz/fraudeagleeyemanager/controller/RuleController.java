@@ -38,9 +38,9 @@ public class RuleController {
 	private final RuleService ruleService;
 	
 	@PostMapping
-	public ResponseEntity<ModelResponse<Rule>> createRule(@RequestBody @Valid CreateRuleRequest request, @ApiIgnore @RequestAttribute(AppConstant.USERNAME) String username){
+	public ResponseEntity<ModelResponse<Rule>> addRule(@RequestBody @Valid CreateRuleRequest request, @ApiIgnore @RequestAttribute(AppConstant.USERNAME) String username){
 		request.setCreatedBy(username);
-		ModelResponse<Rule> response = new ModelResponse<>(ruleService.createRule(request), HttpStatus.CREATED);
+		ModelResponse<Rule> response = new ModelResponse<>(ruleService.addRule(request), HttpStatus.CREATED);
 		return ResponseEntity.status(HttpStatus.valueOf(response.getStatus())).body(response);
 	}
 	

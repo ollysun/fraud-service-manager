@@ -29,10 +29,10 @@ public class NotificationGroupController {
 	private final NotificationGroupService notificationGroupService;
 
 	@PostMapping
-	public ResponseEntity<ModelResponse<NotificationGroup>> createNotificationGroup(@Valid @RequestBody  NotificationGroupRequest request,
+	public ResponseEntity<ModelResponse<NotificationGroup>> addNotificationGroup(@Valid @RequestBody  NotificationGroupRequest request,
 																					@ApiIgnore @RequestAttribute(AppConstant.USERNAME) String username){
 		request.setCreatedBy(username);
-		ModelResponse<NotificationGroup> response = new ModelResponse<>(notificationGroupService.createNotificationGroup(request), HttpStatus.CREATED);
+		ModelResponse<NotificationGroup> response = new ModelResponse<>(notificationGroupService.addNotificationGroup(request), HttpStatus.CREATED);
 		return ResponseEntity.status(HttpStatus.valueOf(response.getStatus())).body(response);
 	}
 		

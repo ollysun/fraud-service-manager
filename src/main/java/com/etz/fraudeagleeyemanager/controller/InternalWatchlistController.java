@@ -30,10 +30,10 @@ public class InternalWatchlistController {
 	private final InternalWatchlistService internalWatchlistService;
 
 	@PostMapping
-	public ResponseEntity<ModelResponse<InternalWatchlist>> createOfac(@Valid @RequestBody  InternalWatchlistRequest request,
+	public ResponseEntity<ModelResponse<InternalWatchlist>> addOfac(@Valid @RequestBody  InternalWatchlistRequest request,
 																	   @ApiIgnore @RequestAttribute(AppConstant.USERNAME) String username){
 		request.setCreatedBy(username);
-		ModelResponse<InternalWatchlist> response = new ModelResponse<>(internalWatchlistService.createInternalWatchlist(request), HttpStatus.CREATED);
+		ModelResponse<InternalWatchlist> response = new ModelResponse<>(internalWatchlistService.addInternalWatchlist(request), HttpStatus.CREATED);
 		return ResponseEntity.status(HttpStatus.valueOf(response.getStatus())).body(response);
 	}
 		
