@@ -451,7 +451,7 @@ public class ProductService {
 	}
 
 	@Transactional(readOnly = true)
-	@PreAuthorize("hasAuthority('PRODUCT.SERVICE.READ')")
+	//@PreAuthorize("hasAuthority('PRODUCT.SERVICE.READ')")
 	public Page<ProductServiceEntity> queryAllProductService(String productCode){
 		Page<ProductServiceEntity> productServiceEntityPage;
 		List<ProductServiceEntity> productServiceEntityList = productServiceRepository.findAll();

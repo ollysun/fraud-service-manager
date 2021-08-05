@@ -2,6 +2,7 @@ package com.etz.fraudeagleeyemanager.config;
 
 import java.util.Collections;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -32,6 +33,9 @@ public class ResourceServerConfig extends ResourceServerConfigurerAdapter {
 
 	private static final String RESOURCE_ID = "fraud-engine";
 
+    @Value("${security.secret-key}")
+    private String secretKey;
+
     private static final String[] SWAGGER_WHITELIST = {
             // -- swagger ui
             "/swagger", "/v2/api-docs", "/swagger-resources", "/swagger-resources/**", "/configuration/ui", "/actuator/health",
@@ -61,7 +65,7 @@ public class ResourceServerConfig extends ResourceServerConfigurerAdapter {
     public JwtAccessTokenConverter accessTokenConverter(){
         JwtAccessTokenConverter conv = new  JwtAccessTokenConverter();
         conv.setAccessTokenConverter(new CustomJwtAccessTokenConverter());
-        conv.setSigningKey("AuthETransactNgView2021");
+        conv.setSigningKey(secretKey);
         return conv;
     }
 
