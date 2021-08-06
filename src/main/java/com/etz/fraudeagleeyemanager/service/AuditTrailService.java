@@ -30,6 +30,6 @@ public class AuditTrailService {
 		eventLogEntity.setEventType(baseAuditEntity.getEventType());
 		eventLogEntity.setEventTime(LocalDateTime.now());
 		
-		eventLogRepository.save(eventLogEntity);
+	//	eventLogRepository.save(eventLogEntity);
 	}
 }

@@ -46,7 +46,7 @@ public class ReportingService {
             report.setName(request.getName());
             report.setDescription(request.getDescription());
             report.setCreatedBy(request.getCreatedBy());
-            reportRepository.save(report);
+           // reportRepository.save(report);
 
             // for auditing purpose for CREATE
             report.setEntityId(null);
@@ -86,7 +86,9 @@ public class ReportingService {
         reportScheduler.setEntityId(null);
         reportScheduler.setRecordBefore(null);
         reportScheduler.setRequestDump(request);
-        return reportSchedulerRepository.save(reportScheduler);
+        ReportScheduler reportSchedulerResult = new ReportScheduler();
+        //reportSchedulerResult = reportSchedulerRepository.save(reportScheduler);
+        return reportSchedulerResult;
     }
 
     @Transactional(rollbackFor = Throwable.class)
@@ -112,7 +114,10 @@ public class ReportingService {
         reportScheduler.setEntityId(null);
         reportScheduler.setRecordBefore(null);
         reportScheduler.setRequestDump(request);
-        return reportSchedulerRepository.save(reportScheduler);
+
+        ReportScheduler reportSchedulerResult = new ReportScheduler();
+       // reportSchedulerResult = reportSchedulerRepository.save(reportScheduler);
+        return reportSchedulerResult;
     }
 
     @Transactional(readOnly = true)

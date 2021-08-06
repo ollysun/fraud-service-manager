@@ -86,9 +86,9 @@ public class ProductService {
 	}
 
 	private ProductEntity addProductEntityToDatabase(ProductEntity accountEntity) {
-		ProductEntity persistedProductEntity;
+		ProductEntity persistedProductEntity = new ProductEntity();
 		try {
-			persistedProductEntity = productEntityRepository.save(accountEntity);
+			//persistedProductEntity = productEntityRepository.save(accountEntity);
 		} catch (Exception ex) {
 		//	log.error("Error occurred while saving product entity to database", ex);
 			throw new FraudEngineException(AppConstant.ERROR_SAVING_TO_DATABASE);
@@ -370,9 +370,9 @@ public class ProductService {
 
 
 	private ServiceDataSet saveServiceDatasetEntityToDatabase(ServiceDataSet accountEntity) {
-		ServiceDataSet persistedServiceDatasetEntity;
+		ServiceDataSet persistedServiceDatasetEntity = new ServiceDataSet();
 		try {
-			persistedServiceDatasetEntity = productDataSetRepository.save(accountEntity);
+		//	persistedServiceDatasetEntity = productDataSetRepository.save(accountEntity);
 		} catch (Exception ex) {
 		//	log.error("Error occurred while saving product entity to database", ex);
 			throw new FraudEngineException(AppConstant.ERROR_SAVING_TO_DATABASE);
@@ -416,7 +416,9 @@ public class ProductService {
 			productService.setCreatedBy(request.getCreatedBy());
 			productService.setDescription(request.getDescription());
 			productService.setProductEntity(productEntityOptional.get());
-			return outputCreatedProductService(productServiceRepository.save(productService));
+			ProductServiceEntity productServiceEntity = new ProductServiceEntity();
+			//productServiceEntity = productServiceRepository.save(productService);
+			return outputCreatedProductService(productServiceEntity);
 		} catch (Exception ex) {
 			throw new FraudEngineException(AppConstant.ERROR_SAVING_TO_REDIS);
 		}
@@ -435,7 +437,9 @@ public class ProductService {
 				productServiceEntity.setUpdatedBy(request.getUpdatedBy());
 				productServiceEntity.setCallbackUrl(request.getCallback());
 				productServiceEntity.setProductEntity(productEntityOptional.get());
-			return outputCreatedProductService(productServiceRepository.save(productServiceEntity));
+			ProductServiceEntity productServiceEntityResult = new ProductServiceEntity();
+			//productServiceEntityResult = productServiceRepository.save(productServiceEntity);
+			return outputCreatedProductService(productServiceEntityResult);
 			}).orElseThrow(()  -> new ResourceNotFoundException("Product service not found for this id " + request.getServiceId()));
 	}
 

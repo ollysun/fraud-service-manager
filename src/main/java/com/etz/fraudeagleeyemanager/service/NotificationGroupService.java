@@ -105,12 +105,12 @@ public class NotificationGroupService {
 	
 	private NotificationGroup addNotificationGroupEntityToDatabase(NotificationGroup notificationGroupEntity) {
 		NotificationGroup persistedNotificationGrouplistEntity = new NotificationGroup();
-		try {
-			persistedNotificationGrouplistEntity = notificationGroupRepository.save(notificationGroupEntity);
-		} catch(Exception ex){
-		//	log.error("Error occurred while saving NotificationGroup entity to database" , ex);
-			throw new FraudEngineException(AppConstant.ERROR_SAVING_TO_DATABASE);
-		}
+//		try {
+//			persistedNotificationGrouplistEntity = notificationGroupRepository.save(notificationGroupEntity);
+//		} catch(Exception ex){
+//		//	log.error("Error occurred while saving NotificationGroup entity to database" , ex);
+//			throw new FraudEngineException(AppConstant.ERROR_SAVING_TO_DATABASE);
+//		}
 		addNotificationGroupEntityToRedis(persistedNotificationGrouplistEntity);
 		return persistedNotificationGrouplistEntity;
 	}

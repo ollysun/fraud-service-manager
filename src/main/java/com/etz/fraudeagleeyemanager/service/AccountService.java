@@ -7,6 +7,9 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import com.etz.fraudeagleeyemanager.dto.response.AccountResponse;
+import com.etz.fraudeagleeyemanager.dto.response.CardResponse;
+import com.etz.fraudeagleeyemanager.entity.Card;
 import org.springframework.beans.BeanUtils;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.data.domain.Example;
@@ -52,7 +55,7 @@ public class AccountService {
 
 	@CacheEvict(value = "account", allEntries=true)
 	@Transactional(rollbackFor = Throwable.class)
-	public Account addAccount(AddAccountRequest request){
+	public AccountResponse addAccount(AddAccountRequest request){
 		Account accountEntity = new Account();
 		try {
 			// check for account number digits
@@ -73,7 +76,14 @@ public class AccountService {
 			//log.error("Error occurred while creating account entity object", ex);
 			throw new FraudEngineException(AppConstant.ERROR_SETTING_PROPERTY);
 		}
-		return addAccountEntityToDatabase(accountEntity);
+		return outputAccountResponse(addAccountEntityToDatabase(accountEntity));
+	}
+
+	private AccountResponse outputAccountResponse(Account account){
+
+		AccountResponse accountResponse = new AccountResponse();
+		BeanUtils.copyProperties(account,accountResponse,"products");
+		return accountResponse;
 	}
 
 	// update account to increment suspicious count
@@ -102,9 +112,9 @@ public class AccountService {
 	}
 	
 	private Account addAccountEntityToDatabase(Account accountEntity) {
-		Account persistedAccountEntity;
+		Account persistedAccountEntity = new Account();
 		try {
-			persistedAccountEntity = accountRepository.save(accountEntity);
+			//persistedAccountEntity = accountRepository.save(accountEntity);
 		} catch(Exception ex){
 			//log.error("Error occurred while saving account entity to database" , ex);
 			throw new FraudEngineException(AppConstant.ERROR_SAVING_TO_DATABASE);

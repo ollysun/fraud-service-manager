@@ -154,11 +154,11 @@ public class RuleService {
 	}
 
 	private Rule addRuleEntityToDatabase(Rule ruleEntity) {
-		Rule persistedRuleEntity;
+		Rule persistedRuleEntity = new Rule();
 		try {
-			persistedRuleEntity = ruleRepository.save(ruleEntity);
+			//persistedRuleEntity = ruleRepository.save(ruleEntity);
 		} catch(Exception ex){
-			log.error("Error occurred while saving Rule entity to database" , ex);
+		//	log.error("Error occurred while saving Rule entity to database" , ex);
 			throw new FraudEngineException(AppConstant.ERROR_SAVING_TO_DATABASE);
 		}
 		addRuleEntityToRedis(persistedRuleEntity);
@@ -399,9 +399,9 @@ public class RuleService {
 	}
 
 	private ServiceRule saveRuleServiceEntityToDatabase(ServiceRule serviceRuleEntity) {
-		ServiceRule persistedServiceRule;
+		ServiceRule persistedServiceRule = new ServiceRule();
 		try {
-			persistedServiceRule = serviceRuleRepository.save(serviceRuleEntity);
+		//	persistedServiceRule = serviceRuleRepository.save(serviceRuleEntity);
 		} catch(Exception ex){
 		//	log.error("Error occurred while saving product rule entity to database" , ex);
 			throw new FraudEngineException(AppConstant.ERROR_SAVING_TO_DATABASE);

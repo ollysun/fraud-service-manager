@@ -52,7 +52,7 @@ public class InternalWatchlistService {
 
 	@Transactional(rollbackFor = Throwable.class)
 	public InternalWatchlist updateInternalWatchlist(UpdateInternalWatchlistRequest request){
-		InternalWatchlist internalWatchlist = findById(request.getWatchId()).get();
+		InternalWatchlist internalWatchlist = findById(request.getWatchId());
 		// for auditing purpose for UPDATE
 		internalWatchlist.setEntityId(String.valueOf(request.getWatchId()));
 		internalWatchlist.setRecordBefore(JsonConverter.objectToJson(internalWatchlist));
@@ -66,12 +66,12 @@ public class InternalWatchlistService {
 		return addInternalWatchlistEntityToDatabase(internalWatchlist);
 	}
 
-	private Optional<InternalWatchlist> findById(Long watchId) {
+	private InternalWatchlist findById(Long watchId) {
 		Optional<InternalWatchlist> internalWatchlistOptional = internalWatchlistRepository.findById(watchId);
 		if(!internalWatchlistOptional.isPresent()) {
 			throw new ResourceNotFoundException("BVN not found on internal watchlist for ID " + watchId);
 		}
-		return internalWatchlistOptional;
+		return internalWatchlistOptional.get();
 	}
 
 	@Transactional(readOnly = true)
@@ -79,13 +79,13 @@ public class InternalWatchlistService {
 		if (Objects.isNull(watchId)) {
 			return internalWatchlistRepository.findAll(PageRequestUtil.getPageRequest());
 		}
-		Optional<InternalWatchlist> internalWatchlistOptional = findById(watchId);
-		return internalWatchlistRepository.findAll(Example.of(internalWatchlistOptional.get()), PageRequestUtil.getPageRequest());
+		InternalWatchlist internalWatchlistOptional = findById(watchId);
+		return internalWatchlistRepository.findAll(Example.of(internalWatchlistOptional), PageRequestUtil.getPageRequest());
 	}
 
 	@Transactional(rollbackFor = Throwable.class)
 	public boolean deleteInternalWatchlist(Long watchId) {
-		InternalWatchlist internalWatchlist = findById(watchId).get();
+		InternalWatchlist internalWatchlist = findById(watchId);
 		// for auditing purpose for DELETE
 		internalWatchlist.setEntityId(String.valueOf(watchId));
 		internalWatchlist.setRecordBefore(JsonConverter.objectToJson(internalWatchlist));

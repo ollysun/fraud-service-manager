@@ -7,6 +7,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import org.checkerframework.checker.units.qual.C;
 import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.Page;
@@ -111,13 +112,13 @@ public class CardService {
 	}
 
 	private Card addCardEntityToDatabase(Card cardEntity) {
-		Card persistedCardEntity;
-		try {
-			persistedCardEntity = cardRepository.save(cardEntity);
-		} catch(Exception ex){
-			log.error("Error occurred while saving card entity to database" , ex);
-			throw new FraudEngineException(AppConstant.ERROR_SAVING_TO_DATABASE);
-		}
+		Card persistedCardEntity = new Card();
+//		try {
+//		//	persistedCardEntity = cardRepository.save(cardEntity);
+//		} catch(Exception ex){
+//			log.error("Error occurred while saving card entity to database" , ex);
+//			throw new FraudEngineException(AppConstant.ERROR_SAVING_TO_DATABASE);
+//		}
 		addCardEntityToRedis(persistedCardEntity);
 		return persistedCardEntity;
 	}
@@ -235,7 +236,7 @@ public class CardService {
 	private CardProduct addCardProductEntityToDatabase(CardProduct cardProductEntity) {
 		CardProduct persistedCardProductEntity = new CardProduct();
 		try {
-			persistedCardProductEntity = cardProductRepository.save(cardProductEntity);
+			//persistedCardProductEntity = cardProductRepository.save(cardProductEntity);
 		} catch(Exception ex){
 			//log.error("Error occurred while saving card product entity to database" , ex);
 			throw new FraudEngineException(AppConstant.ERROR_SAVING_TO_DATABASE);

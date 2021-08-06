@@ -54,7 +54,7 @@ public class OfacWatchlistService {
 
 	@Transactional(rollbackFor = Throwable.class)
 	public OfacWatchlist updateOfacWatchlist(UpdateOfacWatchlistRequest request){
-		OfacWatchlist ofacWatchlist = findById(request.getOfacId()).get();
+		OfacWatchlist ofacWatchlist = findById(request.getOfacId());
 
 		// for auditing purpose for UPDATE
 		ofacWatchlist.setEntityId(String.valueOf(request.getOfacId()));
@@ -70,12 +70,12 @@ public class OfacWatchlistService {
 		return addOfacWatchlistEntityToDatabase(ofacWatchlist);
 	}
 
-	private Optional<OfacWatchlist> findById(Long ofacId) {
+	private OfacWatchlist findById(Long ofacId) {
 		Optional<OfacWatchlist> ofacWatchlistOptional = ofacWatchlistRepository.findById(ofacId);
 		if(!ofacWatchlistOptional.isPresent()) {
 			throw new ResourceNotFoundException("Person, with ID "+ ofacId +", not found on Ofac watchlist");
 		}
-		return ofacWatchlistOptional;
+		return ofacWatchlistOptional.get();
 	}
 
 	@Transactional(readOnly = true,rollbackFor = Throwable.class)
@@ -83,13 +83,13 @@ public class OfacWatchlistService {
 		if (Objects.isNull(ofacId)) {
 			return ofacWatchlistRepository.findAll(PageRequestUtil.getPageRequest());
 		}
-		Optional<OfacWatchlist> ofacWatchlistOptional = findById(ofacId);
-		return ofacWatchlistRepository.findAll(Example.of(ofacWatchlistOptional.get()), PageRequestUtil.getPageRequest());
+		OfacWatchlist ofacWatchlistOptional = findById(ofacId);
+		return ofacWatchlistRepository.findAll(Example.of(ofacWatchlistOptional), PageRequestUtil.getPageRequest());
 	}
 
 	@Transactional(rollbackFor = Throwable.class)
 	public boolean deleteOfacWatchlist(Long ofacId) {
-		OfacWatchlist ofacWatchlist = findById(ofacId).get();
+		OfacWatchlist ofacWatchlist = findById(ofacId);
 
 		// for auditing purpose for DELETE
 		ofacWatchlist.setEntityId(String.valueOf(ofacId));
