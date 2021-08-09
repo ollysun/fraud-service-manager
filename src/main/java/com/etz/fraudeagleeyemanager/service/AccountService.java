@@ -145,8 +145,8 @@ public class AccountService {
 	}
 
 	@Transactional(propagation = Propagation.REQUIRED, rollbackFor = Throwable.class)
-	public AccountProduct mapAccountProduct(AccountToProductRequest request) {
-		
+	public AccountProductResponse mapAccountProduct(AccountToProductRequest request) {
+		AccountProductResponse accountProductResponse = new AccountProductResponse();
 		if(!productRepository.findByCodeAndDeletedFalse(request.getProductCode()).isPresent()){
 			throw new ResourceNotFoundException("Product not found for this code " + request.getProductCode());
 		}
@@ -170,7 +170,9 @@ public class AccountService {
 			//log.error("Error occurred while creating account product entity object", ex);
 			throw new FraudEngineException(AppConstant.ERROR_SETTING_PROPERTY);
 		}
-		return addAccountProductEntityToDatabase(accountProductEntity);
+		BeanUtils.copyProperties(accountProductEntity, accountProductResponse, "account","productEntity");
+		return accountProductResponse;
+		//return addAccountProductEntityToDatabase(accountProductEntity);
 	}
 
 	@Transactional(propagation = Propagation.REQUIRED, rollbackFor = Throwable.class)

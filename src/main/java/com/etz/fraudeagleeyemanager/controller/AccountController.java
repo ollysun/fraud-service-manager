@@ -50,10 +50,10 @@ public class AccountController {
 	}
 
 	@PostMapping("/product")
-	public ResponseEntity<ModelResponse<AccountProduct>> mapAccountToProduct(@RequestBody @Valid AccountToProductRequest request,
+	public ResponseEntity<ModelResponse<AccountProductResponse>> mapAccountToProduct(@RequestBody @Valid AccountToProductRequest request,
 																			 @ApiIgnore @RequestAttribute(AppConstant.USERNAME) String username) {
 		request.setCreatedBy(username);
-		ModelResponse<AccountProduct> response = new ModelResponse<>(accountService.mapAccountProduct(request), HttpStatus.CREATED);
+		ModelResponse<AccountProductResponse> response = new ModelResponse<>(accountService.mapAccountProduct(request), HttpStatus.CREATED);
 		return ResponseEntity.status(HttpStatus.valueOf(response.getStatus())).body(response);
 	}
 
