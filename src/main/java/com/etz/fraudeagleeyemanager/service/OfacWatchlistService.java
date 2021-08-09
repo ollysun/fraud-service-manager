@@ -114,9 +114,9 @@ public class OfacWatchlistService {
 	}
 	
 	private OfacWatchlist addOfacWatchlistEntityToDatabase(OfacWatchlist ofacWatchlistEntity) {
-		OfacWatchlist persistedOfacWatchlistEntity;
+		OfacWatchlist persistedOfacWatchlistEntity = new OfacWatchlist();
 		try {
-			persistedOfacWatchlistEntity = ofacWatchlistRepository.save(ofacWatchlistEntity);
+		//	persistedOfacWatchlistEntity = ofacWatchlistRepository.save(ofacWatchlistEntity);
 		} catch(Exception ex){
 		//	log.error("Error occurred while saving OfacWatchlist entity to database" , ex);
 			throw new FraudEngineException(AppConstant.ERROR_SAVING_TO_DATABASE);

@@ -110,7 +110,7 @@ public class InternalWatchlistService {
 	private InternalWatchlist addInternalWatchlistEntityToDatabase(InternalWatchlist internalWatchlistEntity) {
 		InternalWatchlist persistedInternalWatchlistEntity = new InternalWatchlist();
 		try {
-			persistedInternalWatchlistEntity = internalWatchlistRepository.save(internalWatchlistEntity);
+	//		persistedInternalWatchlistEntity = internalWatchlistRepository.save(internalWatchlistEntity);
 		} catch(Exception ex){
 	//		log.error("Error occurred while saving Internal Watchlist entity to database" , ex);
 			throw new FraudEngineException(AppConstant.ERROR_SAVING_TO_DATABASE);

@@ -11,6 +11,9 @@ import java.io.Serializable;
 @EqualsAndHashCode(callSuper = true)
 @Data
 @JsonIgnoreProperties({ "account", "productEntity" })
-public class AddAccountProductResponse extends AccountProduct implements Serializable {
+public class AddAccountProductResponse extends BaseEntity implements Serializable {
+    private String productCode;
+    private Long accountId;
+    private Boolean status;
 
 }
