@@ -94,25 +94,25 @@ public class InternalWatchlistService {
 		try {
 			internalWatchlistRepository.delete(internalWatchlist);
 		} catch(Exception ex){
-		//	log.error("Error occurred while deleting Internal Watchlist entity from the database" , ex);
+			log.error("Error occurred while deleting Internal Watchlist entity from the database" , ex);
 			throw new FraudEngineException(AppConstant.ERROR_DELETING_FROM_DATABASE);
 		}
 		try {
 			internalWatchlistRedisRepository.setHashOperations(redisTemplate);
 			internalWatchlistRedisRepository.delete(watchId);
 		} catch (Exception ex) {
-		//	log.error("Error occurred while deleting Internal Watchlist entity from Redis", ex);
+			log.error("Error occurred while deleting Internal Watchlist entity from Redis", ex);
 			throw new FraudEngineException(AppConstant.ERROR_DELETING_FROM_REDIS);
 		}
 		return Boolean.TRUE;
 	}
 	
 	private InternalWatchlist addInternalWatchlistEntityToDatabase(InternalWatchlist internalWatchlistEntity) {
-		InternalWatchlist persistedInternalWatchlistEntity = new InternalWatchlist();
+		InternalWatchlist persistedInternalWatchlistEntity;
 		try {
-	//		persistedInternalWatchlistEntity = internalWatchlistRepository.save(internalWatchlistEntity);
+			persistedInternalWatchlistEntity = internalWatchlistRepository.save(internalWatchlistEntity);
 		} catch(Exception ex){
-	//		log.error("Error occurred while saving Internal Watchlist entity to database" , ex);
+			log.error("Error occurred while saving Internal Watchlist entity to database" , ex);
 			throw new FraudEngineException(AppConstant.ERROR_SAVING_TO_DATABASE);
 		}
 		addInternalWatchlistEntityToRedis(persistedInternalWatchlistEntity);

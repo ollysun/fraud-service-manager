@@ -154,11 +154,11 @@ public class RuleService {
 	}
 
 	private Rule addRuleEntityToDatabase(Rule ruleEntity) {
-		Rule persistedRuleEntity = new Rule();
+		Rule persistedRuleEntity;
 		try {
-			//persistedRuleEntity = ruleRepository.save(ruleEntity);
+			persistedRuleEntity = ruleRepository.save(ruleEntity);
 		} catch(Exception ex){
-		//	log.error("Error occurred while saving Rule entity to database" , ex);
+			log.error("Error occurred while saving Rule entity to database" , ex);
 			throw new FraudEngineException(AppConstant.ERROR_SAVING_TO_DATABASE);
 		}
 		addRuleEntityToRedis(persistedRuleEntity);
@@ -302,7 +302,7 @@ public class RuleService {
 			serviceRuleEntity.setRecordBefore(null);
 			serviceRuleEntity.setRequestDump(request);
 		} catch (Exception ex) {
-		//	log.error("Error occurred while creating Product Rule entity object", ex);
+			log.error("Error occurred while creating Product Rule entity object", ex);
 			throw new FraudEngineException(AppConstant.ERROR_SETTING_PROPERTY);
 		}
 		return saveRuleServiceEntityToDatabase(serviceRuleEntity);
@@ -337,7 +337,7 @@ public class RuleService {
 				prodRuleEntity.setAuthorised(request.getAuthorised());
 				prodRuleEntity.setUpdatedBy(request.getUpdatedBy());
 			} catch (Exception ex) {
-			//	log.error("Error occurred while creating Product Rule entity object", ex);
+				log.error("Error occurred while creating Product Rule entity object", ex);
 				throw new FraudEngineException(AppConstant.ERROR_SETTING_PROPERTY);
 			}
 			updatedServiceRuleEntity.add(saveRuleServiceEntityToDatabase(prodRuleEntity));
@@ -399,11 +399,11 @@ public class RuleService {
 	}
 
 	private ServiceRule saveRuleServiceEntityToDatabase(ServiceRule serviceRuleEntity) {
-		ServiceRule persistedServiceRule = new ServiceRule();
+		ServiceRule persistedServiceRule;
 		try {
-		//	persistedServiceRule = serviceRuleRepository.save(serviceRuleEntity);
+			persistedServiceRule = serviceRuleRepository.save(serviceRuleEntity);
 		} catch(Exception ex){
-		//	log.error("Error occurred while saving product rule entity to database" , ex);
+			log.error("Error occurred while saving product rule entity to database" , ex);
 			throw new FraudEngineException(AppConstant.ERROR_SAVING_TO_DATABASE);
 		}
 		addAccountProductEntityToRedis(persistedServiceRule);
@@ -416,7 +416,7 @@ public class RuleService {
 			productRuleRedisRepository.update(alreadyPersistedServiceRule);
 		} catch(Exception ex){
 			//TODO actually delete already saved entity from the database (NOT SOFT DELETE)
-		//	log.error("Error occurred while saving product rule to Redis" , ex);
+			log.error("Error occurred while saving product rule to Redis" , ex);
 			throw new FraudEngineException(AppConstant.ERROR_SAVING_TO_REDIS);
 		}
 	}

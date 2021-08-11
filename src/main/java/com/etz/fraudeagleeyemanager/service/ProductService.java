@@ -79,18 +79,18 @@ public class ProductService {
 
 
 		} catch (Exception ex) {
-		//	log.error("Error occurred while creating product entity object", ex);
+			log.error("Error occurred while creating product entity object", ex);
 			throw new FraudEngineException(AppConstant.ERROR_SETTING_PROPERTY);
 		}
 		return outputProductResponse(addProductEntityToDatabase(productEntity));
 	}
 
 	private ProductEntity addProductEntityToDatabase(ProductEntity accountEntity) {
-		ProductEntity persistedProductEntity = new ProductEntity();
+		ProductEntity persistedProductEntity;
 		try {
-			//persistedProductEntity = productEntityRepository.save(accountEntity);
+			persistedProductEntity = productEntityRepository.save(accountEntity);
 		} catch (Exception ex) {
-		//	log.error("Error occurred while saving product entity to database", ex);
+			log.error("Error occurred while saving product entity to database", ex);
 			throw new FraudEngineException(AppConstant.ERROR_SAVING_TO_DATABASE);
 		}
 		addProductEntityToRedis(persistedProductEntity);
@@ -103,7 +103,7 @@ public class ProductService {
 			productRedisRepository.update(alreadyPersistedProductEntity);
 		} catch (Exception ex) {
 			// TODO actually delete already saved entity from the database (NOT SOFT DELETE)
-		//	log.error("Error occurred while saving product entity to Redis", ex);
+			log.error("Error occurred while saving product entity to Redis", ex);
 			throw new FraudEngineException(AppConstant.ERROR_SAVING_TO_REDIS);
 		}
 	}
@@ -372,9 +372,9 @@ public class ProductService {
 	private ServiceDataSet saveServiceDatasetEntityToDatabase(ServiceDataSet accountEntity) {
 		ServiceDataSet persistedServiceDatasetEntity = new ServiceDataSet();
 		try {
-		//	persistedServiceDatasetEntity = productDataSetRepository.save(accountEntity);
+			persistedServiceDatasetEntity = productDataSetRepository.save(accountEntity);
 		} catch (Exception ex) {
-		//	log.error("Error occurred while saving product entity to database", ex);
+			log.error("Error occurred while saving product entity to database", ex);
 			throw new FraudEngineException(AppConstant.ERROR_SAVING_TO_DATABASE);
 		}
 		addServiceDatasetEntityToRedis(persistedServiceDatasetEntity);
@@ -387,7 +387,7 @@ public class ProductService {
 			productDatasetRedisRepository.update(alreadyPersistedServiceDatasetEntity);
 		} catch (Exception ex) {
 			// TODO actually delete already saved entity from the database (NOT SOFT DELETE)
-		//	log.error("Error occurred while saving product entity to Redis", ex);
+			log.error("Error occurred while saving product entity to Redis", ex);
 			throw new FraudEngineException(AppConstant.ERROR_SAVING_TO_REDIS);
 		}
 	}
@@ -416,8 +416,8 @@ public class ProductService {
 			productService.setCreatedBy(request.getCreatedBy());
 			productService.setDescription(request.getDescription());
 			productService.setProductEntity(productEntityOptional.get());
-			ProductServiceEntity productServiceEntity = new ProductServiceEntity();
-			//productServiceEntity = productServiceRepository.save(productService);
+			ProductServiceEntity productServiceEntity;
+			productServiceEntity = productServiceRepository.save(productService);
 			return outputCreatedProductService(productServiceEntity);
 		} catch (Exception ex) {
 			throw new FraudEngineException(AppConstant.ERROR_SAVING_TO_REDIS);
@@ -437,8 +437,8 @@ public class ProductService {
 				productServiceEntity.setUpdatedBy(request.getUpdatedBy());
 				productServiceEntity.setCallbackUrl(request.getCallback());
 				productServiceEntity.setProductEntity(productEntityOptional.get());
-			ProductServiceEntity productServiceEntityResult = new ProductServiceEntity();
-			//productServiceEntityResult = productServiceRepository.save(productServiceEntity);
+			ProductServiceEntity productServiceEntityResult;
+			productServiceEntityResult = productServiceRepository.save(productServiceEntity);
 			return outputCreatedProductService(productServiceEntityResult);
 			}).orElseThrow(()  -> new ResourceNotFoundException("Product service not found for this id " + request.getServiceId()));
 	}
@@ -490,7 +490,7 @@ public class ProductService {
 			productServiceRedisRepository.setHashOperations(redisTemplate);
 			productServiceRedisRepository.update(alreadyPersistedProductServiceEntity);
 		} catch (Exception ex) {
-		//	log.error("Error occurred while saving product entity to Redis", ex);
+			log.error("Error occurred while saving product entity to Redis", ex);
 			throw new FraudEngineException(AppConstant.ERROR_SAVING_TO_REDIS);
 		}
 	}

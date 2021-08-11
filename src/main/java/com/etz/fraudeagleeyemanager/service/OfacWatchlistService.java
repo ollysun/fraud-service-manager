@@ -107,18 +107,18 @@ public class OfacWatchlistService {
 			ofacWatchlistRedisRepository.setHashOperations(redisTemplate);
 			ofacWatchlistRedisRepository.delete(ofacId);
 		} catch (Exception ex) {
-		//	log.error("Error occurred while deleting OfacWatchlist entity from Redis", ex);
+			log.error("Error occurred while deleting OfacWatchlist entity from Redis", ex);
 			throw new FraudEngineException(AppConstant.ERROR_DELETING_FROM_REDIS);
 		}
 		return Boolean.TRUE;
 	}
 	
 	private OfacWatchlist addOfacWatchlistEntityToDatabase(OfacWatchlist ofacWatchlistEntity) {
-		OfacWatchlist persistedOfacWatchlistEntity = new OfacWatchlist();
+		OfacWatchlist persistedOfacWatchlistEntity;
 		try {
-		//	persistedOfacWatchlistEntity = ofacWatchlistRepository.save(ofacWatchlistEntity);
+			persistedOfacWatchlistEntity = ofacWatchlistRepository.save(ofacWatchlistEntity);
 		} catch(Exception ex){
-		//	log.error("Error occurred while saving OfacWatchlist entity to database" , ex);
+			log.error("Error occurred while saving OfacWatchlist entity to database" , ex);
 			throw new FraudEngineException(AppConstant.ERROR_SAVING_TO_DATABASE);
 		}
 		addOfacWatchlistEntityToRedis(persistedOfacWatchlistEntity);

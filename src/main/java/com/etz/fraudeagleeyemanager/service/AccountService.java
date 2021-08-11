@@ -112,11 +112,11 @@ public class AccountService {
 	}
 	
 	private Account addAccountEntityToDatabase(Account accountEntity) {
-		Account persistedAccountEntity = new Account();
+		Account persistedAccountEntity;
 		try {
-			//persistedAccountEntity = accountRepository.save(accountEntity);
+			persistedAccountEntity = accountRepository.save(accountEntity);
 		} catch(Exception ex){
-			//log.error("Error occurred while saving account entity to database" , ex);
+			log.error("Error occurred while saving account entity to database" , ex);
 			throw new FraudEngineException(AppConstant.ERROR_SAVING_TO_DATABASE);
 		}
 		addAccountEntityToRedis(persistedAccountEntity);
@@ -167,7 +167,7 @@ public class AccountService {
 			accountProductEntity.setRecordBefore(null);
 			accountProductEntity.setRequestDump(request);
 		} catch(Exception ex){
-			//log.error("Error occurred while creating account product entity object", ex);
+			log.error("Error occurred while creating account product entity object", ex);
 			throw new FraudEngineException(AppConstant.ERROR_SETTING_PROPERTY);
 		}
 		BeanUtils.copyProperties(accountProductEntity, accountProductResponse, "account","productEntity");
@@ -206,7 +206,7 @@ public class AccountService {
 				accountProduct.setStatus(request.getStatus());
 				accountProduct.setUpdatedBy(request.getUpdatedBy());
 			} catch (Exception ex) {
-			//	log.error("Error occurred while creating account product entity object", ex);
+				log.error("Error occurred while creating account product entity object", ex);
 				throw new FraudEngineException(AppConstant.ERROR_SETTING_PROPERTY);
 			}
 			BeanUtils.copyProperties(addAccountProductEntityToDatabase(accountProduct), accountProductResponse);
@@ -216,13 +216,13 @@ public class AccountService {
 	}
 	
 	private AccountProduct addAccountProductEntityToDatabase(AccountProduct accountProductEntity) {
-		AccountProduct persistedAccountProductEntity = new AccountProduct();
-//		try {
-//			persistedAccountProductEntity = accountProductRepository.save(accountProductEntity);
-//		} catch(Exception ex){
-//			log.error("Error occurred while saving account product entity to database" , ex);
-//			throw new FraudEngineException(AppConstant.ERROR_SAVING_TO_DATABASE);
-//		}
+		AccountProduct persistedAccountProductEntity;
+		try {
+			persistedAccountProductEntity = accountProductRepository.save(accountProductEntity);
+		} catch(Exception ex){
+			log.error("Error occurred while saving account product entity to database" , ex);
+			throw new FraudEngineException(AppConstant.ERROR_SAVING_TO_DATABASE);
+		}
 		addAccountProductEntityToRedis(persistedAccountProductEntity);
 		return persistedAccountProductEntity;
 	}

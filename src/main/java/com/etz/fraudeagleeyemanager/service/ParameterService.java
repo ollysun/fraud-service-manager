@@ -92,17 +92,17 @@ public class ParameterService {
 		try {
 			parameterRepository.delete(parameter);
 		} catch (Exception ex) {
-		//	log.error("Error occurred while deleting Parameter entity from the database", ex);
+			log.error("Error occurred while deleting Parameter entity from the database", ex);
 			throw new FraudEngineException(AppConstant.ERROR_DELETING_FROM_DATABASE);
 		}
 		try {
 			parameterRedisRepository.setHashOperations(redisTemplate);
 			parameterRedisRepository.delete(parameterId);
 		} catch (Exception ex) {
-		//	log.error("Error occurred while deleting Parameter entity from Redis", ex);
+			log.error("Error occurred while deleting Parameter entity from Redis", ex);
 			throw new FraudEngineException(AppConstant.ERROR_DELETING_FROM_REDIS);
 		}
-		//log.info("Parameter ID deleted: INFO >>>>>>>>>>> {}", parameterId);
+		log.info("Parameter ID deleted: INFO >>>>>>>>>>> {}", parameterId);
 		return Boolean.TRUE;
 	}
 
@@ -124,11 +124,11 @@ public class ParameterService {
 	}
 	
 	private Parameter addInternalWatchlistEntityToDatabase(Parameter parameterEntity) {
-		Parameter persistedParameterEntity = new Parameter();
+		Parameter persistedParameterEntity;
 		try {
-			//persistedParameterEntity = parameterRepository.save(parameterEntity);
+			persistedParameterEntity = parameterRepository.save(parameterEntity);
 		} catch(Exception ex){
-		//	log.error("Error occurred while saving Internal Watchlist entity to database" , ex);
+			log.error("Error occurred while saving Internal Watchlist entity to database" , ex);
 			throw new FraudEngineException(AppConstant.ERROR_SAVING_TO_DATABASE);
 		}
 		addParameterEntityToRedis(persistedParameterEntity);
@@ -141,7 +141,7 @@ public class ParameterService {
 			parameterRedisRepository.update(alreadyPersistedParameterEntity);
 		} catch(Exception ex){
 			//TODO actually delete already saved entity from the database (NOT SOFT DELETE)
-			//log.error("Error occurred while saving Internal Watchlist entity to Redis" , ex);
+			log.error("Error occurred while saving Internal Watchlist entity to Redis" , ex);
 			throw new FraudEngineException(AppConstant.ERROR_SAVING_TO_REDIS);
 		}
 	}
