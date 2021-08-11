@@ -54,7 +54,8 @@ public class AccountController {
 																			 @ApiIgnore @RequestAttribute(AppConstant.USERNAME) String username) {
 		request.setCreatedBy(username);
 		ModelResponse<AccountProductResponse> response = new ModelResponse<>(accountService.mapAccountProduct(request), HttpStatus.CREATED);
-		return ResponseEntity.status(HttpStatus.valueOf(response.getStatus())).body(response);
+		return null;
+		//return ResponseEntity.status(HttpStatus.valueOf(response.getStatus())).body(response);
 	}
 
 	@PutMapping("/product")
