@@ -86,7 +86,9 @@ public class ReportingService {
         reportScheduler.setEntityId(null);
         reportScheduler.setRecordBefore(null);
         reportScheduler.setRequestDump(request);
-        return reportSchedulerRepository.save(reportScheduler);
+        ReportScheduler reportSchedulerResult;
+        reportSchedulerResult = reportSchedulerRepository.save(reportScheduler);
+        return reportSchedulerResult;
     }
 
     @Transactional(rollbackFor = Throwable.class)
@@ -112,7 +114,10 @@ public class ReportingService {
         reportScheduler.setEntityId(null);
         reportScheduler.setRecordBefore(null);
         reportScheduler.setRequestDump(request);
-        return reportSchedulerRepository.save(reportScheduler);
+
+        ReportScheduler reportSchedulerResult;
+        reportSchedulerResult = reportSchedulerRepository.save(reportScheduler);
+        return reportSchedulerResult;
     }
 
     @Transactional(readOnly = true)

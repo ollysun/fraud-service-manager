@@ -7,6 +7,9 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import com.etz.fraudeagleeyemanager.dto.response.AccountResponse;
+import com.etz.fraudeagleeyemanager.dto.response.CardResponse;
+import com.etz.fraudeagleeyemanager.entity.Card;
 import org.springframework.beans.BeanUtils;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.data.domain.Example;
@@ -52,7 +55,7 @@ public class AccountService {
 
 	@CacheEvict(value = "account", allEntries=true)
 	@Transactional(rollbackFor = Throwable.class)
-	public Account addAccount(AddAccountRequest request){
+	public AccountResponse addAccount(AddAccountRequest request){
 		Account accountEntity = new Account();
 		try {
 			// check for account number digits
@@ -73,7 +76,14 @@ public class AccountService {
 			//log.error("Error occurred while creating account entity object", ex);
 			throw new FraudEngineException(AppConstant.ERROR_SETTING_PROPERTY);
 		}
-		return addAccountEntityToDatabase(accountEntity);
+		return outputAccountResponse(addAccountEntityToDatabase(accountEntity));
+	}
+
+	private AccountResponse outputAccountResponse(Account account){
+
+		AccountResponse accountResponse = new AccountResponse();
+		BeanUtils.copyProperties(account,accountResponse,"products");
+		return accountResponse;
 	}
 
 	// update account to increment suspicious count
@@ -106,7 +116,7 @@ public class AccountService {
 		try {
 			persistedAccountEntity = accountRepository.save(accountEntity);
 		} catch(Exception ex){
-			//log.error("Error occurred while saving account entity to database" , ex);
+			log.error("Error occurred while saving account entity to database" , ex);
 			throw new FraudEngineException(AppConstant.ERROR_SAVING_TO_DATABASE);
 		}
 		addAccountEntityToRedis(persistedAccountEntity);
@@ -135,8 +145,8 @@ public class AccountService {
 	}
 
 	@Transactional(propagation = Propagation.REQUIRED, rollbackFor = Throwable.class)
-	public AccountProduct mapAccountProduct(AccountToProductRequest request) {
-		
+	public AccountProductResponse mapAccountProduct(AccountToProductRequest request) {
+		AccountProductResponse accountProductResponse = new AccountProductResponse();
 		if(!productRepository.findByCodeAndDeletedFalse(request.getProductCode()).isPresent()){
 			throw new ResourceNotFoundException("Product not found for this code " + request.getProductCode());
 		}
@@ -157,10 +167,12 @@ public class AccountService {
 			accountProductEntity.setRecordBefore(null);
 			accountProductEntity.setRequestDump(request);
 		} catch(Exception ex){
-			//log.error("Error occurred while creating account product entity object", ex);
+			log.error("Error occurred while creating account product entity object", ex);
 			throw new FraudEngineException(AppConstant.ERROR_SETTING_PROPERTY);
 		}
-		return addAccountProductEntityToDatabase(accountProductEntity);
+		BeanUtils.copyProperties(accountProductEntity, accountProductResponse, "account","productEntity");
+		return accountProductResponse;
+		//return addAccountProductEntityToDatabase(accountProductEntity);
 	}
 
 	@Transactional(propagation = Propagation.REQUIRED, rollbackFor = Throwable.class)
@@ -194,7 +206,7 @@ public class AccountService {
 				accountProduct.setStatus(request.getStatus());
 				accountProduct.setUpdatedBy(request.getUpdatedBy());
 			} catch (Exception ex) {
-			//	log.error("Error occurred while creating account product entity object", ex);
+				log.error("Error occurred while creating account product entity object", ex);
 				throw new FraudEngineException(AppConstant.ERROR_SETTING_PROPERTY);
 			}
 			BeanUtils.copyProperties(addAccountProductEntityToDatabase(accountProduct), accountProductResponse);
@@ -204,13 +216,13 @@ public class AccountService {
 	}
 	
 	private AccountProduct addAccountProductEntityToDatabase(AccountProduct accountProductEntity) {
-		AccountProduct persistedAccountProductEntity = new AccountProduct();
-//		try {
-//			persistedAccountProductEntity = accountProductRepository.save(accountProductEntity);
-//		} catch(Exception ex){
-//			log.error("Error occurred while saving account product entity to database" , ex);
-//			throw new FraudEngineException(AppConstant.ERROR_SAVING_TO_DATABASE);
-//		}
+		AccountProduct persistedAccountProductEntity;
+		try {
+			persistedAccountProductEntity = accountProductRepository.save(accountProductEntity);
+		} catch(Exception ex){
+			log.error("Error occurred while saving account product entity to database" , ex);
+			throw new FraudEngineException(AppConstant.ERROR_SAVING_TO_DATABASE);
+		}
 		addAccountProductEntityToRedis(persistedAccountProductEntity);
 		return persistedAccountProductEntity;
 	}

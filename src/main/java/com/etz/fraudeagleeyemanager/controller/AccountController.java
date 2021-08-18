@@ -4,6 +4,7 @@ package com.etz.fraudeagleeyemanager.controller;
 import javax.validation.Valid;
 
 import com.etz.fraudeagleeyemanager.constant.AppConstant;
+import com.etz.fraudeagleeyemanager.dto.response.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -13,10 +14,6 @@ import com.etz.fraudeagleeyemanager.dto.request.AccountToProductRequest;
 import com.etz.fraudeagleeyemanager.dto.request.AddAccountRequest;
 import com.etz.fraudeagleeyemanager.dto.request.UpdateAccountProductRequest;
 import com.etz.fraudeagleeyemanager.dto.request.UpdateAccountRequestDto;
-import com.etz.fraudeagleeyemanager.dto.response.AccountProductResponse;
-import com.etz.fraudeagleeyemanager.dto.response.CollectionResponse;
-import com.etz.fraudeagleeyemanager.dto.response.ModelResponse;
-import com.etz.fraudeagleeyemanager.dto.response.PageResponse;
 import com.etz.fraudeagleeyemanager.entity.Account;
 import com.etz.fraudeagleeyemanager.entity.AccountProduct;
 import com.etz.fraudeagleeyemanager.service.AccountService;
@@ -35,10 +32,10 @@ public class AccountController {
 	private final AccountService accountService;
 	
 	@PostMapping
-	public ResponseEntity<ModelResponse<Account>> addAccount(@RequestBody @Valid AddAccountRequest request,
-																@ApiIgnore @RequestAttribute(AppConstant.USERNAME) String username) {
+	public ResponseEntity<ModelResponse<AccountResponse>> addAccount(@RequestBody @Valid AddAccountRequest request,
+																	 @ApiIgnore @RequestAttribute(AppConstant.USERNAME) String username) {
 		request.setCreatedBy(username);
-		ModelResponse<Account> response = new ModelResponse<>(accountService.addAccount(request), HttpStatus.CREATED);
+		ModelResponse<AccountResponse> response = new ModelResponse<>(accountService.addAccount(request), HttpStatus.CREATED);
 		return ResponseEntity.status(HttpStatus.valueOf(response.getStatus())).body(response);
 	}
 
@@ -53,11 +50,12 @@ public class AccountController {
 	}
 
 	@PostMapping("/product")
-	public ResponseEntity<ModelResponse<AccountProduct>> mapAccountToProduct(@RequestBody @Valid AccountToProductRequest request,
+	public ResponseEntity<ModelResponse<AccountProductResponse>> mapAccountToProduct(@RequestBody @Valid AccountToProductRequest request,
 																			 @ApiIgnore @RequestAttribute(AppConstant.USERNAME) String username) {
 		request.setCreatedBy(username);
-		ModelResponse<AccountProduct> response = new ModelResponse<>(accountService.mapAccountProduct(request), HttpStatus.CREATED);
-		return ResponseEntity.status(HttpStatus.valueOf(response.getStatus())).body(response);
+		ModelResponse<AccountProductResponse> response = new ModelResponse<>(accountService.mapAccountProduct(request), HttpStatus.CREATED);
+		return null;
+		//return ResponseEntity.status(HttpStatus.valueOf(response.getStatus())).body(response);
 	}
 
 	@PutMapping("/product")
