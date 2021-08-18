@@ -9,15 +9,19 @@ import com.etz.fraudeagleeyemanager.service.ProductService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Positive;
 
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/v1/product/service")
+@Validated
 public class ProductServiceController {
 
    private final ProductService productService;
@@ -30,9 +34,9 @@ public class ProductServiceController {
     }
 
     @PostMapping
-    public ResponseEntity<ModelResponse<ProductServiceResponse>> createProductService(@Valid @RequestBody CreateProductServiceDto request, @ApiIgnore @RequestAttribute(AppConstant.USERNAME) String username){
+    public ResponseEntity<ModelResponse<ProductServiceResponse>> addProductService(@Valid @RequestBody CreateProductServiceDto request, @ApiIgnore @RequestAttribute(AppConstant.USERNAME) String username){
         request.setCreatedBy(username);
-        ModelResponse<ProductServiceResponse> response = new ModelResponse<>(productService.createProductService(request), HttpStatus.CREATED);
+        ModelResponse<ProductServiceResponse> response = new ModelResponse<>(productService.addProductService(request), HttpStatus.CREATED);
         return ResponseEntity.status(HttpStatus.valueOf(response.getStatus())).body(response);
     }
 
@@ -44,7 +48,7 @@ public class ProductServiceController {
     }
 
     @DeleteMapping("/{serviceId}")
-    public BooleanResponse deactivateProductService(@PathVariable String serviceId){
+    public BooleanResponse deactivateProductService(@PathVariable @NotBlank String serviceId){
         return new BooleanResponse(productService.deactivateProductService(serviceId));
     }
 
@@ -57,7 +61,7 @@ public class ProductServiceController {
     public ResponseEntity<ModelResponse<ServiceDataSet>> addServiceDataset(@RequestBody @Valid DatasetProductRequest request,
                                                                            @ApiIgnore @RequestAttribute(AppConstant.USERNAME) String username){
         request.setCreatedBy(username);
-        ModelResponse<ServiceDataSet> response = new ModelResponse<>(productService.createServiceDataset(request), HttpStatus.CREATED);
+        ModelResponse<ServiceDataSet> response = new ModelResponse<>(productService.addServiceDataset(request), HttpStatus.CREATED);
         return ResponseEntity.status(HttpStatus.valueOf(response.getStatus())).body(response);
     }
 
@@ -68,23 +72,23 @@ public class ProductServiceController {
     }
 
     @GetMapping("/dataset/{datasetId}/code/{code}/service/{serviceId}")
-    public ResponseEntity<ServiceDataSetResponse> queryServiceDatasetByIds(@PathVariable String code,
-                                                                           @PathVariable String serviceId,
-                                                                           @PathVariable Long datasetId){
+    public ResponseEntity<ServiceDataSetResponse> queryServiceDatasetByIds(@PathVariable @NotBlank() String code,
+                                                                           @PathVariable @NotBlank String serviceId,
+                                                                           @PathVariable @NotNull @Positive Long datasetId){
         return ResponseEntity.ok(productService.getServiceDatasetByIds(datasetId,code, serviceId));
     }
 
     @PutMapping("/dataset")
-    public ResponseEntity<ServiceDataSetResponse> updateServiceDataset(@RequestBody UpdateDataSetRequest request,
+    public ResponseEntity<ServiceDataSetResponse> updateServiceDataset(@Valid @RequestBody UpdateDataSetRequest request,
                                                                            @ApiIgnore @RequestAttribute(AppConstant.USERNAME) String username){
         request.setUpdatedBy(username);
         return ResponseEntity.ok(productService.updateServiceDataset(request));
     }
 
     @DeleteMapping("/dataset/{datasetId}/code/{code}/service/{serviceId}")
-    public BooleanResponse deleteServiceDatasetByIds(@PathVariable String code,
-                                                     @PathVariable String serviceId,
-                                                     @PathVariable Long datasetId){
+    public BooleanResponse deleteServiceDatasetByIds(@PathVariable @NotNull String code,
+                                                     @PathVariable @NotNull String serviceId,
+                                                     @PathVariable @NotNull Long datasetId){
         return new BooleanResponse(productService.deleteServiceDataset(datasetId,serviceId,code));
     }
 

@@ -36,7 +36,7 @@ public class NotificationGroupService {
 	private final NotificationGroupRedisRepository notificationGroupRedisRepository;
 
 	@Transactional(rollbackFor = Throwable.class)
-	public NotificationGroup createNotificationGroup(NotificationGroupRequest request){
+	public NotificationGroup addNotificationGroup(NotificationGroupRequest request){
 		NotificationGroup notificationGroup = new NotificationGroup();
 		notificationGroup.setGroupName(request.getName());
 		notificationGroup.setEmails(AppUtil.listEmailToString(request.getEmails()));
@@ -52,7 +52,7 @@ public class NotificationGroupService {
 		notificationGroup.setRecordBefore(null);
 		notificationGroup.setRequestDump(request);
 
-		return saveNotificationGroupEntityToDatabase(notificationGroup);
+		return addNotificationGroupEntityToDatabase(notificationGroup);
 	}
 
 	@Transactional(rollbackFor = Throwable.class)
@@ -75,7 +75,7 @@ public class NotificationGroupService {
 		notificationGroup.setStatus(request.getStatus());
 		notificationGroup.setUpdatedBy(request.getUpdatedBy());
 
-		return saveNotificationGroupEntityToDatabase(notificationGroup);
+		return addNotificationGroupEntityToDatabase(notificationGroup);
 	}
 
 	@Transactional(readOnly = true)
@@ -103,24 +103,25 @@ public class NotificationGroupService {
 		return notificationGroupRepository.findAll(Example.of(notificationGroupOptional.get()), PageRequestUtil.getPageRequest());		
 	}
 	
-	private NotificationGroup saveNotificationGroupEntityToDatabase(NotificationGroup notificationGroupEntity) {
-		NotificationGroup persistedNotificationGrouplistEntity;
+	private NotificationGroup addNotificationGroupEntityToDatabase(NotificationGroup notificationGroupEntity) {
+		NotificationGroup persistedNotificationGrouplistEntity = new NotificationGroup();
 		try {
 			persistedNotificationGrouplistEntity = notificationGroupRepository.save(notificationGroupEntity);
 		} catch(Exception ex){
-			log.error("Error occurred while saving NotificationGroup entity to database" , ex);
+		//	log.error("Error occurred while saving NotificationGroup entity to database" , ex);
 			throw new FraudEngineException(AppConstant.ERROR_SAVING_TO_DATABASE);
 		}
-		saveNotificationGroupEntityToRedis(persistedNotificationGrouplistEntity);
+		addNotificationGroupEntityToRedis(persistedNotificationGrouplistEntity);
 		return persistedNotificationGrouplistEntity;
 	}
 	
-	private void saveNotificationGroupEntityToRedis(NotificationGroup alreadyPersistedNotificationGroupEntity) {
+	private void addNotificationGroupEntityToRedis(NotificationGroup alreadyPersistedNotificationGroupEntity) {
 		try {
 			notificationGroupRedisRepository.setHashOperations(redisTemplate);
 			notificationGroupRedisRepository.update(alreadyPersistedNotificationGroupEntity);
 		} catch(Exception ex){
-			log.error("Error occurred while saving NotificationGroup entity to Redis" , ex);
+			//TODO actually delete already saved entity from the database (NOT SOFT DELETE)
+			//log.error("Error occurred while saving NotificationGroup entity to Redis" , ex);
 			throw new FraudEngineException(AppConstant.ERROR_SAVING_TO_REDIS);
 		}
 	}

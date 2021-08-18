@@ -3,10 +3,12 @@ package com.etz.fraudeagleeyemanager.controller;
 
 
 import javax.validation.Valid;
+import javax.validation.constraints.Positive;
 
 import com.etz.fraudeagleeyemanager.constant.AppConstant;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import com.etz.fraudeagleeyemanager.dto.request.InternalWatchlistRequest;
@@ -23,15 +25,16 @@ import springfox.documentation.annotations.ApiIgnore;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/v1/watchlist/internal")
+@Validated
 public class InternalWatchlistController {
 
 	private final InternalWatchlistService internalWatchlistService;
 
 	@PostMapping
-	public ResponseEntity<ModelResponse<InternalWatchlist>> createOfac(@Valid @RequestBody  InternalWatchlistRequest request,
+	public ResponseEntity<ModelResponse<InternalWatchlist>> addOfac(@Valid @RequestBody  InternalWatchlistRequest request,
 																	   @ApiIgnore @RequestAttribute(AppConstant.USERNAME) String username){
 		request.setCreatedBy(username);
-		ModelResponse<InternalWatchlist> response = new ModelResponse<>(internalWatchlistService.createInternalWatchlist(request), HttpStatus.CREATED);
+		ModelResponse<InternalWatchlist> response = new ModelResponse<>(internalWatchlistService.addInternalWatchlist(request), HttpStatus.CREATED);
 		return ResponseEntity.status(HttpStatus.valueOf(response.getStatus())).body(response);
 	}
 		
@@ -49,7 +52,7 @@ public class InternalWatchlistController {
 	}
 	
 	@DeleteMapping("/{watchId}")
-	public BooleanResponse deleteOfac(@PathVariable Long watchId){
+	public BooleanResponse deleteOfac(@PathVariable @Positive Long watchId){
 		return new BooleanResponse(internalWatchlistService.deleteInternalWatchlist(watchId));
 	}
 }

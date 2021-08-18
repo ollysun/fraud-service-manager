@@ -50,7 +50,7 @@ public class CardService {
 	private final CardProductRedisRepository cardProductRedisRepository;
 
 	@Transactional(rollbackFor = Throwable.class)
-	public CardResponse createCard(CardRequest request) {
+	public CardResponse addCard(CardRequest request) {
 		Card cardEntity = new Card();
 		try {
 			cardEntity.setCardholderName(request.getHolderName());
@@ -80,10 +80,10 @@ public class CardService {
 			cardEntity.setRecordBefore(null);
 			cardEntity.setRequestDump(request);
 		} catch (Exception ex) {
-			log.error("Error occurred while creating card entity object", ex);
+			//log.error("Error occurred while creating card entity object", ex);
 			throw new FraudEngineException(AppConstant.ERROR_SETTING_PROPERTY);
 		}
-		return outputCardResponse(saveCardEntityToDatabase(cardEntity));
+		return outputCardResponse(addCardEntityToDatabase(cardEntity));
 	}
 	
  	// update card to increment suspicious count
@@ -104,13 +104,13 @@ public class CardService {
 			card.setBlockReason(updateCardRequestDto.getBlockReason());
 			card.setStatus(updateCardRequestDto.getStatus());
 		} catch (Exception ex) {
-			log.error("Error occurred while creating card entity object", ex);
+			//log.error("Error occurred while creating card entity object", ex);
 			throw new FraudEngineException(AppConstant.ERROR_SETTING_PROPERTY);
 		}
-		return saveCardEntityToDatabase(card);
+		return addCardEntityToDatabase(card);
 	}
 
-	private Card saveCardEntityToDatabase(Card cardEntity) {
+	private Card addCardEntityToDatabase(Card cardEntity) {
 		Card persistedCardEntity;
 		try {
 			persistedCardEntity = cardRepository.save(cardEntity);
@@ -118,17 +118,17 @@ public class CardService {
 			log.error("Error occurred while saving card entity to database" , ex);
 			throw new FraudEngineException(AppConstant.ERROR_SAVING_TO_DATABASE);
 		}
-		saveCardEntityToRedis(persistedCardEntity);
+		addCardEntityToRedis(persistedCardEntity);
 		return persistedCardEntity;
 	}
 	
-	private void saveCardEntityToRedis(Card alreadyPersistedCardEntity) {
+	private void addCardEntityToRedis(Card alreadyPersistedCardEntity) {
 		try {
 			cardRedisRepository.setHashOperations(redisTemplate);
 			cardRedisRepository.update(alreadyPersistedCardEntity);
 		} catch(Exception ex){
 			//TODO actually delete already saved entity from the database (NOT SOFT DELETE)
-			log.error("Error occurred while saving card entity to Redis" , ex);
+			//log.error("Error occurred while saving card entity to Redis" , ex);
 			throw new FraudEngineException(AppConstant.ERROR_SAVING_TO_REDIS);
 		}
 	}
@@ -169,10 +169,10 @@ public class CardService {
 			cardToProdEntity.setRecordBefore(null);
 			cardToProdEntity.setRequestDump(request);
 		} catch (Exception ex) {
-			log.error("Error occurred while creating card product entity object", ex);
+			//log.error("Error occurred while creating card product entity object", ex);
 			throw new FraudEngineException(AppConstant.ERROR_SETTING_PROPERTY);
 		}
-		return saveCardProductEntityToDatabase(cardToProdEntity);
+		return addCardProductEntityToDatabase(cardToProdEntity);
 	}
 
 	@Transactional(rollbackFor = Throwable.class)
@@ -209,7 +209,7 @@ public class CardService {
 				log.error("Error occurred while creating card product entity object", ex);
 				throw new FraudEngineException(AppConstant.ERROR_SETTING_PROPERTY);
 			}
-			BeanUtils.copyProperties(saveCardProductEntityToDatabase(cardProductEntity), cardProductResponse);
+			BeanUtils.copyProperties(addCardProductEntityToDatabase(cardProductEntity), cardProductResponse);
 			updatedCardProductResponseList.add(cardProductResponse);
 		}
 		return updatedCardProductResponseList;
@@ -232,25 +232,25 @@ public class CardService {
 		return cardResponse;
 	}
 	
-	private CardProduct saveCardProductEntityToDatabase(CardProduct cardProductEntity) {
-		CardProduct persistedCardProductEntity;
+	private CardProduct addCardProductEntityToDatabase(CardProduct cardProductEntity) {
+		CardProduct persistedCardProductEntity = new CardProduct();
 		try {
 			persistedCardProductEntity = cardProductRepository.save(cardProductEntity);
 		} catch(Exception ex){
-			log.error("Error occurred while saving card product entity to database" , ex);
+			//log.error("Error occurred while saving card product entity to database" , ex);
 			throw new FraudEngineException(AppConstant.ERROR_SAVING_TO_DATABASE);
 		}
-		saveCardProductEntityToRedis(persistedCardProductEntity);
+		addCardProductEntityToRedis(persistedCardProductEntity);
 		return persistedCardProductEntity;
 	}
 	
-	private void saveCardProductEntityToRedis(CardProduct alreadyPersistedCardProductEntity) {
+	private void addCardProductEntityToRedis(CardProduct alreadyPersistedCardProductEntity) {
 		try {
 			cardProductRedisRepository.setHashOperations(redisTemplate);
 			cardProductRedisRepository.update(alreadyPersistedCardProductEntity);
 		} catch(Exception ex){
 			//TODO actually delete already saved entity from the database (NOT SOFT DELETE)
-			log.error("Error occurred while saving card product entity to Redis" , ex);
+			//log.error("Error occurred while saving card product entity to Redis" , ex);
 			throw new FraudEngineException(AppConstant.ERROR_SAVING_TO_REDIS);
 		}
 	}

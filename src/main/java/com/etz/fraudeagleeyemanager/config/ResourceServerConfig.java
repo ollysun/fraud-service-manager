@@ -2,6 +2,7 @@ package com.etz.fraudeagleeyemanager.config;
 
 import java.util.Collections;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -9,6 +10,7 @@ import org.springframework.core.Ordered;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.oauth2.config.annotation.web.configuration.EnableResourceServer;
 import org.springframework.security.oauth2.config.annotation.web.configuration.ResourceServerConfigurerAdapter;
 import org.springframework.security.oauth2.config.annotation.web.configurers.ResourceServerSecurityConfigurer;
@@ -31,6 +33,9 @@ public class ResourceServerConfig extends ResourceServerConfigurerAdapter {
 
 	private static final String RESOURCE_ID = "fraud-engine";
 
+    @Value("${security.secret-key}")
+    private String secretKey;
+
     private static final String[] SWAGGER_WHITELIST = {
             // -- swagger ui
             "/swagger", "/v2/api-docs", "/swagger-resources", "/swagger-resources/**", "/configuration/ui", "/actuator/health",
@@ -44,6 +49,7 @@ public class ResourceServerConfig extends ResourceServerConfigurerAdapter {
     @Override
     public void configure(HttpSecurity http) throws Exception {
         http.csrf().disable();
+        http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
         http.authorizeRequests()
                 .antMatchers("/health","/info", "/trace", "/monitoring",
                         "/webjars/**","/swagger.html")
@@ -59,7 +65,7 @@ public class ResourceServerConfig extends ResourceServerConfigurerAdapter {
     public JwtAccessTokenConverter accessTokenConverter(){
         JwtAccessTokenConverter conv = new  JwtAccessTokenConverter();
         conv.setAccessTokenConverter(new CustomJwtAccessTokenConverter());
-        conv.setSigningKey("AuthETransactNgView2021");
+        conv.setSigningKey(secretKey);
         return conv;
     }
 

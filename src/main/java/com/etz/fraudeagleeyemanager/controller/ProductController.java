@@ -3,10 +3,12 @@ package com.etz.fraudeagleeyemanager.controller;
 
 
 import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
 
 import com.etz.fraudeagleeyemanager.constant.AppConstant;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import com.etz.fraudeagleeyemanager.dto.request.CreateProductRequest;
@@ -27,15 +29,16 @@ import springfox.documentation.annotations.ApiIgnore;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/v1/product")
+@Validated
 public class ProductController {
 
 	private final ProductService productService;
 
 	@PostMapping
-	public ResponseEntity<ModelResponse<ProductResponse>> createProduct(@Valid @RequestBody  CreateProductRequest request,
+	public ResponseEntity<ModelResponse<ProductResponse>> addProduct(@Valid @RequestBody  CreateProductRequest request,
 																		@ApiIgnore @RequestAttribute(AppConstant.USERNAME) String username){
 		request.setCreatedBy(username);
-		ModelResponse<ProductResponse> response = new ModelResponse<>(productService.createProduct(request), HttpStatus.CREATED);
+		ModelResponse<ProductResponse> response = new ModelResponse<>(productService.addProduct(request), HttpStatus.CREATED);
 		return ResponseEntity.status(HttpStatus.valueOf(response.getStatus())).body(response);
 	}
 		
@@ -46,7 +49,7 @@ public class ProductController {
 	}
 	
 	@DeleteMapping("/{code}")
-	public BooleanResponse deleteProduct(@PathVariable String code){
+	public BooleanResponse deleteProduct(@PathVariable @NotNull String code){
 		return new BooleanResponse(productService.deleteProduct(code));
 	}
 	
