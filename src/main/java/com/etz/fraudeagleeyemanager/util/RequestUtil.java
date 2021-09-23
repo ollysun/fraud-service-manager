@@ -110,7 +110,7 @@ public class RequestUtil {
     	Map<String, Object> claims = (Map<String, Object>)getRequest().getAttribute("access_token_claim");
     	String claimValue = "";
     	if (claims.containsKey(claim)) {
-    		claimValue = (String) claims.get(claim);
+    		claimValue = String.valueOf(claims.get(claim));
     	}
     	return claimValue;
     }

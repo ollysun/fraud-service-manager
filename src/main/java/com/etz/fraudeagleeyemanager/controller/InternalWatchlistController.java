@@ -16,7 +16,7 @@ import com.etz.fraudeagleeyemanager.dto.request.UpdateInternalWatchlistRequest;
 import com.etz.fraudeagleeyemanager.dto.response.BooleanResponse;
 import com.etz.fraudeagleeyemanager.dto.response.ModelResponse;
 import com.etz.fraudeagleeyemanager.dto.response.PageResponse;
-import com.etz.fraudeagleeyemanager.entity.InternalWatchlist;
+import com.etz.fraudeagleeyemanager.entity.eagleeyedb.InternalWatchlist;
 import com.etz.fraudeagleeyemanager.service.InternalWatchlistService;
 
 import lombok.RequiredArgsConstructor;

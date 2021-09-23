@@ -5,6 +5,9 @@ import javax.validation.Valid;
 
 import com.etz.fraudeagleeyemanager.constant.AppConstant;
 import com.etz.fraudeagleeyemanager.dto.response.*;
+import com.etz.fraudeagleeyemanager.entity.eagleeyedb.Account;
+import com.etz.fraudeagleeyemanager.entity.eagleeyedb.AccountProduct;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -14,8 +17,6 @@ import com.etz.fraudeagleeyemanager.dto.request.AccountToProductRequest;
 import com.etz.fraudeagleeyemanager.dto.request.AddAccountRequest;
 import com.etz.fraudeagleeyemanager.dto.request.UpdateAccountProductRequest;
 import com.etz.fraudeagleeyemanager.dto.request.UpdateAccountRequestDto;
-import com.etz.fraudeagleeyemanager.entity.Account;
-import com.etz.fraudeagleeyemanager.entity.AccountProduct;
 import com.etz.fraudeagleeyemanager.service.AccountService;
 
 import lombok.RequiredArgsConstructor;

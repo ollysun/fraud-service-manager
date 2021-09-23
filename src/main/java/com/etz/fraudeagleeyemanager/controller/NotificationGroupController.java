@@ -14,7 +14,7 @@ import com.etz.fraudeagleeyemanager.dto.request.NotificationGroupRequest;
 import com.etz.fraudeagleeyemanager.dto.request.UpdateNotificationGroupRequest;
 import com.etz.fraudeagleeyemanager.dto.response.ModelResponse;
 import com.etz.fraudeagleeyemanager.dto.response.PageResponse;
-import com.etz.fraudeagleeyemanager.entity.NotificationGroup;
+import com.etz.fraudeagleeyemanager.entity.eagleeyedb.NotificationGroup;
 import com.etz.fraudeagleeyemanager.service.NotificationGroupService;
 
 import lombok.RequiredArgsConstructor;

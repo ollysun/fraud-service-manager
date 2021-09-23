@@ -1,39 +1,40 @@
 package com.etz.fraudeagleeyemanager.config;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
-import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.security.oauth2.client.DefaultOAuth2ClientContext;
 import org.springframework.security.oauth2.client.OAuth2RestTemplate;
 import org.springframework.security.oauth2.client.token.AccessTokenRequest;
 import org.springframework.security.oauth2.client.token.DefaultAccessTokenRequest;
 import org.springframework.security.oauth2.client.token.grant.password.ResourceOwnerPasswordResourceDetails;
 import org.springframework.security.oauth2.common.AuthenticationScheme;
-import org.springframework.web.util.DefaultUriBuilderFactory;
+import org.springframework.security.oauth2.config.annotation.web.configuration.EnableOAuth2Client;
 
-//@Configuration
-//@EnableOAuth2Client
+@Configuration
+@EnableOAuth2Client
 public class Oauth2ClientConfig {
 
-	//@Value("${spring.product-server.client-id}")
+	@Value("clientId")
 	private String clientId;
 	
-	//@Value("${spring.product-server.client-secret}")
+	@Value("secret")
 	private String clientSecret;
 	
-	//@Value("${spring.product-server.grant-type}")
+	@Value("password")
 	private String grantType;
 	
-	//@Value("${spring.product-server.create-token-url}")
+	@Value("http://172.17.10.83:9191/api/oauth/token")
 	private String accessTokenURI;
 	
-	//@Value("${spring.product-server.username}")
+	@Value("test")
 	private String username;
 	
-	//@Value("${spring.product-server.password}")
+	@Value("pass")
 	private String password;
 
     @Bean
-    public ResourceOwnerPasswordResourceDetails resourceDetails(){
+    public ResourceOwnerPasswordResourceDetails resource(){
     	ResourceOwnerPasswordResourceDetails resourceDetails = new ResourceOwnerPasswordResourceDetails();
     	
     	resourceDetails.setClientId(clientId);
@@ -50,15 +51,8 @@ public class Oauth2ClientConfig {
 
     @Bean
     public OAuth2RestTemplate oAuth2RestTemplate() {
-        HttpComponentsClientHttpRequestFactory requestFactory = new HttpComponentsClientHttpRequestFactory();
-        requestFactory.setConnectTimeout(6000);
-        requestFactory.setReadTimeout(6000);
-        DefaultUriBuilderFactory defaultUriBuilderFactory = new DefaultUriBuilderFactory();
-        defaultUriBuilderFactory.setEncodingMode(DefaultUriBuilderFactory.EncodingMode.NONE);
         AccessTokenRequest atr = new DefaultAccessTokenRequest();
-        OAuth2RestTemplate oauth2RestTemplate = new OAuth2RestTemplate(resourceDetails(), new DefaultOAuth2ClientContext(atr));
-        oauth2RestTemplate.setUriTemplateHandler(defaultUriBuilderFactory);
-        oauth2RestTemplate.setRequestFactory(requestFactory);
+        OAuth2RestTemplate oauth2RestTemplate = new OAuth2RestTemplate(resource(), new DefaultOAuth2ClientContext(atr));
         return oauth2RestTemplate;
     }
 

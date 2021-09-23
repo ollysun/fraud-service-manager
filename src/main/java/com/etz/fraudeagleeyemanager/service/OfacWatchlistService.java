@@ -4,35 +4,37 @@ package com.etz.fraudeagleeyemanager.service;
 import java.util.Objects;
 import java.util.Optional;
 
-import com.etz.fraudeagleeyemanager.util.AppUtil;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.Page;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.etz.fraudeagleeyemanager.constant.AppConstant;
 import com.etz.fraudeagleeyemanager.dto.request.OfacWatchlistRequest;
 import com.etz.fraudeagleeyemanager.dto.request.UpdateOfacWatchlistRequest;
-import com.etz.fraudeagleeyemanager.entity.OfacWatchlist;
+import com.etz.fraudeagleeyemanager.entity.eagleeyedb.OfacWatchlist;
 import com.etz.fraudeagleeyemanager.exception.FraudEngineException;
 import com.etz.fraudeagleeyemanager.exception.ResourceNotFoundException;
 import com.etz.fraudeagleeyemanager.redisrepository.OfacWatchlistRedisRepository;
-import com.etz.fraudeagleeyemanager.repository.OfacWatchlistRepository;
+import com.etz.fraudeagleeyemanager.repository.eagleeyedb.OfacWatchlistRepository;
+import com.etz.fraudeagleeyemanager.util.AppUtil;
 import com.etz.fraudeagleeyemanager.util.JsonConverter;
 import com.etz.fraudeagleeyemanager.util.PageRequestUtil;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class OfacWatchlistService {
 
+	private final AppUtil appUtil;
 	private final RedisTemplate<String, Object> redisTemplate;
 	private final OfacWatchlistRepository ofacWatchlistRepository;
 	private final OfacWatchlistRedisRepository ofacWatchlistRedisRepository;
+	
 
 	@Transactional(rollbackFor = Throwable.class)
 	public OfacWatchlist addOfacWatchlist(OfacWatchlistRequest request){
@@ -49,7 +51,7 @@ public class OfacWatchlistService {
 		ofacWatchlist.setRecordBefore(null);
 		ofacWatchlist.setRequestDump(request);
 
-		return addOfacWatchlistEntityToDatabase(ofacWatchlist);
+		return addOfacWatchlistEntityToDatabase(ofacWatchlist, request.getCreatedBy());
 	}
 
 	@Transactional(rollbackFor = Throwable.class)
@@ -65,9 +67,10 @@ public class OfacWatchlistService {
 		ofacWatchlist.setCategory(AppUtil.checkCategory(request.getCategory()));
 		ofacWatchlist.setComments(request.getComments());
 		ofacWatchlist.setStatus(request.getStatus());
+		ofacWatchlist.setAuthorised(false);
 		ofacWatchlist.setUpdatedBy(request.getUpdatedBy());
 
-		return addOfacWatchlistEntityToDatabase(ofacWatchlist);
+		return addOfacWatchlistEntityToDatabase(ofacWatchlist, request.getUpdatedBy());
 	}
 
 	private OfacWatchlist findById(Long ofacId) {
@@ -113,7 +116,7 @@ public class OfacWatchlistService {
 		return Boolean.TRUE;
 	}
 	
-	private OfacWatchlist addOfacWatchlistEntityToDatabase(OfacWatchlist ofacWatchlistEntity) {
+	private OfacWatchlist addOfacWatchlistEntityToDatabase(OfacWatchlist ofacWatchlistEntity, String createdBy) {
 		OfacWatchlist persistedOfacWatchlistEntity;
 		try {
 			persistedOfacWatchlistEntity = ofacWatchlistRepository.save(ofacWatchlistEntity);
@@ -122,6 +125,9 @@ public class OfacWatchlistService {
 			throw new FraudEngineException(AppConstant.ERROR_SAVING_TO_DATABASE);
 		}
 		addOfacWatchlistEntityToRedis(persistedOfacWatchlistEntity);
+		
+		// create & user notification
+		appUtil.createUserNotification(AppConstant.OFAC_WATCHLIST, persistedOfacWatchlistEntity.getId().toString(), createdBy);
 		return persistedOfacWatchlistEntity;
 	}
 	
@@ -134,5 +140,7 @@ public class OfacWatchlistService {
 			throw new FraudEngineException(AppConstant.ERROR_SAVING_TO_REDIS);
 		}
 	}
+	
+	
 	
 }

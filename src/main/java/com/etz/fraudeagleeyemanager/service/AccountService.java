@@ -7,15 +7,14 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import com.etz.fraudeagleeyemanager.dto.response.AccountResponse;
-import com.etz.fraudeagleeyemanager.dto.response.CardResponse;
-import com.etz.fraudeagleeyemanager.entity.Card;
 import org.springframework.beans.BeanUtils;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.Page;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.etz.fraudeagleeyemanager.constant.AppConstant;
 import com.etz.fraudeagleeyemanager.dto.request.AccountToProductRequest;
@@ -23,22 +22,21 @@ import com.etz.fraudeagleeyemanager.dto.request.AddAccountRequest;
 import com.etz.fraudeagleeyemanager.dto.request.UpdateAccountProductRequest;
 import com.etz.fraudeagleeyemanager.dto.request.UpdateAccountRequestDto;
 import com.etz.fraudeagleeyemanager.dto.response.AccountProductResponse;
-import com.etz.fraudeagleeyemanager.entity.Account;
-import com.etz.fraudeagleeyemanager.entity.AccountProduct;
+import com.etz.fraudeagleeyemanager.dto.response.AccountResponse;
+import com.etz.fraudeagleeyemanager.entity.eagleeyedb.Account;
+import com.etz.fraudeagleeyemanager.entity.eagleeyedb.AccountProduct;
 import com.etz.fraudeagleeyemanager.exception.FraudEngineException;
 import com.etz.fraudeagleeyemanager.exception.ResourceNotFoundException;
 import com.etz.fraudeagleeyemanager.redisrepository.AccountProductRedisRepository;
 import com.etz.fraudeagleeyemanager.redisrepository.AccountRedisRepository;
-import com.etz.fraudeagleeyemanager.repository.AccountProductRepository;
-import com.etz.fraudeagleeyemanager.repository.AccountRepository;
-import com.etz.fraudeagleeyemanager.repository.ProductEntityRepository;
+import com.etz.fraudeagleeyemanager.repository.eagleeyedb.AccountProductRepository;
+import com.etz.fraudeagleeyemanager.repository.eagleeyedb.AccountRepository;
+import com.etz.fraudeagleeyemanager.repository.eagleeyedb.ProductEntityRepository;
 import com.etz.fraudeagleeyemanager.util.JsonConverter;
 import com.etz.fraudeagleeyemanager.util.PageRequestUtil;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
 @Service

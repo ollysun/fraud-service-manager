@@ -1,6 +1,6 @@
 package com.etz.fraudeagleeyemanager.dto.response;
 
-import com.etz.fraudeagleeyemanager.entity.CardProduct;
+import com.etz.fraudeagleeyemanager.entity.eagleeyedb.CardProduct;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Data;
 import lombok.EqualsAndHashCode;

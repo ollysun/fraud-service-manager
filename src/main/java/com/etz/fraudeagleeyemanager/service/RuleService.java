@@ -1,6 +1,25 @@
 package com.etz.fraudeagleeyemanager.service;
 
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import javax.persistence.TypedQuery;
+
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.BeanUtils;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.data.domain.Page;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.etz.fraudeagleeyemanager.constant.AppConstant;
 import com.etz.fraudeagleeyemanager.dto.request.CreateRuleRequest;
 import com.etz.fraudeagleeyemanager.dto.request.MapRuleToServiceRequest;
@@ -10,30 +29,26 @@ import com.etz.fraudeagleeyemanager.dto.response.ProductRuleResponse;
 import com.etz.fraudeagleeyemanager.dto.response.RuleProductResponse;
 import com.etz.fraudeagleeyemanager.dto.response.RuleResponse;
 import com.etz.fraudeagleeyemanager.dto.response.UpdatedRuleResponse;
-import com.etz.fraudeagleeyemanager.entity.*;
+import com.etz.fraudeagleeyemanager.entity.eagleeyedb.ProductRuleId;
+import com.etz.fraudeagleeyemanager.entity.eagleeyedb.ProductServiceEntity;
+import com.etz.fraudeagleeyemanager.entity.eagleeyedb.Rule;
+import com.etz.fraudeagleeyemanager.entity.eagleeyedb.ServiceDataSet;
+import com.etz.fraudeagleeyemanager.entity.eagleeyedb.ServiceRule;
 import com.etz.fraudeagleeyemanager.exception.FraudEngineException;
 import com.etz.fraudeagleeyemanager.exception.ResourceNotFoundException;
 import com.etz.fraudeagleeyemanager.redisrepository.ProductRuleRedisRepository;
 import com.etz.fraudeagleeyemanager.redisrepository.RuleRedisRepository;
-import com.etz.fraudeagleeyemanager.repository.*;
+import com.etz.fraudeagleeyemanager.repository.eagleeyedb.NotificationGroupRepository;
+import com.etz.fraudeagleeyemanager.repository.eagleeyedb.ProductDataSetRepository;
+import com.etz.fraudeagleeyemanager.repository.eagleeyedb.ProductServiceRepository;
+import com.etz.fraudeagleeyemanager.repository.eagleeyedb.RuleRepository;
+import com.etz.fraudeagleeyemanager.repository.eagleeyedb.ServiceRuleRepository;
 import com.etz.fraudeagleeyemanager.util.AppUtil;
 import com.etz.fraudeagleeyemanager.util.JsonConverter;
 import com.etz.fraudeagleeyemanager.util.PageRequestUtil;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.BeanUtils;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.data.domain.Page;
-import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
-import javax.persistence.TypedQuery;
-import java.util.*;
-import java.util.stream.Collectors;
 
 
 @Slf4j
@@ -41,6 +56,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class RuleService {
 
+	private final AppUtil appUtil;
 	private final RedisTemplate<String, Object> redisTemplate;
 	private final ServiceRuleRepository serviceRuleRepository;
 	private final NotificationGroupRepository notificationGroupRepository;
@@ -50,8 +66,8 @@ public class RuleService {
 	private final ProductServiceRepository productServiceRepository;
 	private final ProductDataSetRepository productDataSetRepository;
 
-	@PersistenceContext
-	private final EntityManager em;
+	@PersistenceContext(unitName = "primary")
+	private EntityManager em;
 
 	@CacheEvict(value = "product", allEntries=true)
 	@Transactional(rollbackFor = Throwable.class)
@@ -87,7 +103,7 @@ public class RuleService {
 			ruleEntity.setDataSourceValTwo(AppUtil.checkDataSource(request.getSecondDataSourceVal()));
 			ruleEntity.setSuspicionLevel(request.getSuspicion());
 		    ruleEntity.setAction(AppUtil.getLevelAction(request.getSuspicion()));
-			ruleEntity.setAuthorised(request.getAuthorised());
+			ruleEntity.setAuthorised(false);
 			ruleEntity.setStatus(Boolean.TRUE);
 			ruleEntity.setCreatedBy(request.getCreatedBy());
 			
@@ -96,14 +112,7 @@ public class RuleService {
 			ruleEntity.setRecordBefore(null);
 			ruleEntity.setRequestDump(request);
 
-		return addRuleEntityToDatabase(ruleEntity);
-		
-		// save rule
-		// notify Super admin for approval
-			// on rejection, notify admin
-			// on approval, proceed
-		// If rule is statistical based, refresh corresponding redis server; pocket-moni
-		// refresh fraud engine redis server;
+		return addRuleEntityToDatabase(ruleEntity, ruleEntity.getCreatedBy());
 	}
 
 	@Transactional(rollbackFor = Throwable.class)
@@ -144,14 +153,14 @@ public class RuleService {
 			ruleEntity.setDataSourceValTwo(AppUtil.checkDataSource(request.getSecondDataSource()));
 			ruleEntity.setSuspicionLevel(request.getSuspicion());
 			ruleEntity.setAction(AppUtil.getLevelAction(request.getSuspicion()));
-			ruleEntity.setAuthorised(request.getAuthorised());
+			ruleEntity.setAuthorised(false);
 			ruleEntity.setStatus(request.getStatus());
 			ruleEntity.setUpdatedBy(request.getUpdatedBy());
 
-		return outputUpdatedRuleResponse(addRuleEntityToDatabase(ruleEntity));
+		return outputUpdatedRuleResponse(addRuleEntityToDatabase(ruleEntity, ruleEntity.getUpdatedBy()));
 	}
 
-	private Rule addRuleEntityToDatabase(Rule ruleEntity) {
+	private Rule addRuleEntityToDatabase(Rule ruleEntity, String createdBy) {
 		Rule persistedRuleEntity;
 		try {
 			persistedRuleEntity = ruleRepository.save(ruleEntity);
@@ -160,6 +169,8 @@ public class RuleService {
 			throw new FraudEngineException(AppConstant.ERROR_SAVING_TO_DATABASE);
 		}
 		addRuleEntityToRedis(persistedRuleEntity);
+		// create & user notification
+		appUtil.createUserNotification(AppConstant.RULE, persistedRuleEntity.getId().toString(), createdBy);
 		return persistedRuleEntity;
 	}
 	
@@ -168,7 +179,7 @@ public class RuleService {
 			ruleRedisRepository.setHashOperations(redisTemplate);
 			ruleRedisRepository.update(alreadyPersistedRuleEntity);
 		} catch(Exception ex){
-			//log.error("Error occurred while saving Rule entity to Redis" , ex);
+			log.error("Error occurred while saving Rule entity to Redis" , ex);
 			throw new FraudEngineException(AppConstant.ERROR_SAVING_TO_REDIS);
 		}
 	}
@@ -292,7 +303,7 @@ public class RuleService {
 			}
 			serviceRuleEntity.setNotifyCustomer(request.getNotifyCustomer());
 			serviceRuleEntity.setStatus(Boolean.TRUE);
-			serviceRuleEntity.setAuthorised(request.getAuthorised());
+			serviceRuleEntity.setAuthorised(false);
 			serviceRuleEntity.setCreatedBy(request.getCreatedBy());
 		
 		// for auditing purpose for CREATE
@@ -303,7 +314,7 @@ public class RuleService {
 			log.error("Error occurred while creating Product Rule entity object", ex);
 			throw new FraudEngineException(AppConstant.ERROR_SETTING_PROPERTY);
 		}
-		return saveRuleServiceEntityToDatabase(serviceRuleEntity);
+		return saveRuleServiceEntityToDatabase(serviceRuleEntity, serviceRuleEntity.getCreatedBy());
 	}
 
 	@Transactional(rollbackFor = Throwable.class)
@@ -319,26 +330,26 @@ public class RuleService {
 
 
 		List<ServiceRule> updatedServiceRuleEntity = new ArrayList<>();
-		for (ServiceRule prodRuleEntity:prodRuleEntityList) {
+		for (ServiceRule serviceRuleEntity:prodRuleEntityList) {
 			try {
 				// for auditing purpose for UPDATE
-				prodRuleEntity.setEntityId("ruleId: " + prodRuleEntity.getRuleId() + " serviceId: " + prodRuleEntity.getServiceId());
-				prodRuleEntity.setRecordBefore(JsonConverter.objectToJson(prodRuleEntity));
-				prodRuleEntity.setRequestDump(request);
+				serviceRuleEntity.setEntityId("ruleId: " + serviceRuleEntity.getRuleId() + " serviceId: " + serviceRuleEntity.getServiceId());
+				serviceRuleEntity.setRecordBefore(JsonConverter.objectToJson(serviceRuleEntity));
+				serviceRuleEntity.setRequestDump(request);
 
-				prodRuleEntity.setNotifyAdmin(request.getNotifyAdmin());
+				serviceRuleEntity.setNotifyAdmin(request.getNotifyAdmin());
 				if (Boolean.TRUE.equals(request.getNotifyAdmin())){
-					prodRuleEntity.setNotificationGroupId(request.getNotificationGroupId());
+					serviceRuleEntity.setNotificationGroupId(request.getNotificationGroupId());
 				}
-				prodRuleEntity.setNotifyCustomer(request.getNotifyCustomer());
-				prodRuleEntity.setStatus(request.getStatus());
-				prodRuleEntity.setAuthorised(request.getAuthorised());
-				prodRuleEntity.setUpdatedBy(request.getUpdatedBy());
+				serviceRuleEntity.setNotifyCustomer(request.getNotifyCustomer());
+				serviceRuleEntity.setStatus(request.getStatus());
+				serviceRuleEntity.setAuthorised(false);
+				serviceRuleEntity.setUpdatedBy(request.getUpdatedBy());
 			} catch (Exception ex) {
 				log.error("Error occurred while creating Product Rule entity object", ex);
 				throw new FraudEngineException(AppConstant.ERROR_SETTING_PROPERTY);
 			}
-			updatedServiceRuleEntity.add(saveRuleServiceEntityToDatabase(prodRuleEntity));
+			updatedServiceRuleEntity.add(saveRuleServiceEntityToDatabase(serviceRuleEntity, serviceRuleEntity.getUpdatedBy()));
 		}
 		return outputProductRuleResponseList(updatedServiceRuleEntity);
 	}
@@ -361,14 +372,14 @@ public class RuleService {
 			try {
 				serviceRuleRepository.deleteByRuleIdAndServiceId(ruleId, serviceId);
 			} catch (Exception ex) {
-				log.error("Error occurred while deleting product rule entity from the database", ex);
+				log.error("Error occurred while deleting service rule entity from the database", ex);
 				throw new FraudEngineException(AppConstant.ERROR_DELETING_FROM_DATABASE);
 			}
 			try {
 				String redisId = serviceId + ":"+ruleId;
 				productRuleRedisRepository.delete(redisId);
 			} catch (Exception ex) {
-				log.error("Error occurred while deleting product rule entity from Redis", ex);
+				log.error("Error occurred while deleting service rule entity from Redis", ex);
 				throw new FraudEngineException(AppConstant.ERROR_DELETING_FROM_REDIS);
 			}
 		}else {
@@ -396,7 +407,7 @@ public class RuleService {
 		return ruleProductResponseList;
 	}
 
-	private ServiceRule saveRuleServiceEntityToDatabase(ServiceRule serviceRuleEntity) {
+	private ServiceRule saveRuleServiceEntityToDatabase(ServiceRule serviceRuleEntity, String createdBy) {
 		ServiceRule persistedServiceRule;
 		try {
 			persistedServiceRule = serviceRuleRepository.save(serviceRuleEntity);
@@ -405,6 +416,8 @@ public class RuleService {
 			throw new FraudEngineException(AppConstant.ERROR_SAVING_TO_DATABASE);
 		}
 		addAccountProductEntityToRedis(persistedServiceRule);
+		// create & user notification
+		appUtil.createUserNotification(AppConstant.SERVICE_RULE, persistedServiceRule.getServiceId() + "_" + persistedServiceRule.getRule().toString(), createdBy);
 		return persistedServiceRule;
 	}
 	
@@ -413,7 +426,6 @@ public class RuleService {
 			productRuleRedisRepository.setHashOperations(redisTemplate);
 			productRuleRedisRepository.update(alreadyPersistedServiceRule);
 		} catch(Exception ex){
-			//TODO actually delete already saved entity from the database (NOT SOFT DELETE)
 			log.error("Error occurred while saving product rule to Redis" , ex);
 			throw new FraudEngineException(AppConstant.ERROR_SAVING_TO_REDIS);
 		}

@@ -19,8 +19,8 @@ import com.etz.fraudeagleeyemanager.dto.response.BooleanResponse;
 import com.etz.fraudeagleeyemanager.dto.response.CollectionResponse;
 import com.etz.fraudeagleeyemanager.dto.response.ModelResponse;
 import com.etz.fraudeagleeyemanager.dto.response.ServiceDataSetResponse;
+import com.etz.fraudeagleeyemanager.entity.eagleeyedb.ServiceDataSet;
 import com.etz.fraudeagleeyemanager.dto.response.ProductResponse;
-import com.etz.fraudeagleeyemanager.entity.ServiceDataSet;
 import com.etz.fraudeagleeyemanager.service.ProductService;
 
 import lombok.RequiredArgsConstructor;

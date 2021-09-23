@@ -17,8 +17,8 @@ import com.etz.fraudeagleeyemanager.dto.response.CardResponse;
 import com.etz.fraudeagleeyemanager.dto.response.CollectionResponse;
 import com.etz.fraudeagleeyemanager.dto.response.ModelResponse;
 import com.etz.fraudeagleeyemanager.dto.response.PageResponse;
-import com.etz.fraudeagleeyemanager.entity.Card;
-import com.etz.fraudeagleeyemanager.entity.CardProduct;
+import com.etz.fraudeagleeyemanager.entity.eagleeyedb.Card;
+import com.etz.fraudeagleeyemanager.entity.eagleeyedb.CardProduct;
 import com.etz.fraudeagleeyemanager.service.CardService;
 
 import lombok.RequiredArgsConstructor;

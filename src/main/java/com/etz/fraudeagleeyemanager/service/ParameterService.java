@@ -13,11 +13,11 @@ import org.springframework.stereotype.Service;
 import com.etz.fraudeagleeyemanager.constant.AppConstant;
 import com.etz.fraudeagleeyemanager.dto.request.CreateParameterRequest;
 import com.etz.fraudeagleeyemanager.dto.request.UpdateParameterRequest;
-import com.etz.fraudeagleeyemanager.entity.Parameter;
+import com.etz.fraudeagleeyemanager.entity.eagleeyedb.Parameter;
 import com.etz.fraudeagleeyemanager.exception.FraudEngineException;
 import com.etz.fraudeagleeyemanager.exception.ResourceNotFoundException;
 import com.etz.fraudeagleeyemanager.redisrepository.ParameterRedisRepository;
-import com.etz.fraudeagleeyemanager.repository.ParameterRepository;
+import com.etz.fraudeagleeyemanager.repository.eagleeyedb.ParameterRepository;
 import com.etz.fraudeagleeyemanager.util.AppUtil;
 import com.etz.fraudeagleeyemanager.util.JsonConverter;
 import com.etz.fraudeagleeyemanager.util.PageRequestUtil;
@@ -30,6 +30,7 @@ import org.springframework.transaction.annotation.Transactional;
 @AllArgsConstructor
 public class ParameterService {
 
+	private final AppUtil appUtil;
 	private final RedisTemplate<String, Object> redisTemplate;
 	private final ParameterRedisRepository parameterRedisRepository;
 	private final ParameterRepository parameterRepository;
@@ -40,11 +41,10 @@ public class ParameterService {
 			throw new FraudEngineException("The name and operator already exists in Parameter table ");
 		}
 
-
 		Parameter parameterEntity = new Parameter();
 		parameterEntity.setName(request.getName());
 		parameterEntity.setOperator(AppUtil.checkParameterOperator(request.getOperator()));
-		parameterEntity.setAuthorised(request.getAuthorised());
+		parameterEntity.setAuthorised(false);
 		parameterEntity.setRequireValue(request.getRequireValue());
 		parameterEntity.setCreatedBy(request.getCreatedBy());
 
@@ -53,7 +53,7 @@ public class ParameterService {
 		parameterEntity.setRecordBefore(null);
 		parameterEntity.setRequestDump(request);
 
-		return addInternalWatchlistEntityToDatabase(parameterEntity);
+		return addInternalWatchlistEntityToDatabase(parameterEntity, parameterEntity.getUpdatedBy());
 	}
 
 	@Transactional(rollbackFor = Throwable.class)
@@ -68,10 +68,10 @@ public class ParameterService {
 		parameterEntity.setName(request.getName());
 		parameterEntity.setOperator(AppUtil.checkParameterOperator(request.getOperator()));
 		parameterEntity.setRequireValue(request.getRequireValue());
-		parameterEntity.setAuthorised(request.getAuthorised());
+		parameterEntity.setAuthorised(false);
 		parameterEntity.setUpdatedBy(request.getUpdatedBy());
 
-		return addInternalWatchlistEntityToDatabase(parameterEntity);
+		return addInternalWatchlistEntityToDatabase(parameterEntity, parameterEntity.getUpdatedBy());
 	}
 
 	// todo disable parameter
@@ -123,15 +123,17 @@ public class ParameterService {
 		return parameterEntityOptional.get();
 	}
 	
-	private Parameter addInternalWatchlistEntityToDatabase(Parameter parameterEntity) {
+	private Parameter addInternalWatchlistEntityToDatabase(Parameter parameterEntity, String createdBy) {
 		Parameter persistedParameterEntity;
 		try {
 			persistedParameterEntity = parameterRepository.save(parameterEntity);
 		} catch(Exception ex){
-			log.error("Error occurred while saving Internal Watchlist entity to database" , ex);
+			log.error("Error occurred while saving Parameter entity to database" , ex);
 			throw new FraudEngineException(AppConstant.ERROR_SAVING_TO_DATABASE);
 		}
 		addParameterEntityToRedis(persistedParameterEntity);
+		// create & user notification
+		appUtil.createUserNotification(AppConstant.PARAMETER, persistedParameterEntity.getId().toString(), createdBy);
 		return persistedParameterEntity;
 	}
 	
@@ -140,8 +142,7 @@ public class ParameterService {
 			parameterRedisRepository.setHashOperations(redisTemplate);
 			parameterRedisRepository.update(alreadyPersistedParameterEntity);
 		} catch(Exception ex){
-			//TODO actually delete already saved entity from the database (NOT SOFT DELETE)
-			log.error("Error occurred while saving Internal Watchlist entity to Redis" , ex);
+			log.error("Error occurred while saving Parameter entity to Redis" , ex);
 			throw new FraudEngineException(AppConstant.ERROR_SAVING_TO_REDIS);
 		}
 	}

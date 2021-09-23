@@ -6,7 +6,7 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Positive;
 
 import com.etz.fraudeagleeyemanager.constant.AppConstant;
-import com.etz.fraudeagleeyemanager.entity.ServiceRule;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -23,7 +23,8 @@ import com.etz.fraudeagleeyemanager.dto.response.PageResponse;
 import com.etz.fraudeagleeyemanager.dto.response.ProductRuleResponse;
 import com.etz.fraudeagleeyemanager.dto.response.RuleProductResponse;
 import com.etz.fraudeagleeyemanager.dto.response.RuleResponse;
-import com.etz.fraudeagleeyemanager.entity.Rule;
+import com.etz.fraudeagleeyemanager.entity.eagleeyedb.Rule;
+import com.etz.fraudeagleeyemanager.entity.eagleeyedb.ServiceRule;
 import com.etz.fraudeagleeyemanager.service.RuleService;
 
 import lombok.RequiredArgsConstructor;

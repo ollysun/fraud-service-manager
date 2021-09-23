@@ -6,45 +6,50 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import com.etz.fraudeagleeyemanager.dto.request.*;
-import com.etz.fraudeagleeyemanager.dto.response.ProductServiceResponse;
-import com.etz.fraudeagleeyemanager.entity.ProductDatasetId;
-import com.etz.fraudeagleeyemanager.entity.ProductServiceEntity;
-import com.etz.fraudeagleeyemanager.redisrepository.ProductServiceRedisRepository;
-import com.etz.fraudeagleeyemanager.repository.ProductServiceRepository;
-import com.etz.fraudeagleeyemanager.util.AppUtil;
-import com.etz.fraudeagleeyemanager.util.PageRequestUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.etz.fraudeagleeyemanager.constant.AppConstant;
-import com.etz.fraudeagleeyemanager.dto.response.ServiceDataSetResponse;
+import com.etz.fraudeagleeyemanager.dto.request.CreateProductRequest;
+import com.etz.fraudeagleeyemanager.dto.request.CreateProductServiceDto;
+import com.etz.fraudeagleeyemanager.dto.request.DatasetProductRequest;
+import com.etz.fraudeagleeyemanager.dto.request.UpdateDataSetRequest;
+import com.etz.fraudeagleeyemanager.dto.request.UpdateProductRequest;
+import com.etz.fraudeagleeyemanager.dto.request.UpdateProductServiceDto;
 import com.etz.fraudeagleeyemanager.dto.response.ProductResponse;
-import com.etz.fraudeagleeyemanager.entity.ServiceDataSet;
-import com.etz.fraudeagleeyemanager.entity.ProductEntity;
+import com.etz.fraudeagleeyemanager.dto.response.ProductServiceResponse;
+import com.etz.fraudeagleeyemanager.dto.response.ServiceDataSetResponse;
+import com.etz.fraudeagleeyemanager.entity.eagleeyedb.ProductDatasetId;
+import com.etz.fraudeagleeyemanager.entity.eagleeyedb.ProductEntity;
+import com.etz.fraudeagleeyemanager.entity.eagleeyedb.ProductServiceEntity;
+import com.etz.fraudeagleeyemanager.entity.eagleeyedb.ServiceDataSet;
 import com.etz.fraudeagleeyemanager.exception.FraudEngineException;
 import com.etz.fraudeagleeyemanager.exception.ResourceNotFoundException;
 import com.etz.fraudeagleeyemanager.redisrepository.ProductDatasetRedisRepository;
 import com.etz.fraudeagleeyemanager.redisrepository.ProductRedisRepository;
-import com.etz.fraudeagleeyemanager.repository.ProductDataSetRepository;
-import com.etz.fraudeagleeyemanager.repository.ProductEntityRepository;
+import com.etz.fraudeagleeyemanager.redisrepository.ProductServiceRedisRepository;
+import com.etz.fraudeagleeyemanager.repository.eagleeyedb.ProductDataSetRepository;
+import com.etz.fraudeagleeyemanager.repository.eagleeyedb.ProductEntityRepository;
+import com.etz.fraudeagleeyemanager.repository.eagleeyedb.ProductServiceRepository;
+import com.etz.fraudeagleeyemanager.util.AppUtil;
 import com.etz.fraudeagleeyemanager.util.JsonConverter;
+import com.etz.fraudeagleeyemanager.util.PageRequestUtil;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.cache.annotation.Cacheable;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class ProductService {
 
+	private final AppUtil appUtil;
 	private final RedisTemplate<String, Object> redisTemplate;
 	private final ProductEntityRepository productEntityRepository;
 	private final ProductDataSetRepository productDataSetRepository;
@@ -232,21 +237,21 @@ public class ProductService {
 			}
 		}
 
-		ServiceDataSet prodDatasetEntity = new ServiceDataSet();
-		prodDatasetEntity.setProductCode(request.getProductCode());
-		prodDatasetEntity.setServiceId(request.getServiceId());
-		prodDatasetEntity.setFieldName(request.getFieldName());
-		prodDatasetEntity.setDataType(AppUtil.checkDataType(request.getDataType()));
-		prodDatasetEntity.setMandatory(request.getCompulsory());
-		prodDatasetEntity.setAuthorised(request.getAuthorised());
-		prodDatasetEntity.setCreatedBy(request.getCreatedBy());
+		ServiceDataSet serviceDataSet = new ServiceDataSet();
+		serviceDataSet.setProductCode(request.getProductCode());
+		serviceDataSet.setServiceId(request.getServiceId());
+		serviceDataSet.setFieldName(request.getFieldName());
+		serviceDataSet.setDataType(AppUtil.checkDataType(request.getDataType()));
+		serviceDataSet.setMandatory(request.getCompulsory());
+		serviceDataSet.setAuthorised(false);
+		serviceDataSet.setCreatedBy(request.getCreatedBy());
 
 		// for auditing purpose for CREATE
-		prodDatasetEntity.setEntityId(null);
-		prodDatasetEntity.setRecordBefore(null);
-		prodDatasetEntity.setRequestDump(request);
+		serviceDataSet.setEntityId(null);
+		serviceDataSet.setRecordBefore(null);
+		serviceDataSet.setRequestDump(request);
 
-		return outputCreatedServiceDataset(saveServiceDatasetEntityToDatabase(prodDatasetEntity));
+		return outputCreatedServiceDataset(saveServiceDatasetEntityToDatabase(serviceDataSet, serviceDataSet.getCreatedBy()));
 	}
 
 	private ServiceDataSetResponse outputCreatedServiceDataset(ServiceDataSet productEntity) {
@@ -308,16 +313,17 @@ public class ProductService {
 
 		serviceDataSet.setDataType(AppUtil.checkDataType(request.getDataType()));
 		serviceDataSet.setMandatory(request.getCompulsory());
-		serviceDataSet.setAuthorised(request.getAuthorised());
+		serviceDataSet.setAuthorised(false);
 		serviceDataSet.setUpdatedBy(request.getUpdatedBy());
 		serviceDataSet.setFieldName(request.getFieldName());
 
 		ServiceDataSetResponse productDataSetResponse = new ServiceDataSetResponse();
 		BeanUtils.copyProperties(serviceDataSet, productDataSetResponse, "createdBy", "createdAt","productServiceEntity", "productEntity");
-		addServiceDatasetEntityToRedis(serviceDataSet);
+		saveServiceDatasetEntityToDatabase(serviceDataSet, serviceDataSet.getUpdatedBy());
 		return productDataSetResponse;
 	}
 
+	@SuppressWarnings("unused")
 	private List<ServiceDataSetResponse> outputUpdatedProductDatasetResponse(List<ServiceDataSet> serviceDataSetList) {
 		List<ServiceDataSetResponse> updatedProductDatasetResponseList = new ArrayList<>();
 		serviceDataSetList.forEach(productDataSet -> {
@@ -369,15 +375,17 @@ public class ProductService {
 	}
 
 
-	private ServiceDataSet saveServiceDatasetEntityToDatabase(ServiceDataSet accountEntity) {
+	private ServiceDataSet saveServiceDatasetEntityToDatabase(ServiceDataSet serviceDatasetEntity, String createdBy) {
 		ServiceDataSet persistedServiceDatasetEntity = new ServiceDataSet();
 		try {
-			persistedServiceDatasetEntity = productDataSetRepository.save(accountEntity);
+			persistedServiceDatasetEntity = productDataSetRepository.save(serviceDatasetEntity);
 		} catch (Exception ex) {
-			log.error("Error occurred while saving product entity to database", ex);
+			log.error("Error occurred while saving ServiceDataset entity to database", ex);
 			throw new FraudEngineException(AppConstant.ERROR_SAVING_TO_DATABASE);
 		}
 		addServiceDatasetEntityToRedis(persistedServiceDatasetEntity);
+		// create & user notification
+		appUtil.createUserNotification(AppConstant.SERVICE_DATASET, persistedServiceDatasetEntity.getProductCode()+"_"+persistedServiceDatasetEntity.getServiceId()+"_"+persistedServiceDatasetEntity.getDatasetId(), createdBy);
 		return persistedServiceDatasetEntity;
 	}
 
@@ -386,8 +394,7 @@ public class ProductService {
 			productDatasetRedisRepository.setHashOperations(redisTemplate);
 			productDatasetRedisRepository.update(alreadyPersistedServiceDatasetEntity);
 		} catch (Exception ex) {
-			// TODO actually delete already saved entity from the database (NOT SOFT DELETE)
-			log.error("Error occurred while saving product entity to Redis", ex);
+			log.error("Error occurred while saving ServiceDataset to Redis", ex);
 			throw new FraudEngineException(AppConstant.ERROR_SAVING_TO_REDIS);
 		}
 	}

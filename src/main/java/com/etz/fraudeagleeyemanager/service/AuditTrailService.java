@@ -5,9 +5,9 @@ import java.time.LocalDateTime;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
-import com.etz.fraudeagleeyemanager.entity.BaseAuditEntity;
-import com.etz.fraudeagleeyemanager.entity.EventLogEntity;
-import com.etz.fraudeagleeyemanager.repository.EventLogRepository;
+import com.etz.fraudeagleeyemanager.entity.eagleeyedb.BaseAuditEntity;
+import com.etz.fraudeagleeyemanager.entity.eagleeyedb.EventLogEntity;
+import com.etz.fraudeagleeyemanager.repository.eagleeyedb.EventLogRepository;
 import com.etz.fraudeagleeyemanager.util.JsonConverter;
 
 import lombok.RequiredArgsConstructor;

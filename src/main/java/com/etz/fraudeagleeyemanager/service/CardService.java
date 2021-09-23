@@ -7,12 +7,12 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import org.checkerframework.checker.units.qual.C;
 import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.Page;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.etz.fraudeagleeyemanager.constant.AppConstant;
 import com.etz.fraudeagleeyemanager.dto.request.CardRequest;
@@ -21,22 +21,21 @@ import com.etz.fraudeagleeyemanager.dto.request.UpdateCardProductRequest;
 import com.etz.fraudeagleeyemanager.dto.request.UpdateCardRequestDto;
 import com.etz.fraudeagleeyemanager.dto.response.CardProductResponse;
 import com.etz.fraudeagleeyemanager.dto.response.CardResponse;
-import com.etz.fraudeagleeyemanager.entity.Card;
-import com.etz.fraudeagleeyemanager.entity.CardProduct;
+import com.etz.fraudeagleeyemanager.entity.eagleeyedb.Card;
+import com.etz.fraudeagleeyemanager.entity.eagleeyedb.CardProduct;
 import com.etz.fraudeagleeyemanager.exception.FraudEngineException;
 import com.etz.fraudeagleeyemanager.exception.ResourceNotFoundException;
 import com.etz.fraudeagleeyemanager.redisrepository.CardProductRedisRepository;
 import com.etz.fraudeagleeyemanager.redisrepository.CardRedisRepository;
-import com.etz.fraudeagleeyemanager.repository.CardProductRepository;
-import com.etz.fraudeagleeyemanager.repository.CardRepository;
-import com.etz.fraudeagleeyemanager.repository.ProductEntityRepository;
+import com.etz.fraudeagleeyemanager.repository.eagleeyedb.CardProductRepository;
+import com.etz.fraudeagleeyemanager.repository.eagleeyedb.CardRepository;
+import com.etz.fraudeagleeyemanager.repository.eagleeyedb.ProductEntityRepository;
 import com.etz.fraudeagleeyemanager.util.AppUtil;
 import com.etz.fraudeagleeyemanager.util.JsonConverter;
 import com.etz.fraudeagleeyemanager.util.PageRequestUtil;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
 @Service

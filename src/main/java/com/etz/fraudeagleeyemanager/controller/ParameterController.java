@@ -14,7 +14,7 @@ import com.etz.fraudeagleeyemanager.dto.request.UpdateParameterRequest;
 import com.etz.fraudeagleeyemanager.dto.response.BooleanResponse;
 import com.etz.fraudeagleeyemanager.dto.response.ModelResponse;
 import com.etz.fraudeagleeyemanager.dto.response.PageResponse;
-import com.etz.fraudeagleeyemanager.entity.Parameter;
+import com.etz.fraudeagleeyemanager.entity.eagleeyedb.Parameter;
 import com.etz.fraudeagleeyemanager.service.ParameterService;
 
 import lombok.RequiredArgsConstructor;

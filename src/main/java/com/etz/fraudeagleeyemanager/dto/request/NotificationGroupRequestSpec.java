@@ -7,7 +7,7 @@ import javax.persistence.criteria.Root;
 
 import org.springframework.data.jpa.domain.Specification;
 
-import com.etz.fraudeagleeyemanager.entity.NotificationGroup;
+import com.etz.fraudeagleeyemanager.entity.eagleeyedb.NotificationGroup;
 
 public class NotificationGroupRequestSpec implements Specification<NotificationGroup> {
 	private static final long serialVersionUID = 1L;

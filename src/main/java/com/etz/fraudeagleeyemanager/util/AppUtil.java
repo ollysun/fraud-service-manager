@@ -1,17 +1,24 @@
 package com.etz.fraudeagleeyemanager.util;
 
+import com.etz.fraudeagleeyemanager.constant.AppConstant;
 import com.etz.fraudeagleeyemanager.constant.LevelAction;
+import com.etz.fraudeagleeyemanager.dto.request.UserNotificationRequest;
+import com.etz.fraudeagleeyemanager.entity.eagleeyedb.UserNotification;
 import com.etz.fraudeagleeyemanager.exception.FraudEngineException;
+import com.etz.fraudeagleeyemanager.service.UtilityService;
 import com.google.i18n.phonenumbers.NumberParseException;
 import com.google.i18n.phonenumbers.PhoneNumberUtil;
 import com.google.i18n.phonenumbers.Phonenumber;
 import org.apache.commons.lang3.StringUtils;
+
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -24,9 +31,12 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 @Slf4j
+@Component
+@RequiredArgsConstructor
 public class AppUtil {
 
-    private AppUtil() {}
+	private final UtilityService utilityService;
+	
 	
     public static boolean isBlank(String text) {
         return text == null || text.trim().length() == 0;
@@ -224,6 +234,7 @@ public class AppUtil {
 
         return operator;
     }
+    
     public static String checkOperator(String datatype, String operatorRequest){
         String output = "";
         if (StringUtils.isNotBlank(datatype) && StringUtils.isNotBlank(operatorRequest)) {
@@ -432,5 +443,16 @@ public class AppUtil {
         return true;
     }
 
+    public UserNotification createUserNotification(String entity, String entityId, String createdBy) {
+    	UserNotificationRequest userNotification = new UserNotificationRequest();
+		userNotification.setEntity(entity);
+		userNotification.setEntityId(entityId);
+		userNotification.setNotifType(1);
+		userNotification.setRoleId(Long.valueOf(RequestUtil.getAccessTokenClaim(AppConstant.ROLE_ID).isEmpty()? "0" : RequestUtil.getAccessTokenClaim(AppConstant.ROLE_ID)));
+		userNotification.setUserId(Long.valueOf(RequestUtil.getAccessTokenClaim(AppConstant.USER_ID).isEmpty()? "0" : RequestUtil.getAccessTokenClaim(AppConstant.USER_ID)));
+		//userNotification.setMessage(message);
+		userNotification.setCreatedBy(createdBy);
+		return utilityService.createUserNotification(userNotification);
+    }
 
 }

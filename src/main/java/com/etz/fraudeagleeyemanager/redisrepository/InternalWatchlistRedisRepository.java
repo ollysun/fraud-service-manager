@@ -1,9 +1,10 @@
 package com.etz.fraudeagleeyemanager.redisrepository;
 
-import com.etz.fraudeagleeyemanager.entity.InternalWatchlist;
+import com.etz.fraudeagleeyemanager.entity.eagleeyedb.InternalWatchlist;
 import com.etz.fraudeagleeyemanager.enums.FraudRedisKey;
 import com.etz.fraudeagleeyemanager.exception.FraudEngineException;
-import com.etz.fraudeagleeyemanager.repository.RedisRepository;
+import com.etz.fraudeagleeyemanager.repository.eagleeyedb.RedisRepository;
+
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.HashOperations;
 import org.springframework.data.redis.core.RedisTemplate;

@@ -1,7 +1,7 @@
 package com.etz.fraudeagleeyemanager.dto.response;
 
-import com.etz.fraudeagleeyemanager.entity.AccountProduct;
-import com.etz.fraudeagleeyemanager.entity.BaseEntity;
+import com.etz.fraudeagleeyemanager.entity.eagleeyedb.AccountProduct;
+import com.etz.fraudeagleeyemanager.entity.eagleeyedb.BaseEntity;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Data;
 import lombok.EqualsAndHashCode;

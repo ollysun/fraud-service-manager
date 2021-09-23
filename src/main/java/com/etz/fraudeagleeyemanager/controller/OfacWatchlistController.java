@@ -16,7 +16,7 @@ import com.etz.fraudeagleeyemanager.dto.request.UpdateOfacWatchlistRequest;
 import com.etz.fraudeagleeyemanager.dto.response.BooleanResponse;
 import com.etz.fraudeagleeyemanager.dto.response.ModelResponse;
 import com.etz.fraudeagleeyemanager.dto.response.PageResponse;
-import com.etz.fraudeagleeyemanager.entity.OfacWatchlist;
+import com.etz.fraudeagleeyemanager.entity.eagleeyedb.OfacWatchlist;
 import com.etz.fraudeagleeyemanager.service.OfacWatchlistService;
 
 import lombok.RequiredArgsConstructor;

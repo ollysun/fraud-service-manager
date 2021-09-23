@@ -2,7 +2,7 @@ package com.etz.fraudeagleeyemanager.dto.response;
 
 import java.io.Serializable;
 
-import com.etz.fraudeagleeyemanager.entity.BaseEntity;
+import com.etz.fraudeagleeyemanager.entity.eagleeyedb.BaseEntity;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import lombok.Data;
