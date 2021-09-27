@@ -67,8 +67,6 @@ public class UtilityService {
 	private final RolePermissionRepository rolePermissionRepository;
 	private final PermissionRepository permissionRepository;
 	
-	//private final OAuth2RestTemplate oAuth2RestTemplate;
-	
 	
 	public Boolean approval(ApprovalRequest request) {
 

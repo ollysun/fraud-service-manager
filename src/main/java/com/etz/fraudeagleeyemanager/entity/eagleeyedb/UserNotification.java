@@ -42,7 +42,7 @@ public class UserNotification extends BaseAuditEntity implements Serializable {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
-	@Column(name = "entity", unique = true, nullable = false)
+	@Column(name = "entity", nullable = false)
 	private String entityName;
 	
 	@Column(name = "entity_id", nullable = false)
