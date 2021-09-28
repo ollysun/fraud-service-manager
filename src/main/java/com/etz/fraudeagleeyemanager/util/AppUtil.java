@@ -1,6 +1,26 @@
 package com.etz.fraudeagleeyemanager.util;
 
-import com.etz.fraudeagleeyemanager.constant.AppConstant;
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.Month;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.BeanWrapper;
+import org.springframework.beans.BeanWrapperImpl;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Component;
+
 import com.etz.fraudeagleeyemanager.constant.LevelAction;
 import com.etz.fraudeagleeyemanager.dto.request.UserNotificationRequest;
 import com.etz.fraudeagleeyemanager.entity.eagleeyedb.UserNotification;
@@ -9,26 +29,9 @@ import com.etz.fraudeagleeyemanager.service.UtilityService;
 import com.google.i18n.phonenumbers.NumberParseException;
 import com.google.i18n.phonenumbers.PhoneNumberUtil;
 import com.google.i18n.phonenumbers.Phonenumber;
-import org.apache.commons.lang3.StringUtils;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.BeanWrapper;
-import org.springframework.beans.BeanWrapperImpl;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.Pageable;
-import org.springframework.stereotype.Component;
-
-import java.math.BigDecimal;
-import java.math.BigInteger;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.time.LocalDate;
-import java.time.Month;
-import java.util.*;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Component
@@ -444,13 +447,11 @@ public class AppUtil {
     }
 
     public UserNotification createUserNotification(String entity, String entityId, String createdBy) {
+    	
     	UserNotificationRequest userNotification = new UserNotificationRequest();
 		userNotification.setEntity(entity);
 		userNotification.setEntityId(entityId);
 		userNotification.setNotifType(1);
-		userNotification.setRoleId(Long.valueOf(RequestUtil.getAccessTokenClaim(AppConstant.ROLE_ID).isEmpty()? "0" : RequestUtil.getAccessTokenClaim(AppConstant.ROLE_ID)));
-		userNotification.setUserId(Long.valueOf(RequestUtil.getAccessTokenClaim(AppConstant.USER_ID).isEmpty()? "0" : RequestUtil.getAccessTokenClaim(AppConstant.USER_ID)));
-		//userNotification.setMessage(message);
 		userNotification.setCreatedBy(createdBy);
 		return utilityService.createUserNotification(userNotification);
     }

@@ -16,4 +16,6 @@ public interface UserNotificationRepository extends JpaRepository<UserNotificati
 	Optional<List<UserNotification>> findByUserId(Long userId);
 	
 	Optional<List<UserNotification>> findByRoleIdAndUserId(Long roleId, Long userId);
+	
+	Optional<List<UserNotification>> findByEntityNameAndEntityID(String entityName, String entityID);
 }

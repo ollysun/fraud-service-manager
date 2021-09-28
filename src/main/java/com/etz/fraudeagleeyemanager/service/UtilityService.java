@@ -7,6 +7,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -67,7 +68,9 @@ public class UtilityService {
 	private final RolePermissionRepository rolePermissionRepository;
 	private final PermissionRepository permissionRepository;
 	
-	
+
+	@PreAuthorize("hasAnyAuthority('OFAC.APPROVE', 'WATCHLIST_INTERNAL.APPROVE', 'NOTIFICATION_GROUP.APPROVE', 'RULE.APPROVE',"
+			+ " 'RULE.PRODUCT.APPROVE', 'PARAMETER.APPROVE', 'SERVICE.DATASET.APPROVE', 'USER.APPROVE', 'ROLE.APPROVE')")
 	public Boolean approval(ApprovalRequest request) {
 
 		// confirm that user role has permission to approve
@@ -277,12 +280,25 @@ public class UtilityService {
 	
 	@Transactional(rollbackFor = Throwable.class)
 	public UserNotification createUserNotification(UserNotificationRequest request){
-		UserNotification userNotificationEntity = new UserNotification();
+		
+		// get permission ID for entity with approve permission
+    	Long entityApprovalPermissionId = permissionRepository.findAll().stream()
+    			.filter(permission -> permission.getName().equals(request.getEntity().concat(AppConstant.DOT_APPROVE)))
+    			.map(PermissionEntity::getId).findFirst().orElseThrow(()->new ResourceNotFoundException("Entity " + request.getEntity() +" has no approval related permission"));
+    	
+    	// get all role(s) that have been assigned the approval permission ID gotten from above
+    	List<Long> roleIdsHavingEntityApprovalPermissionId = rolePermissionRepository.findByPermissionId(entityApprovalPermissionId).stream().map(RolePermission::getRoleId).collect(Collectors.toList());
+    	if(roleIdsHavingEntityApprovalPermissionId.isEmpty()) {
+    		throw new ResourceNotFoundException("No Role has been assigned " + request.getEntity() +" approval permission");
+    	}
+    	
+    	// creates user notification for the first role having the entity approval permission
+    	UserNotification userNotificationEntity = new UserNotification();
 		try {
 			userNotificationEntity.setEntityName(request.getEntity().toUpperCase());
 			userNotificationEntity.setEntityID(request.getEntityId());
 			userNotificationEntity.setNotifyType(1);
-			userNotificationEntity.setRoleId(request.getRoleId());
+			userNotificationEntity.setRoleId(roleIdsHavingEntityApprovalPermissionId.stream().findFirst().get());
 			userNotificationEntity.setUserId(request.getUserId());
 			userNotificationEntity.setSystem(Boolean.TRUE);
 			userNotificationEntity.setMessage(request.getMessage());
@@ -297,7 +313,34 @@ public class UtilityService {
 			log.error("Error occurred while creating UserNotification entity object", ex);
 			throw new FraudEngineException(AppConstant.ERROR_SETTING_PROPERTY);
 		}
-		return saveUserNotificationToDatabase(userNotificationEntity);
+		UserNotification userNotificationEntityCreated = saveUserNotificationToDatabase(userNotificationEntity);
+    	
+		// This part creates user notification for other roles having the entity approval permission
+    	roleIdsHavingEntityApprovalPermissionId.stream().skip(1).forEach(roleId -> {
+			UserNotification userNotification = new UserNotification();
+    		try {
+    			userNotification.setEntityName(request.getEntity().toUpperCase());
+    			userNotification.setEntityID(request.getEntityId());
+    			userNotification.setNotifyType(1);
+    			userNotification.setRoleId(roleId);
+    			userNotification.setUserId(request.getUserId());
+    			userNotification.setSystem(Boolean.TRUE);
+    			userNotification.setMessage(request.getMessage());
+    			userNotification.setStatus(Boolean.FALSE);
+    			userNotification.setCreatedBy(request.getCreatedBy());
+    			
+    			// for auditing purpose for CREATE
+    			userNotification.setEntityId(null);
+    			userNotification.setRecordBefore(null);
+    			userNotification.setRequestDump(request);
+    		} catch(Exception ex){
+    			log.error("Error occurred while setting UserNotification entity object", ex);
+    			throw new FraudEngineException(AppConstant.ERROR_SETTING_PROPERTY);
+    		}
+    		saveUserNotificationToDatabase(userNotification);
+    	});
+		
+		return userNotificationEntityCreated;
 	}
 	
 	@Transactional(propagation = Propagation.REQUIRED, rollbackFor = Throwable.class)
@@ -317,10 +360,26 @@ public class UtilityService {
 			userNotificationEntity.setStatus(Boolean.TRUE);
 			userNotificationEntity.setUpdatedBy(updateUserNotificationRequest.getUpdatedBy());
 		} catch(Exception ex){
-			log.error("Error occurred while creating UserNotification entity object", ex);
+			log.error("Error occurred while setting UserNotification entity object", ex);
 			throw new FraudEngineException(AppConstant.ERROR_SETTING_PROPERTY);
 		}
-		return saveUserNotificationToDatabase(userNotificationEntity);
+		UserNotification userNotificationEntityUpdated = saveUserNotificationToDatabase(userNotificationEntity);
+		
+		// This part updates the read status of similar notification but for different role(s)
+		Optional<List<UserNotification>> userNotificationOptinal = userNotificationRepository.findByEntityNameAndEntityID(userNotificationEntity.getEntityName(), userNotificationEntity.getEntityID());
+		List<UserNotification> userNotifications = userNotificationOptinal.orElseGet(ArrayList::new);
+		userNotifications.stream().filter(userNotification -> !userNotification.getId().equals(updateUserNotificationRequest.getId())).forEach(userNotification -> {
+			// for auditing purpose for UPDATE
+			userNotification.setEntityId(String.valueOf(userNotification.getId()));
+			userNotification.setRecordBefore(JsonConverter.objectToJson(userNotification));
+			userNotification.setRequestDump(updateUserNotificationRequest);
+			
+			userNotification.setStatus(Boolean.TRUE);
+			userNotification.setUpdatedBy(userNotification.getUpdatedBy());
+			saveUserNotificationToDatabase(userNotification);
+		});
+		
+		return userNotificationEntityUpdated;
 	}
 	
 	@Transactional(readOnly = true)
