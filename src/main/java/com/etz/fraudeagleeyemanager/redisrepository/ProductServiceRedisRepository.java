@@ -9,10 +9,10 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
-import com.etz.fraudeagleeyemanager.entity.eagleeyedb.ProductServiceEntity;
+import com.etz.fraudeagleeyemanager.entity.ProductServiceEntity;
 import com.etz.fraudeagleeyemanager.enums.FraudRedisKey;
 import com.etz.fraudeagleeyemanager.exception.FraudEngineException;
-import com.etz.fraudeagleeyemanager.repository.eagleeyedb.RedisRepository;
+import com.etz.fraudeagleeyemanager.repository.RedisRepository;
 
 import lombok.extern.slf4j.Slf4j;
 

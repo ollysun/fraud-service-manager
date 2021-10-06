@@ -4,26 +4,26 @@ package com.etz.fraudeagleeyemanager.service;
 import java.util.Objects;
 import java.util.Optional;
 
-import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.Page;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.etz.fraudeagleeyemanager.constant.AppConstant;
 import com.etz.fraudeagleeyemanager.dto.request.CreateParameterRequest;
 import com.etz.fraudeagleeyemanager.dto.request.UpdateParameterRequest;
-import com.etz.fraudeagleeyemanager.entity.eagleeyedb.Parameter;
+import com.etz.fraudeagleeyemanager.entity.Parameter;
 import com.etz.fraudeagleeyemanager.exception.FraudEngineException;
 import com.etz.fraudeagleeyemanager.exception.ResourceNotFoundException;
 import com.etz.fraudeagleeyemanager.redisrepository.ParameterRedisRepository;
-import com.etz.fraudeagleeyemanager.repository.eagleeyedb.ParameterRepository;
+import com.etz.fraudeagleeyemanager.repository.ParameterRepository;
 import com.etz.fraudeagleeyemanager.util.AppUtil;
 import com.etz.fraudeagleeyemanager.util.JsonConverter;
 import com.etz.fraudeagleeyemanager.util.PageRequestUtil;
 
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
 @Service

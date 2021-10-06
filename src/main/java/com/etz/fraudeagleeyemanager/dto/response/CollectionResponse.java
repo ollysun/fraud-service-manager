@@ -2,6 +2,7 @@ package com.etz.fraudeagleeyemanager.dto.response;
 
 import com.etz.fraudeagleeyemanager.util.RequestUtil;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
@@ -10,6 +11,7 @@ import java.util.Collection;
 @Getter
 @Setter
 @ToString
+@NoArgsConstructor
 public class CollectionResponse<T> {
 
 

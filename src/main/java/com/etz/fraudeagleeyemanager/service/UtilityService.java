@@ -1,51 +1,52 @@
 package com.etz.fraudeagleeyemanager.service;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.etz.fraudeagleeyemanager.config.AuthServerMandatoryURL;
 import com.etz.fraudeagleeyemanager.constant.AppConstant;
 import com.etz.fraudeagleeyemanager.dto.request.ApprovalRequest;
 import com.etz.fraudeagleeyemanager.dto.request.UpdateUserNotificationRequest;
 import com.etz.fraudeagleeyemanager.dto.request.UserNotificationRequest;
-import com.etz.fraudeagleeyemanager.entity.authservicedb.PermissionEntity;
-import com.etz.fraudeagleeyemanager.entity.authservicedb.Role;
-import com.etz.fraudeagleeyemanager.entity.authservicedb.RolePermission;
-import com.etz.fraudeagleeyemanager.entity.authservicedb.UserEntity;
-import com.etz.fraudeagleeyemanager.entity.eagleeyedb.BaseEntity;
-import com.etz.fraudeagleeyemanager.entity.eagleeyedb.InternalWatchlist;
-import com.etz.fraudeagleeyemanager.entity.eagleeyedb.NotificationGroup;
-import com.etz.fraudeagleeyemanager.entity.eagleeyedb.OfacWatchlist;
-import com.etz.fraudeagleeyemanager.entity.eagleeyedb.Parameter;
-import com.etz.fraudeagleeyemanager.entity.eagleeyedb.ProductDatasetId;
-import com.etz.fraudeagleeyemanager.entity.eagleeyedb.ProductRuleId;
-import com.etz.fraudeagleeyemanager.entity.eagleeyedb.Rule;
-import com.etz.fraudeagleeyemanager.entity.eagleeyedb.ServiceDataSet;
-import com.etz.fraudeagleeyemanager.entity.eagleeyedb.ServiceRule;
-import com.etz.fraudeagleeyemanager.entity.eagleeyedb.UserNotification;
+import com.etz.fraudeagleeyemanager.dto.response.ModelResponse;
+import com.etz.fraudeagleeyemanager.dto.response.RoleIdByPermissionResponse;
+import com.etz.fraudeagleeyemanager.dto.response.RoleResponse;
+import com.etz.fraudeagleeyemanager.dto.response.UserResponse;
+import com.etz.fraudeagleeyemanager.entity.BaseEntity;
+import com.etz.fraudeagleeyemanager.entity.InternalWatchlist;
+import com.etz.fraudeagleeyemanager.entity.NotificationGroup;
+import com.etz.fraudeagleeyemanager.entity.OfacWatchlist;
+import com.etz.fraudeagleeyemanager.entity.Parameter;
+import com.etz.fraudeagleeyemanager.entity.ProductDatasetId;
+import com.etz.fraudeagleeyemanager.entity.ProductRuleId;
+import com.etz.fraudeagleeyemanager.entity.Rule;
+import com.etz.fraudeagleeyemanager.entity.ServiceDataSet;
+import com.etz.fraudeagleeyemanager.entity.ServiceRule;
+import com.etz.fraudeagleeyemanager.entity.UserNotification;
 import com.etz.fraudeagleeyemanager.exception.FraudEngineException;
 import com.etz.fraudeagleeyemanager.exception.ResourceNotFoundException;
-import com.etz.fraudeagleeyemanager.repository.authservicedb.PermissionRepository;
-import com.etz.fraudeagleeyemanager.repository.authservicedb.RolePermissionRepository;
-import com.etz.fraudeagleeyemanager.repository.authservicedb.RoleRepository;
-import com.etz.fraudeagleeyemanager.repository.authservicedb.UserRepository;
-import com.etz.fraudeagleeyemanager.repository.eagleeyedb.InternalWatchlistRepository;
-import com.etz.fraudeagleeyemanager.repository.eagleeyedb.NotificationGroupRepository;
-import com.etz.fraudeagleeyemanager.repository.eagleeyedb.OfacWatchlistRepository;
-import com.etz.fraudeagleeyemanager.repository.eagleeyedb.ParameterRepository;
-import com.etz.fraudeagleeyemanager.repository.eagleeyedb.ProductDataSetRepository;
-import com.etz.fraudeagleeyemanager.repository.eagleeyedb.RuleRepository;
-import com.etz.fraudeagleeyemanager.repository.eagleeyedb.ServiceRuleRepository;
-import com.etz.fraudeagleeyemanager.repository.eagleeyedb.UserNotificationRepository;
+import com.etz.fraudeagleeyemanager.repository.InternalWatchlistRepository;
+import com.etz.fraudeagleeyemanager.repository.NotificationGroupRepository;
+import com.etz.fraudeagleeyemanager.repository.OfacWatchlistRepository;
+import com.etz.fraudeagleeyemanager.repository.ParameterRepository;
+import com.etz.fraudeagleeyemanager.repository.ProductDataSetRepository;
+import com.etz.fraudeagleeyemanager.repository.RuleRepository;
+import com.etz.fraudeagleeyemanager.repository.ServiceRuleRepository;
+import com.etz.fraudeagleeyemanager.repository.UserNotificationRepository;
+import com.etz.fraudeagleeyemanager.util.ApiUtil;
 import com.etz.fraudeagleeyemanager.util.JsonConverter;
+import com.etz.fraudeagleeyemanager.util.RequestUtil;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -63,27 +64,22 @@ public class UtilityService {
 	private final ParameterRepository parameterRepository;
 	private final ProductDataSetRepository productDataSetRepository;
 	private final UserNotificationRepository userNotificationRepository;
-	private final UserRepository userRepository;
-	private final RoleRepository roleRepository;
-	private final RolePermissionRepository rolePermissionRepository;
-	private final PermissionRepository permissionRepository;
+
+    private final ApiUtil apiUtil;
+    private final AuthServerMandatoryURL authServerUrl;
 	
 
-	@PreAuthorize("hasAnyAuthority('OFAC.APPROVE', 'WATCHLIST_INTERNAL.APPROVE', 'NOTIFICATION_GROUP.APPROVE', 'RULE.APPROVE',"
-			+ " 'RULE.PRODUCT.APPROVE', 'PARAMETER.APPROVE', 'SERVICE.DATASET.APPROVE', 'USER.APPROVE', 'ROLE.APPROVE')")
+//	@PreAuthorize("hasAnyAuthority('OFAC.APPROVE', 'WATCHLIST_INTERNAL.APPROVE', 'NOTIFICATION_GROUP.APPROVE', 'RULE.APPROVE',"
+//			+ " 'RULE.PRODUCT.APPROVE', 'PARAMETER.APPROVE', 'SERVICE.DATASET.APPROVE', 'USER.APPROVE', 'ROLE.APPROVE')")
 	public Boolean approval(ApprovalRequest request) {
 
-		// confirm that user role has permission to approve
-		if(!hasPermissionToApprove(request)){
-			log.error("User Role has no permission to approve entity {}", request.getEntity());
-			throw new ResourceNotFoundException("User Role does not have the permission to approve entity " + request.getEntity());
-		}
-		
+		log.info("Approval Request: {}", request);
 		switch(request.getEntity().toUpperCase()) {
 		
 		case AppConstant.OFAC_WATCHLIST : 
 			Optional<OfacWatchlist> ofacWatchlistOptional = ofacWatchlistRepository.findById(Long.valueOf(request.getEntityId()));
 			if(!ofacWatchlistOptional.isPresent()) {
+				log.error("OfacWatlist not found for ID " + Long.valueOf(request.getEntityId()));
 				throw new ResourceNotFoundException("OfacWatlist not found for ID " + Long.valueOf(request.getEntityId()));
 			}
 			OfacWatchlist ofacWatchlist = ofacWatchlistOptional.get();
@@ -101,6 +97,7 @@ public class UtilityService {
 		case AppConstant.INTERNAL_WATCHLIST : 
 			Optional<InternalWatchlist> internalWatchlistOptional = internalWatchlistRepository.findById(Long.valueOf(request.getEntityId()));
 			if(!internalWatchlistOptional.isPresent()) {
+				log.error("InternalWatchlist not found for ID " + Long.valueOf(request.getEntityId()));
 				throw new ResourceNotFoundException("InternalWatchlist not found for ID " + Long.valueOf(request.getEntityId()));
 			}
 			InternalWatchlist internalWatchlist = internalWatchlistOptional.get();
@@ -118,6 +115,7 @@ public class UtilityService {
 		case AppConstant.NOTIFICATION_GROUPS : 
 			Optional<NotificationGroup> notificationGroupOptional = notificationGroupRepository.findById(Long.valueOf(request.getEntityId()));
 			if(!notificationGroupOptional.isPresent()) {
+				log.error("NotificationGroup not found for ID " + Long.valueOf(request.getEntityId()));
 				throw new ResourceNotFoundException("NotificationGroup not found for ID " + Long.valueOf(request.getEntityId()));
 			}
 			NotificationGroup notificationGroup = notificationGroupOptional.get();
@@ -135,6 +133,7 @@ public class UtilityService {
 		case AppConstant.RULE : 
 			Optional<Rule> ruleOptional = ruleRepository.findById(Long.valueOf(request.getEntityId()));
 			if(!ruleOptional.isPresent()) {
+				log.error("Rule not found for ID " + Long.valueOf(request.getEntityId()));
 				throw new ResourceNotFoundException("Rule not found for ID " + Long.valueOf(request.getEntityId()));
 			}
 			Rule rule = ruleOptional.get();
@@ -149,12 +148,13 @@ public class UtilityService {
 			updateAuthorised(ruleRepository, rule);
 			break;
 			
-		case AppConstant.SERVICE_RULE : //entityId - service_ruleId
+		case AppConstant.SERVICE_RULE : //entityId => service_ruleId
 			String serviceId = request.getEntityId().split("_")[0];
 			Long ruleId = Long.valueOf(request.getEntityId().split("_")[1]);
 			Optional<ServiceRule> serviceRuleOptional = serviceRuleRepository.findById(new ProductRuleId(ruleId, serviceId));
 			if(!serviceRuleOptional.isPresent()) {
-				throw new ResourceNotFoundException("ServiceRule not found for ID " + Long.valueOf(request.getEntityId()));
+				log.error("ServiceRule not found for ID " + request.getEntityId());
+				throw new ResourceNotFoundException("ServiceRule not found for ID " + request.getEntityId());
 			}
 			ServiceRule serviceRule = serviceRuleOptional.get();
 			// for auditing purpose for UPDATE
@@ -171,6 +171,7 @@ public class UtilityService {
 		case AppConstant.PARAMETER : 
 			Optional<Parameter> parameterOptional = parameterRepository.findById(Long.valueOf(request.getEntityId()));
 			if(!parameterOptional.isPresent()) {
+				log.error("Parameter not found for ID " + Long.valueOf(request.getEntityId()));
 				throw new ResourceNotFoundException("Parameter not found for ID " + Long.valueOf(request.getEntityId()));
 			}
 			Parameter parameter = parameterOptional.get();
@@ -185,14 +186,15 @@ public class UtilityService {
 			updateAuthorised(parameterRepository, parameter);
 			break;
 			
-		case AppConstant.SERVICE_DATASET : // EntityId - productCode_ServiceId_DatasetId
+		case AppConstant.SERVICE_DATASET : // EntityId => productCode_ServiceId_DatasetId
 			String productCode = request.getEntityId().split("_")[0];
 			String serviceCode = request.getEntityId().split("_")[1];
 			Long datasetId = Long.valueOf(request.getEntityId().split("_")[2]);
 			
 			Optional<ServiceDataSet> serviceDatasetOptional = productDataSetRepository.findById(new ProductDatasetId(datasetId, productCode, serviceCode));
 			if(!serviceDatasetOptional.isPresent()) {
-				throw new ResourceNotFoundException("ServiceDataSet not found for ID " + Long.valueOf(request.getEntityId()));
+				log.error("ServiceDataSet not found for ID " + request.getEntityId());
+				throw new ResourceNotFoundException("ServiceDataSet not found for ID " + request.getEntityId());
 			}
 			ServiceDataSet serviceDataset = serviceDatasetOptional.get();
 			// for auditing purpose for UPDATE
@@ -206,34 +208,55 @@ public class UtilityService {
 			updateAuthorised(productDataSetRepository, serviceDataset);
 			break;
 
-		case AppConstant.USER : saveUser(request);	break;
+		case AppConstant.USER :
+			try {
+				log.info("Update User authoriser URL: {}", authServerUrl.getUserAuthoriserUrl());
+				
+				@SuppressWarnings("unchecked")
+				ModelResponse<UserResponse> userResponse = apiUtil.put(authServerUrl.getUserAuthoriserUrl(), setFixedExtraHeader(), request, 
+						(Class<ModelResponse<UserResponse>>) (Class<?>) ModelResponse.class);
+
+				log.info("Update User authoriser http status code >>> {}", userResponse.getStatus());
+				log.info("Update User authoriser message >>> {}", userResponse.getMessage());
+				log.info("User response object >>> {}", userResponse.getData());
 			
-		case AppConstant.ROLE : saveRole(request);	break;
+			} catch(Exception ex) {
+				log.error("Call to Update User Authoriser endpoint failed >>> {}", ex);
+				throw new FraudEngineException("Could not update User Authoriser");
+			}
+			break;
+			
+		case AppConstant.ROLE :
+			try {
+				log.info("Update User authoriser URL: {}", authServerUrl.getRoleAuthoriserUrl());
+				
+				@SuppressWarnings("unchecked")
+				ModelResponse<RoleResponse> roleResponse = apiUtil.put(authServerUrl.getRoleAuthoriserUrl(), setFixedExtraHeader(), request, 
+						(Class<ModelResponse<RoleResponse>>) (Class<?>) ModelResponse.class);
+	
+				log.info("Update Role authoriser http status code >>> {}", roleResponse.getStatus());
+				log.info("Update Role authoriser message >>> {}", roleResponse.getMessage());
+				log.info("Role response object >>> {}", roleResponse.getData());
+			
+			} catch(Exception ex) {
+				log.error("Call to Update Role Authoriser endpoint failed >>> {}", ex);
+				throw new FraudEngineException("Could not update Role Authoriser");
+			}
+			break;
 		}
 		
 		return Boolean.TRUE;
 	}
 	
-	private boolean hasPermissionToApprove(ApprovalRequest request) {
-		// get all permissions
-		List<PermissionEntity> allPermissions = permissionRepository.findAll();
-		
-		// get all permission IDs user role have
-		List<Long> rolePermissions = rolePermissionRepository.findByRoleId(request.getUserRole()).stream().map(RolePermission::getPermissionId).collect(Collectors.toList());
-		
-		// filter out permissions that the user role has
-		List<PermissionEntity> filteredPermissions = allPermissions.stream().filter(p -> rolePermissions.contains(p.getId())).collect(Collectors.toList());
-		
-		// get number of permissions with approval
-		Long permCount = filteredPermissions.stream().map(PermissionEntity::getName).filter(s -> s.equals(request.getEntity().concat(AppConstant.DOT_APPROVE))).count();
-		
-		// if user has approval permission, permCount will be equal to 1 and return TRUE
-		return (permCount > 0);
+	private static HashMap<String, String> setFixedExtraHeader() {
+		HashMap<String, String> extraHeaders = new HashMap<>();
+		extraHeaders.put(HttpHeaders.AUTHORIZATION, "Bearer " + RequestUtil.getToken());
+		extraHeaders.put(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE);
+		return extraHeaders;
 	}
 	
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	private void updateAuthorised(JpaRepository repository, BaseEntity entity) {
-		//<? extends BaseEntity, ? extends Serializable>
 		try {
 			repository.save(entity);
 		} catch(Exception ex){
@@ -242,55 +265,26 @@ public class UtilityService {
 		}
 	}
 	
-	@Transactional("authServiceTransactionManager")
-	public void saveRole(ApprovalRequest request) {
-		Optional<Role> roleOptional = roleRepository.findById(Long.valueOf(request.getEntityId()));
-		if(!roleOptional.isPresent()) {
-			throw new ResourceNotFoundException("Role not found for ID " + Long.valueOf(request.getEntityId()));
-		}
-		Role role = roleOptional.get();
-		// for auditing purpose for UPDATE
-		role.setEntityId(request.getEntityId());
-		role.setRecordBefore(JsonConverter.objectToJson(role));
-		role.setRequestDump(request);
-		
-		role.setAuthorised(request.getAction().equalsIgnoreCase(AppConstant.APPROVE_ACTION) ? Boolean.TRUE : Boolean.FALSE);
-		role.setAuthoriser(request.getCreatedBy());
-		role.setUpdatedBy(request.getCreatedBy());
-		updateAuthorised(roleRepository, role);
-	}
-	
-	@Transactional("authServiceTransactionManager")
-	public void saveUser(ApprovalRequest request) {
-		Optional<UserEntity> userOptional = userRepository.findById(Long.valueOf(request.getEntityId()));
-		if(!userOptional.isPresent()) {
-			throw new ResourceNotFoundException("UserEntity not found for ID " + Long.valueOf(request.getEntityId()));
-		}
-		UserEntity userEntity = userOptional.get();
-		// for auditing purpose for UPDATE
-		userEntity.setEntityId(request.getEntityId());
-		userEntity.setRecordBefore(JsonConverter.objectToJson(userEntity));
-		userEntity.setRequestDump(request);
-		
-		userEntity.setAuthorised(request.getAction().equalsIgnoreCase(AppConstant.APPROVE_ACTION) ? Boolean.TRUE : Boolean.FALSE);
-		userEntity.setAuthoriser(request.getCreatedBy());
-		userEntity.setUpdatedBy(request.getCreatedBy());
-		updateAuthorised(userRepository, userEntity);
-	}
-	
 	@Transactional(rollbackFor = Throwable.class)
 	public UserNotification createUserNotification(UserNotificationRequest request){
-		
-		// get permission ID for entity with approve permission
-    	Long entityApprovalPermissionId = permissionRepository.findAll().stream()
-    			.filter(permission -> permission.getName().equals(request.getEntity().concat(AppConstant.DOT_APPROVE)))
-    			.map(PermissionEntity::getId).findFirst().orElseThrow(()->new ResourceNotFoundException("Entity " + request.getEntity() +" has no approval related permission"));
     	
-    	// get all role(s) that have been assigned the approval permission ID gotten from above
-    	List<Long> roleIdsHavingEntityApprovalPermissionId = rolePermissionRepository.findByPermissionId(entityApprovalPermissionId).stream().map(RolePermission::getRoleId).collect(Collectors.toList());
-    	if(roleIdsHavingEntityApprovalPermissionId.isEmpty()) {
-    		throw new ResourceNotFoundException("No Role has been assigned " + request.getEntity() +" approval permission");
-    	}
+		List<Long> roleIdsHavingEntityApprovalPermissionId = new ArrayList<>();
+    	try {
+			
+    		String url = authServerUrl.getRoleIdsByPermissionNameUrl() + "?permissionName=" + request.getEntity().concat(AppConstant.DOT_APPROVE);
+    		RoleIdByPermissionResponse response = apiUtil.get(url, setFixedExtraHeader(), RoleIdByPermissionResponse.class);
+
+			log.info("RoleIdsByPermissionName URL : {}", url);
+			log.info("Get roleIdsByPermissionNameUrl http status code >>> {}", response.getStatus());
+			log.info("Get roleIdsByPermissionNameUrl message >>> {}", response.getMessage());
+			log.info("RoleIdsByPermissionName response object >>> {}", response.getData());
+		
+			roleIdsHavingEntityApprovalPermissionId = response.getData(); //.stream().collect(Collectors.toList())
+		} catch(Exception ex) {
+			log.error("Call to Get roleIdsByPermissionNameUrl endpoint failed >>> {}", ex);
+			throw new FraudEngineException("Could not Get roleIdsByPermissionName");
+		}
+    	
     	
     	// creates user notification for the first role having the entity approval permission
     	UserNotification userNotificationEntity = new UserNotification();
@@ -299,7 +293,7 @@ public class UtilityService {
 			userNotificationEntity.setEntityID(request.getEntityId());
 			userNotificationEntity.setNotifyType(1);
 			userNotificationEntity.setRoleId(roleIdsHavingEntityApprovalPermissionId.stream().findFirst().get());
-			userNotificationEntity.setUserId(request.getUserId());
+			userNotificationEntity.setUserID(request.getUserId());
 			userNotificationEntity.setSystem(Boolean.TRUE);
 			userNotificationEntity.setMessage(request.getMessage());
 			userNotificationEntity.setStatus(Boolean.FALSE);
@@ -323,7 +317,7 @@ public class UtilityService {
     			userNotification.setEntityID(request.getEntityId());
     			userNotification.setNotifyType(1);
     			userNotification.setRoleId(roleId);
-    			userNotification.setUserId(request.getUserId());
+    			userNotification.setUserID(request.getUserId());
     			userNotification.setSystem(Boolean.TRUE);
     			userNotification.setMessage(request.getMessage());
     			userNotification.setStatus(Boolean.FALSE);
@@ -347,6 +341,7 @@ public class UtilityService {
 	public UserNotification updateUserNotification(UpdateUserNotificationRequest updateUserNotificationRequest){
 		Optional<UserNotification> userNotifcationOptional = userNotificationRepository.findById(updateUserNotificationRequest.getId());
 		if(!userNotifcationOptional.isPresent()) {
+			log.error("User Notification not found for ID " + updateUserNotificationRequest.getId());
 			throw new ResourceNotFoundException("User Notification not found for ID " + updateUserNotificationRequest.getId());
 		}
 		
@@ -383,20 +378,20 @@ public class UtilityService {
 	}
 	
 	@Transactional(readOnly = true)
-	public List<UserNotification> getUserNotification(Long userRoleId, Long userId){
-		if (Objects.isNull(userRoleId) && Objects.isNull(userId)) {
+	public List<UserNotification> getUserNotification(Long userRoleId, Long userID){
+		if (Objects.isNull(userRoleId) && Objects.isNull(userID)) {
 			return userNotificationRepository.findAll().stream().filter(userNotification -> userNotification.getStatus().equals(Boolean.FALSE)).collect(Collectors.toList());
 		}
 		
 		Optional<List<UserNotification>> userNotificationOptional = Optional.empty();
-		if(Objects.nonNull(userRoleId) && Objects.nonNull(userId)) {
-			userNotificationOptional = userNotificationRepository.findByRoleIdAndUserId(userRoleId, userId);
+		if(Objects.nonNull(userRoleId) && Objects.nonNull(userID)) {
+			userNotificationOptional = userNotificationRepository.findByRoleIdAndUserID(userRoleId, userID);
 			
 		}else if(Objects.nonNull(userRoleId)) {
 			userNotificationOptional = userNotificationRepository.findByRoleId(userRoleId);
 			
-		}else if(Objects.nonNull(userId)) {
-			userNotificationOptional = userNotificationRepository.findByUserId(userId);
+		}else if(Objects.nonNull(userID)) {
+			userNotificationOptional = userNotificationRepository.findByUserID(userID);
 		}
 
 		List<UserNotification> userNotifications = new ArrayList<>();

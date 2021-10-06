@@ -9,7 +9,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
 import javax.persistence.TypedQuery;
 
 import org.apache.commons.lang3.StringUtils;
@@ -29,20 +28,20 @@ import com.etz.fraudeagleeyemanager.dto.response.ProductRuleResponse;
 import com.etz.fraudeagleeyemanager.dto.response.RuleProductResponse;
 import com.etz.fraudeagleeyemanager.dto.response.RuleResponse;
 import com.etz.fraudeagleeyemanager.dto.response.UpdatedRuleResponse;
-import com.etz.fraudeagleeyemanager.entity.eagleeyedb.ProductRuleId;
-import com.etz.fraudeagleeyemanager.entity.eagleeyedb.ProductServiceEntity;
-import com.etz.fraudeagleeyemanager.entity.eagleeyedb.Rule;
-import com.etz.fraudeagleeyemanager.entity.eagleeyedb.ServiceDataSet;
-import com.etz.fraudeagleeyemanager.entity.eagleeyedb.ServiceRule;
+import com.etz.fraudeagleeyemanager.entity.ProductRuleId;
+import com.etz.fraudeagleeyemanager.entity.ProductServiceEntity;
+import com.etz.fraudeagleeyemanager.entity.Rule;
+import com.etz.fraudeagleeyemanager.entity.ServiceDataSet;
+import com.etz.fraudeagleeyemanager.entity.ServiceRule;
 import com.etz.fraudeagleeyemanager.exception.FraudEngineException;
 import com.etz.fraudeagleeyemanager.exception.ResourceNotFoundException;
 import com.etz.fraudeagleeyemanager.redisrepository.ProductRuleRedisRepository;
 import com.etz.fraudeagleeyemanager.redisrepository.RuleRedisRepository;
-import com.etz.fraudeagleeyemanager.repository.eagleeyedb.NotificationGroupRepository;
-import com.etz.fraudeagleeyemanager.repository.eagleeyedb.ProductDataSetRepository;
-import com.etz.fraudeagleeyemanager.repository.eagleeyedb.ProductServiceRepository;
-import com.etz.fraudeagleeyemanager.repository.eagleeyedb.RuleRepository;
-import com.etz.fraudeagleeyemanager.repository.eagleeyedb.ServiceRuleRepository;
+import com.etz.fraudeagleeyemanager.repository.NotificationGroupRepository;
+import com.etz.fraudeagleeyemanager.repository.ProductDataSetRepository;
+import com.etz.fraudeagleeyemanager.repository.ProductServiceRepository;
+import com.etz.fraudeagleeyemanager.repository.RuleRepository;
+import com.etz.fraudeagleeyemanager.repository.ServiceRuleRepository;
 import com.etz.fraudeagleeyemanager.util.AppUtil;
 import com.etz.fraudeagleeyemanager.util.JsonConverter;
 import com.etz.fraudeagleeyemanager.util.PageRequestUtil;
@@ -66,7 +65,7 @@ public class RuleService {
 	private final ProductServiceRepository productServiceRepository;
 	private final ProductDataSetRepository productDataSetRepository;
 
-	@PersistenceContext(unitName = "primary")
+	//@PersistenceContext(unitName = "primary")
 	private EntityManager em;
 
 	@CacheEvict(value = "product", allEntries=true)

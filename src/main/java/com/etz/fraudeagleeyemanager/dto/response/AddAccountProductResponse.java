@@ -1,18 +1,20 @@
 package com.etz.fraudeagleeyemanager.dto.response;
 
-import com.etz.fraudeagleeyemanager.entity.eagleeyedb.AccountProduct;
-import com.etz.fraudeagleeyemanager.entity.eagleeyedb.BaseEntity;
+import java.io.Serializable;
+
+import com.etz.fraudeagleeyemanager.entity.BaseEntity;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-
-import java.io.Serializable;
 
 @EqualsAndHashCode(callSuper = true)
 @Data
 @JsonIgnoreProperties({ "account", "productEntity" })
 public class AddAccountProductResponse extends BaseEntity implements Serializable {
-    private String productCode;
+
+	private static final long serialVersionUID = 1L;
+	private String productCode;
     private Long accountId;
     private Boolean status;
 

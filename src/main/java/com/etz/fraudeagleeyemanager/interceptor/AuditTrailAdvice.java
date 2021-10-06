@@ -7,7 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.etz.fraudeagleeyemanager.constant.AppConstant;
-import com.etz.fraudeagleeyemanager.entity.eagleeyedb.BaseAuditEntity;
+import com.etz.fraudeagleeyemanager.entity.BaseAuditEntity;
 import com.etz.fraudeagleeyemanager.enums.CrudOperation;
 import com.etz.fraudeagleeyemanager.service.AuditTrailService;
 import com.etz.fraudeagleeyemanager.util.JsonConverter;
@@ -21,7 +21,7 @@ public class AuditTrailAdvice {
 	AuditTrailService auditTrailService;
 
 	@Around("execution(* javax.persistence.EntityManager.persist(..))"
-			+ " && args(entity,..) && !args(com.etz.fraudeagleeyemanager.entity.eagleeyedb.EventLogEntity)")
+			+ " && args(entity,..) && !args(com.etz.fraudeagleeyemanager.entity.EventLogEntity)")
 	public Object interceptCreate(ProceedingJoinPoint jp, Object entity) {
 		String eventType = CrudOperation.CREATE.getValue();
 		String eventDescription = "Created " + entity.getClass().getSimpleName();
@@ -30,7 +30,7 @@ public class AuditTrailAdvice {
 	}
 	
 	@Around("execution(* javax.persistence.EntityManager.merge(..))"
-			+ " && !execution(* javax.persistence.EntityManager.merge(com.etz.fraudeagleeyemanager.entity.eagleeyedb.EventLogEntity))"
+			+ " && !execution(* javax.persistence.EntityManager.merge(com.etz.fraudeagleeyemanager.entity.EventLogEntity))"
 			+ " && args(entity,..)")
 	public Object interceptUpdate(ProceedingJoinPoint jp, Object entity) {
 		String eventType = CrudOperation.UPDATE.getValue();
@@ -40,7 +40,7 @@ public class AuditTrailAdvice {
 	}
 
 	@Around("execution(* javax.persistence.EntityManager.remove(..))"
-			+ " && !execution(* javax.persistence.EntityManager.remove(com.etz.fraudeagleeyemanager.entity.eagleeyedb.EventLogEntity))"
+			+ " && !execution(* javax.persistence.EntityManager.remove(com.etz.fraudeagleeyemanager.entity.EventLogEntity))"
 			+ " && args(entity,..)")
 	public Object interceptDelete(ProceedingJoinPoint jp, Object entity) {
 		String eventType = CrudOperation.DELETE.getValue();

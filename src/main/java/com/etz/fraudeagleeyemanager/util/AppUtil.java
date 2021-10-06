@@ -23,7 +23,7 @@ import org.springframework.stereotype.Component;
 
 import com.etz.fraudeagleeyemanager.constant.LevelAction;
 import com.etz.fraudeagleeyemanager.dto.request.UserNotificationRequest;
-import com.etz.fraudeagleeyemanager.entity.eagleeyedb.UserNotification;
+import com.etz.fraudeagleeyemanager.entity.UserNotification;
 import com.etz.fraudeagleeyemanager.exception.FraudEngineException;
 import com.etz.fraudeagleeyemanager.service.UtilityService;
 import com.google.i18n.phonenumbers.NumberParseException;

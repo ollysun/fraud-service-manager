@@ -1,7 +1,5 @@
 package com.etz.fraudeagleeyemanager.controller;
 
-
-
 import javax.validation.Valid;
 
 import org.springframework.http.HttpStatus;
@@ -23,7 +21,7 @@ import com.etz.fraudeagleeyemanager.dto.request.UserNotificationRequest;
 import com.etz.fraudeagleeyemanager.dto.response.BooleanResponse;
 import com.etz.fraudeagleeyemanager.dto.response.CollectionResponse;
 import com.etz.fraudeagleeyemanager.dto.response.ModelResponse;
-import com.etz.fraudeagleeyemanager.entity.eagleeyedb.UserNotification;
+import com.etz.fraudeagleeyemanager.entity.UserNotification;
 import com.etz.fraudeagleeyemanager.service.UtilityService;
 
 import lombok.RequiredArgsConstructor;

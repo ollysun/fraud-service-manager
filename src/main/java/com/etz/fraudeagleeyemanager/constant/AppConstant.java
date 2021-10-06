@@ -41,6 +41,10 @@ public final class AppConstant {
 	public static final String USER = "USER";
 	public static final String ROLE = "ROLE";
 	public static final String DOT_APPROVE = ".APPROVE";
+	
+	
+	public static final String ACCESS_TOKEN_CLAIM = "access_token_claim";
+	public static final String ACCESS_TOKEN = "token";
 
 	
 	

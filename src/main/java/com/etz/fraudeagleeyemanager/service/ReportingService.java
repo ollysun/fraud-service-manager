@@ -1,30 +1,32 @@
 package com.etz.fraudeagleeyemanager.service;
 
-import com.etz.fraudeagleeyemanager.constant.AppConstant;
-import com.etz.fraudeagleeyemanager.dto.request.CreateReportRequest;
-import com.etz.fraudeagleeyemanager.dto.request.CreateReportSchedulerRequest;
-import com.etz.fraudeagleeyemanager.dto.request.UpdateReportSchedulerRequest;
-import com.etz.fraudeagleeyemanager.entity.eagleeyedb.NotificationGroup;
-import com.etz.fraudeagleeyemanager.entity.eagleeyedb.Report;
-import com.etz.fraudeagleeyemanager.entity.eagleeyedb.ReportScheduler;
-import com.etz.fraudeagleeyemanager.enums.ExportType;
-import com.etz.fraudeagleeyemanager.enums.IntervalType;
-import com.etz.fraudeagleeyemanager.exception.FraudEngineException;
-import com.etz.fraudeagleeyemanager.exception.ResourceNotFoundException;
-import com.etz.fraudeagleeyemanager.repository.eagleeyedb.NotificationGroupRepository;
-import com.etz.fraudeagleeyemanager.repository.eagleeyedb.ReportRepository;
-import com.etz.fraudeagleeyemanager.repository.eagleeyedb.ReportSchedulerRepository;
-import com.etz.fraudeagleeyemanager.util.AppUtil;
-import com.etz.fraudeagleeyemanager.util.PageRequestUtil;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import java.util.List;
+import java.util.Objects;
+
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-import java.util.Objects;
+import com.etz.fraudeagleeyemanager.constant.AppConstant;
+import com.etz.fraudeagleeyemanager.dto.request.CreateReportRequest;
+import com.etz.fraudeagleeyemanager.dto.request.CreateReportSchedulerRequest;
+import com.etz.fraudeagleeyemanager.dto.request.UpdateReportSchedulerRequest;
+import com.etz.fraudeagleeyemanager.entity.NotificationGroup;
+import com.etz.fraudeagleeyemanager.entity.Report;
+import com.etz.fraudeagleeyemanager.entity.ReportScheduler;
+import com.etz.fraudeagleeyemanager.enums.ExportType;
+import com.etz.fraudeagleeyemanager.enums.IntervalType;
+import com.etz.fraudeagleeyemanager.exception.FraudEngineException;
+import com.etz.fraudeagleeyemanager.exception.ResourceNotFoundException;
+import com.etz.fraudeagleeyemanager.repository.NotificationGroupRepository;
+import com.etz.fraudeagleeyemanager.repository.ReportRepository;
+import com.etz.fraudeagleeyemanager.repository.ReportSchedulerRepository;
+import com.etz.fraudeagleeyemanager.util.AppUtil;
+import com.etz.fraudeagleeyemanager.util.PageRequestUtil;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service
