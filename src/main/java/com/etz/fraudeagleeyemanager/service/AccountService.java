@@ -13,6 +13,8 @@ import org.springframework.data.domain.Example;
 import org.springframework.data.domain.Page;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.etz.fraudeagleeyemanager.constant.AppConstant;
 import com.etz.fraudeagleeyemanager.dto.request.AccountToProductRequest;
@@ -20,6 +22,7 @@ import com.etz.fraudeagleeyemanager.dto.request.AddAccountRequest;
 import com.etz.fraudeagleeyemanager.dto.request.UpdateAccountProductRequest;
 import com.etz.fraudeagleeyemanager.dto.request.UpdateAccountRequestDto;
 import com.etz.fraudeagleeyemanager.dto.response.AccountProductResponse;
+import com.etz.fraudeagleeyemanager.dto.response.AccountResponse;
 import com.etz.fraudeagleeyemanager.entity.Account;
 import com.etz.fraudeagleeyemanager.entity.AccountProduct;
 import com.etz.fraudeagleeyemanager.exception.FraudEngineException;
@@ -34,8 +37,6 @@ import com.etz.fraudeagleeyemanager.util.PageRequestUtil;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
 @Service
@@ -52,7 +53,7 @@ public class AccountService {
 
 	@CacheEvict(value = "account", allEntries=true)
 	@Transactional(rollbackFor = Throwable.class)
-	public Account createAccount(AddAccountRequest request){
+	public AccountResponse addAccount(AddAccountRequest request){
 		Account accountEntity = new Account();
 		try {
 			// check for account number digits
@@ -70,10 +71,17 @@ public class AccountService {
 			accountEntity.setRecordBefore(null);
 			accountEntity.setRequestDump(request);
 		} catch(Exception ex){
-			log.error("Error occurred while creating account entity object", ex);
+			//log.error("Error occurred while creating account entity object", ex);
 			throw new FraudEngineException(AppConstant.ERROR_SETTING_PROPERTY);
 		}
-		return saveAccountEntityToDatabase(accountEntity);
+		return outputAccountResponse(addAccountEntityToDatabase(accountEntity));
+	}
+
+	private AccountResponse outputAccountResponse(Account account){
+
+		AccountResponse accountResponse = new AccountResponse();
+		BeanUtils.copyProperties(account,accountResponse,"products");
+		return accountResponse;
 	}
 
 	// update account to increment suspicious count
@@ -95,13 +103,13 @@ public class AccountService {
 			account.setBlockReason(updateAccountRequestDto.getBlockReason());
 			account.setStatus(updateAccountRequestDto.getStatus());
 		} catch(Exception ex){
-			log.error("Error occurred while creating account entity object", ex);
+			//log.error("Error occurred while creating account entity object", ex);
 			throw new FraudEngineException(AppConstant.ERROR_SETTING_PROPERTY);
 		}
-		return saveAccountEntityToDatabase(account);
+		return addAccountEntityToDatabase(account);
 	}
 	
-	private Account saveAccountEntityToDatabase(Account accountEntity) {
+	private Account addAccountEntityToDatabase(Account accountEntity) {
 		Account persistedAccountEntity;
 		try {
 			persistedAccountEntity = accountRepository.save(accountEntity);
@@ -109,17 +117,17 @@ public class AccountService {
 			log.error("Error occurred while saving account entity to database" , ex);
 			throw new FraudEngineException(AppConstant.ERROR_SAVING_TO_DATABASE);
 		}
-		saveAccountEntityToRedis(persistedAccountEntity);
+		addAccountEntityToRedis(persistedAccountEntity);
 		return persistedAccountEntity;
 	}
 	
-	private void saveAccountEntityToRedis(Account alreadyPersistedAccountEntity) {
+	private void addAccountEntityToRedis(Account alreadyPersistedAccountEntity) {
 		try {
 			accountRedisRepository.setHashOperations(redisTemplate);
 			accountRedisRepository.update(alreadyPersistedAccountEntity);
 		} catch(Exception ex){
 			//TODO actually delete already saved entity from the database (NOT SOFT DELETE)
-			log.error("Error occurred while saving account entity to Redis" , ex);
+			//log.error("Error occurred while saving account entity to Redis" , ex);
 			throw new FraudEngineException(AppConstant.ERROR_SAVING_TO_REDIS);
 		}
 	}
@@ -135,8 +143,8 @@ public class AccountService {
 	}
 
 	@Transactional(propagation = Propagation.REQUIRED, rollbackFor = Throwable.class)
-	public AccountProduct mapAccountProduct(AccountToProductRequest request) {
-		
+	public AccountProductResponse mapAccountProduct(AccountToProductRequest request) {
+		AccountProductResponse accountProductResponse = new AccountProductResponse();
 		if(!productRepository.findByCodeAndDeletedFalse(request.getProductCode()).isPresent()){
 			throw new ResourceNotFoundException("Product not found for this code " + request.getProductCode());
 		}
@@ -160,7 +168,9 @@ public class AccountService {
 			log.error("Error occurred while creating account product entity object", ex);
 			throw new FraudEngineException(AppConstant.ERROR_SETTING_PROPERTY);
 		}
-		return saveAccountProductEntityToDatabase(accountProductEntity);
+		BeanUtils.copyProperties(accountProductEntity, accountProductResponse, "account","productEntity");
+		return accountProductResponse;
+		//return addAccountProductEntityToDatabase(accountProductEntity);
 	}
 
 	@Transactional(propagation = Propagation.REQUIRED, rollbackFor = Throwable.class)
@@ -197,13 +207,13 @@ public class AccountService {
 				log.error("Error occurred while creating account product entity object", ex);
 				throw new FraudEngineException(AppConstant.ERROR_SETTING_PROPERTY);
 			}
-			BeanUtils.copyProperties(saveAccountProductEntityToDatabase(accountProduct), accountProductResponse);
+			BeanUtils.copyProperties(addAccountProductEntityToDatabase(accountProduct), accountProductResponse);
 			accountProductResponseList.add(accountProductResponse);
 		}
 		return accountProductResponseList;
 	}
 	
-	private AccountProduct saveAccountProductEntityToDatabase(AccountProduct accountProductEntity) {
+	private AccountProduct addAccountProductEntityToDatabase(AccountProduct accountProductEntity) {
 		AccountProduct persistedAccountProductEntity;
 		try {
 			persistedAccountProductEntity = accountProductRepository.save(accountProductEntity);
@@ -211,17 +221,16 @@ public class AccountService {
 			log.error("Error occurred while saving account product entity to database" , ex);
 			throw new FraudEngineException(AppConstant.ERROR_SAVING_TO_DATABASE);
 		}
-		saveAccountProductEntityToRedis(persistedAccountProductEntity);
+		addAccountProductEntityToRedis(persistedAccountProductEntity);
 		return persistedAccountProductEntity;
 	}
 	
-	private void saveAccountProductEntityToRedis(AccountProduct alreadyPersistedAccountProductEntity) {
+	private void addAccountProductEntityToRedis(AccountProduct alreadyPersistedAccountProductEntity) {
 		try {
 			accountProductRedisRepository.setHashOperations(redisTemplate);
 			accountProductRedisRepository.update(alreadyPersistedAccountProductEntity);
 		} catch(Exception ex){
-			//TODO actually delete already saved entity from the database (NOT SOFT DELETE)
-			log.error("Error occurred while saving account product entity to Redis" , ex);
+			//log.error("Error occurred while saving account product entity to Redis" , ex);
 			throw new FraudEngineException(AppConstant.ERROR_SAVING_TO_REDIS);
 		}
 	}

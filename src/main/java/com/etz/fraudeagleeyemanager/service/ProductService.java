@@ -6,45 +6,50 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import com.etz.fraudeagleeyemanager.dto.request.*;
-import com.etz.fraudeagleeyemanager.dto.response.ProductServiceResponse;
-import com.etz.fraudeagleeyemanager.entity.ProductDatasetId;
-import com.etz.fraudeagleeyemanager.entity.ProductServiceEntity;
-import com.etz.fraudeagleeyemanager.redisrepository.ProductServiceRedisRepository;
-import com.etz.fraudeagleeyemanager.repository.ProductServiceRepository;
-import com.etz.fraudeagleeyemanager.util.AppUtil;
-import com.etz.fraudeagleeyemanager.util.PageRequestUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.etz.fraudeagleeyemanager.constant.AppConstant;
-import com.etz.fraudeagleeyemanager.dto.response.ServiceDataSetResponse;
+import com.etz.fraudeagleeyemanager.dto.request.CreateProductRequest;
+import com.etz.fraudeagleeyemanager.dto.request.CreateProductServiceDto;
+import com.etz.fraudeagleeyemanager.dto.request.DatasetProductRequest;
+import com.etz.fraudeagleeyemanager.dto.request.UpdateDataSetRequest;
+import com.etz.fraudeagleeyemanager.dto.request.UpdateProductRequest;
+import com.etz.fraudeagleeyemanager.dto.request.UpdateProductServiceDto;
 import com.etz.fraudeagleeyemanager.dto.response.ProductResponse;
-import com.etz.fraudeagleeyemanager.entity.ServiceDataSet;
+import com.etz.fraudeagleeyemanager.dto.response.ProductServiceResponse;
+import com.etz.fraudeagleeyemanager.dto.response.ServiceDataSetResponse;
+import com.etz.fraudeagleeyemanager.entity.ProductDatasetId;
 import com.etz.fraudeagleeyemanager.entity.ProductEntity;
+import com.etz.fraudeagleeyemanager.entity.ProductServiceEntity;
+import com.etz.fraudeagleeyemanager.entity.ServiceDataSet;
 import com.etz.fraudeagleeyemanager.exception.FraudEngineException;
 import com.etz.fraudeagleeyemanager.exception.ResourceNotFoundException;
 import com.etz.fraudeagleeyemanager.redisrepository.ProductDatasetRedisRepository;
 import com.etz.fraudeagleeyemanager.redisrepository.ProductRedisRepository;
+import com.etz.fraudeagleeyemanager.redisrepository.ProductServiceRedisRepository;
 import com.etz.fraudeagleeyemanager.repository.ProductDataSetRepository;
 import com.etz.fraudeagleeyemanager.repository.ProductEntityRepository;
+import com.etz.fraudeagleeyemanager.repository.ProductServiceRepository;
+import com.etz.fraudeagleeyemanager.util.AppUtil;
 import com.etz.fraudeagleeyemanager.util.JsonConverter;
+import com.etz.fraudeagleeyemanager.util.PageRequestUtil;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.cache.annotation.Cacheable;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class ProductService {
 
+	private final AppUtil appUtil;
 	private final RedisTemplate<String, Object> redisTemplate;
 	private final ProductEntityRepository productEntityRepository;
 	private final ProductDataSetRepository productDataSetRepository;
@@ -55,8 +60,8 @@ public class ProductService {
 
 	@CacheEvict(value = "product", allEntries=true)
 	@Transactional(rollbackFor = Throwable.class)
-	@PreAuthorize("hasAuthority('PRODUCT.CREATE')")
-	public ProductResponse createProduct(CreateProductRequest request) {
+	//@PreAuthorize("hasAuthority('PRODUCT.CREATE')")
+	public ProductResponse addProduct(CreateProductRequest request) {
 		ProductEntity productEntity = new ProductEntity();
 		if (productEntityRepository.findCountByCode(request.getProductCode()) > 0){
 			throw new FraudEngineException("Similar record already exist for code " + request.getProductCode());
@@ -82,10 +87,10 @@ public class ProductService {
 			log.error("Error occurred while creating product entity object", ex);
 			throw new FraudEngineException(AppConstant.ERROR_SETTING_PROPERTY);
 		}
-		return outputProductResponse(saveProductEntityToDatabase(productEntity));
+		return outputProductResponse(addProductEntityToDatabase(productEntity));
 	}
 
-	private ProductEntity saveProductEntityToDatabase(ProductEntity accountEntity) {
+	private ProductEntity addProductEntityToDatabase(ProductEntity accountEntity) {
 		ProductEntity persistedProductEntity;
 		try {
 			persistedProductEntity = productEntityRepository.save(accountEntity);
@@ -93,11 +98,11 @@ public class ProductService {
 			log.error("Error occurred while saving product entity to database", ex);
 			throw new FraudEngineException(AppConstant.ERROR_SAVING_TO_DATABASE);
 		}
-		saveProductEntityToRedis(persistedProductEntity);
+		addProductEntityToRedis(persistedProductEntity);
 		return persistedProductEntity;
 	}
 
-	private void saveProductEntityToRedis(ProductEntity alreadyPersistedProductEntity) {
+	private void addProductEntityToRedis(ProductEntity alreadyPersistedProductEntity) {
 		try {
 			productRedisRepository.setHashOperations(redisTemplate);
 			productRedisRepository.update(alreadyPersistedProductEntity);
@@ -117,7 +122,7 @@ public class ProductService {
 
 	@Cacheable(value="product")
 	@Transactional(readOnly = true)
-	@PreAuthorize("hasAuthority('PRODUCT.READ')")
+	//@PreAuthorize("hasAuthority('PRODUCT.READ')")
 	public List<ProductResponse> getProduct(String productCode) {
 		if (Objects.isNull(productCode)) {
 			return outputCreateProduct(productEntityRepository.findAllByDeletedFalse());
@@ -141,7 +146,7 @@ public class ProductService {
 
 	@CacheEvict(value = "product", allEntries=true)
 	@Transactional(rollbackFor = Throwable.class)
-	@PreAuthorize("hasAuthority('PRODUCT.UPDATE')")
+	//@PreAuthorize("hasAuthority('PRODUCT.UPDATE')")
 	public ProductResponse updateProduct(UpdateProductRequest request) {
 		ProductEntity productEntity = findByCode(request.getProductCode()).get();
 
@@ -159,10 +164,10 @@ public class ProductService {
 			productEntity.setStatus(request.getStatus());
 			productEntity.setUpdatedBy(request.getUpdatedBy());
 		} catch (Exception ex) {
-			log.error("Error occurred while creating product entity object", ex);
+		//	log.error("Error occurred while creating product entity object", ex);
 			throw new FraudEngineException(AppConstant.ERROR_SETTING_PROPERTY);
 		}
-		return outputUpdatedProductResponse(saveProductEntityToDatabase(productEntity));
+		return outputUpdatedProductResponse(addProductEntityToDatabase(productEntity));
 	}
 
 	private ProductResponse outputUpdatedProductResponse(ProductEntity productEntity) {
@@ -174,7 +179,7 @@ public class ProductService {
 
 	@CacheEvict(value = "product")
 	@Transactional(rollbackFor = Throwable.class)
-	@PreAuthorize("hasAuthority('PRODUCT.DELETE')")
+	//@PreAuthorize("hasAuthority('PRODUCT.DELETE')")
 	public Boolean deleteProduct(String productCode) {
 		Optional<ProductEntity> productEntityOptional = findByCode(productCode);
 		ProductEntity productEntity = productEntityOptional.get();
@@ -188,14 +193,14 @@ public class ProductService {
 		try {
 			productEntityRepository.delete(productEntity);
 		} catch (Exception ex) {
-			log.error("Error occurred while deleting product entity from database", ex);
+		//	log.error("Error occurred while deleting product entity from database", ex);
 			throw new FraudEngineException(AppConstant.ERROR_DELETING_FROM_DATABASE);
 		}
 		try {
 			productRedisRepository.setHashOperations(redisTemplate);
 			productRedisRepository.delete(productCode);
 		} catch (Exception ex) {
-			log.error("Error occurred while deleting product entity from Redis", ex);
+		//	log.error("Error occurred while deleting product entity from Redis", ex);
 			throw new FraudEngineException(AppConstant.ERROR_DELETING_FROM_REDIS);
 		}
 		return Boolean.TRUE;
@@ -210,8 +215,8 @@ public class ProductService {
 	}
 
 	@Transactional(rollbackFor = Throwable.class)
-	@PreAuthorize("hasAnyAuthority('SERVICE.DATASET.CREATE','SERVICE.DATASET.APPROVE')")
-	public ServiceDataSet createServiceDataset(DatasetProductRequest request) {
+	//@PreAuthorize("hasAnyAuthority('SERVICE.DATASET.CREATE','SERVICE.DATASET.APPROVE')")
+	public ServiceDataSet addServiceDataset(DatasetProductRequest request) {
 		List<ServiceDataSet> serviceDataSetList = new ArrayList<>();
 
 		//check for the code before creating the dataset
@@ -232,21 +237,21 @@ public class ProductService {
 			}
 		}
 
-		ServiceDataSet prodDatasetEntity = new ServiceDataSet();
-		prodDatasetEntity.setProductCode(request.getProductCode());
-		prodDatasetEntity.setServiceId(request.getServiceId());
-		prodDatasetEntity.setFieldName(request.getFieldName());
-		prodDatasetEntity.setDataType(AppUtil.checkDataType(request.getDataType()));
-		prodDatasetEntity.setMandatory(request.getCompulsory());
-		prodDatasetEntity.setAuthorised(request.getAuthorised());
-		prodDatasetEntity.setCreatedBy(request.getCreatedBy());
+		ServiceDataSet serviceDataSet = new ServiceDataSet();
+		serviceDataSet.setProductCode(request.getProductCode());
+		serviceDataSet.setServiceId(request.getServiceId());
+		serviceDataSet.setFieldName(request.getFieldName());
+		serviceDataSet.setDataType(AppUtil.checkDataType(request.getDataType()));
+		serviceDataSet.setMandatory(request.getCompulsory());
+		serviceDataSet.setAuthorised(false);
+		serviceDataSet.setCreatedBy(request.getCreatedBy());
 
 		// for auditing purpose for CREATE
-		prodDatasetEntity.setEntityId(null);
-		prodDatasetEntity.setRecordBefore(null);
-		prodDatasetEntity.setRequestDump(request);
+		serviceDataSet.setEntityId(null);
+		serviceDataSet.setRecordBefore(null);
+		serviceDataSet.setRequestDump(request);
 
-		return outputCreatedServiceDataset(saveServiceDatasetEntityToDatabase(prodDatasetEntity));
+		return outputCreatedServiceDataset(saveServiceDatasetEntityToDatabase(serviceDataSet, serviceDataSet.getCreatedBy()));
 	}
 
 	private ServiceDataSetResponse outputCreatedServiceDataset(ServiceDataSet productEntity) {
@@ -256,7 +261,7 @@ public class ProductService {
 	}
 
 	@Transactional(readOnly = true, rollbackFor = Throwable.class)
-	@PreAuthorize("hasAuthority('SERVICE.DATASET.READ')")
+	//@PreAuthorize("hasAuthority('SERVICE.DATASET.READ')")
 	public ServiceDataSetResponse getServiceDatasetByIds(Long datasetId, String productCode, String serviceId){
 		ServiceDataSet serviceDataSet = productDataSetRepository.findByIds(datasetId,productCode,serviceId)
 										.orElseThrow(() -> new ResourceNotFoundException("Service Dataset Details not found"));
@@ -266,7 +271,7 @@ public class ProductService {
 	}
 
 	@Transactional(readOnly = true, rollbackFor = Throwable.class)
-	@PreAuthorize("hasAuthority('SERVICE.DATASET.READ')")
+	//@PreAuthorize("hasAuthority('SERVICE.DATASET.READ')")
 	public Page<ServiceDataSetResponse> getServiceDataset(String productCode, String serviceId) {
 		Page<ServiceDataSetResponse> serviceDataSetResponsePage = null;
 		List<ServiceDataSet> serviceDataSetList = productDataSetRepository.findAll();
@@ -294,7 +299,7 @@ public class ProductService {
 	}
 
 	@Transactional(rollbackFor = Throwable.class)
-	@PreAuthorize("hasAnyAuthority('SERVICE.DATASET.UPDATE','SERVICE.DATASET.APPROVE')")
+	//@PreAuthorize("hasAnyAuthority('SERVICE.DATASET.UPDATE','SERVICE.DATASET.APPROVE')")
 	public ServiceDataSetResponse updateServiceDataset(UpdateDataSetRequest request) {
 
 		ServiceDataSet serviceDataSet = productDataSetRepository.findByIds(request.getDatasetId(), request.getProductCode(),
@@ -308,16 +313,17 @@ public class ProductService {
 
 		serviceDataSet.setDataType(AppUtil.checkDataType(request.getDataType()));
 		serviceDataSet.setMandatory(request.getCompulsory());
-		serviceDataSet.setAuthorised(request.getAuthorised());
+		serviceDataSet.setAuthorised(false);
 		serviceDataSet.setUpdatedBy(request.getUpdatedBy());
 		serviceDataSet.setFieldName(request.getFieldName());
 
 		ServiceDataSetResponse productDataSetResponse = new ServiceDataSetResponse();
 		BeanUtils.copyProperties(serviceDataSet, productDataSetResponse, "createdBy", "createdAt","productServiceEntity", "productEntity");
-		saveServiceDatasetEntityToRedis(serviceDataSet);
+		saveServiceDatasetEntityToDatabase(serviceDataSet, serviceDataSet.getUpdatedBy());
 		return productDataSetResponse;
 	}
 
+	@SuppressWarnings("unused")
 	private List<ServiceDataSetResponse> outputUpdatedProductDatasetResponse(List<ServiceDataSet> serviceDataSetList) {
 		List<ServiceDataSetResponse> updatedProductDatasetResponseList = new ArrayList<>();
 		serviceDataSetList.forEach(productDataSet -> {
@@ -329,30 +335,30 @@ public class ProductService {
 	}
 
 	@Transactional(rollbackFor = Throwable.class)
-	@PreAuthorize("hasAnyAuthority('SERVICE.DATASET.DELETE','SERVICE.DATASET.APPROVE')")
+	//@PreAuthorize("hasAnyAuthority('SERVICE.DATASET.DELETE','SERVICE.DATASET.APPROVE')")
 	public boolean deleteServiceDataset(Long datasetId, String serviceId, String code) {
 		ServiceDataSet serviceDataSet = productDataSetRepository.findByIds(datasetId, code, serviceId)
 				.orElseThrow(() -> new ResourceNotFoundException("Service Dataset Details not found"));
 
-
-		productDatasetRedisRepository.setHashOperations(redisTemplate);
+			productDatasetRedisRepository.setHashOperations(redisTemplate);
+		
 			// for auditing purpose for DELETE
-		serviceDataSet.setEntityId(serviceId);
-		serviceDataSet.setRecordBefore(JsonConverter.objectToJson(serviceDataSet));
-		serviceDataSet.setRecordAfter(null);
-		serviceDataSet.setRequestDump(serviceId);
+			serviceDataSet.setEntityId(serviceId);
+			serviceDataSet.setRecordBefore(JsonConverter.objectToJson(serviceDataSet));
+			serviceDataSet.setRecordAfter(null);
+			serviceDataSet.setRequestDump(serviceId);
 
 			try {
-				productDataSetRepository.delete(datasetId,code,serviceId);
+				productDataSetRepository.delete(serviceDataSet);
 			} catch (Exception ex) {
-				log.error("Error occurred while deleting product dataset entity from database", ex);
+			//	log.error("Error occurred while deleting product dataset entity from database", ex);
 				throw new FraudEngineException(AppConstant.ERROR_DELETING_FROM_DATABASE);
 			}
 			try {
 				String redisId = code + ":" + datasetId + ":" + serviceId;
 				productDatasetRedisRepository.delete(redisId);
 			} catch (Exception ex) {
-				log.error("Error occurred while deleting product dataset entity from Redis", ex);
+			//	log.error("Error occurred while deleting product dataset entity from Redis", ex);
 				throw new FraudEngineException(AppConstant.ERROR_DELETING_FROM_REDIS);
 			}
 		return Boolean.TRUE;
@@ -369,33 +375,34 @@ public class ProductService {
 	}
 
 
-	private ServiceDataSet saveServiceDatasetEntityToDatabase(ServiceDataSet accountEntity) {
-		ServiceDataSet persistedServiceDatasetEntity;
+	private ServiceDataSet saveServiceDatasetEntityToDatabase(ServiceDataSet serviceDatasetEntity, String createdBy) {
+		ServiceDataSet persistedServiceDatasetEntity = new ServiceDataSet();
 		try {
-			persistedServiceDatasetEntity = productDataSetRepository.save(accountEntity);
+			persistedServiceDatasetEntity = productDataSetRepository.save(serviceDatasetEntity);
 		} catch (Exception ex) {
-			log.error("Error occurred while saving product entity to database", ex);
+			log.error("Error occurred while saving ServiceDataset entity to database", ex);
 			throw new FraudEngineException(AppConstant.ERROR_SAVING_TO_DATABASE);
 		}
-		saveServiceDatasetEntityToRedis(persistedServiceDatasetEntity);
+		addServiceDatasetEntityToRedis(persistedServiceDatasetEntity);
+		// create & user notification
+		appUtil.createUserNotification(AppConstant.SERVICE_DATASET, persistedServiceDatasetEntity.getProductCode()+"_"+persistedServiceDatasetEntity.getServiceId()+"_"+persistedServiceDatasetEntity.getDatasetId(), createdBy);
 		return persistedServiceDatasetEntity;
 	}
 
-	private void saveServiceDatasetEntityToRedis(ServiceDataSet alreadyPersistedServiceDatasetEntity) {
+	private void addServiceDatasetEntityToRedis(ServiceDataSet alreadyPersistedServiceDatasetEntity) {
 		try {
 			productDatasetRedisRepository.setHashOperations(redisTemplate);
 			productDatasetRedisRepository.update(alreadyPersistedServiceDatasetEntity);
 		} catch (Exception ex) {
-			// TODO actually delete already saved entity from the database (NOT SOFT DELETE)
-			log.error("Error occurred while saving product entity to Redis", ex);
+			log.error("Error occurred while saving ServiceDataset to Redis", ex);
 			throw new FraudEngineException(AppConstant.ERROR_SAVING_TO_REDIS);
 		}
 	}
 
 	@CacheEvict(value = "Service", allEntries=true)
 	@Transactional(rollbackFor = Throwable.class)
-	@PreAuthorize("hasAuthority('PRODUCT.SERVICE.CREATE')")
-	public ProductServiceResponse createProductService(CreateProductServiceDto request) {
+	//@PreAuthorize("hasAuthority('PRODUCT.SERVICE.CREATE')")
+	public ProductServiceResponse addProductService(CreateProductServiceDto request) {
 		Optional<ProductEntity> productEntityOptional = productEntityRepository.findByCodeAndDeletedFalse(request.getProductCode());
 		if (!productEntityOptional.isPresent()) {
 			throw new ResourceNotFoundException("Product not found for Code " + request.getProductCode());
@@ -416,42 +423,69 @@ public class ProductService {
 			productService.setCreatedBy(request.getCreatedBy());
 			productService.setDescription(request.getDescription());
 			productService.setProductEntity(productEntityOptional.get());
+
+			// for auditing purpose for CREATE
+			productService.setEntityId(null);
+			productService.setRecordBefore(null);
+			productService.setRequestDump(request);
+			
 			return outputCreatedProductService(productServiceRepository.save(productService));
 		} catch (Exception ex) {
-			throw new FraudEngineException(AppConstant.ERROR_SAVING_TO_REDIS);
+			throw new FraudEngineException(AppConstant.ERROR_SAVING_TO_DATABASE);
 		}
 	}
+	
 	@Transactional(rollbackFor = Throwable.class)
-	@PreAuthorize("hasAuthority('PRODUCT.SERVICE.UPDATE')")
+	//@PreAuthorize("hasAuthority('PRODUCT.SERVICE.UPDATE')")
 	public ProductServiceResponse updateProductService(UpdateProductServiceDto request) {
 		Optional<ProductEntity> productEntityOptional = productEntityRepository.findByCodeAndDeletedFalse(request.getProductCode());
 		if (!productEntityOptional.isPresent()) {
 			throw new ResourceNotFoundException("Product not found for Code " + request.getProductCode());
 		}
 		return	productServiceRepository.findById(request.getServiceId()).map(productServiceEntity -> {
-				productServiceEntity.setServiceName(request.getServiceName());
-				productServiceEntity.setStatus(request.getStatus());
-				productServiceEntity.setDescription(request.getDescription());
-				productServiceEntity.setUpdatedBy(request.getUpdatedBy());
-				productServiceEntity.setCallbackUrl(request.getCallback());
-				productServiceEntity.setProductEntity(productEntityOptional.get());
+			// for auditing purpose for UPDATE
+			productServiceEntity.setEntityId(request.getServiceId());
+			productServiceEntity.setRecordBefore(JsonConverter.objectToJson(productServiceEntity));
+			productServiceEntity.setRequestDump(request);
+
+			productServiceEntity.setServiceName(request.getServiceName());
+			productServiceEntity.setStatus(request.getStatus());
+			productServiceEntity.setDescription(request.getDescription());
+			productServiceEntity.setUpdatedBy(request.getUpdatedBy());
+			productServiceEntity.setCallbackUrl(request.getCallback());
+			productServiceEntity.setProductEntity(productEntityOptional.get());
+				
 			return outputCreatedProductService(productServiceRepository.save(productServiceEntity));
 			}).orElseThrow(()  -> new ResourceNotFoundException("Product service not found for this id " + request.getServiceId()));
 	}
 
 	@Transactional(rollbackFor = Throwable.class)
-	@PreAuthorize("hasAuthority('PRODUCT.SERVICE.DELETE')")
+	//@PreAuthorize("hasAuthority('PRODUCT.SERVICE.DELETE')")
 	public Boolean deactivateProductService(String serviceId){
-		Optional<ProductServiceEntity> productServiceEntity = productServiceRepository.findById(serviceId);
-		if (!productServiceEntity.isPresent()) {
+		Optional<ProductServiceEntity> productServiceEntityOptional = productServiceRepository.findById(serviceId);
+		if (!productServiceEntityOptional.isPresent()) {
 			throw new ResourceNotFoundException("Product service not found for this id " + serviceId);
 		}
-		productServiceRepository.deleteById(serviceId);
+
+		ProductServiceEntity productServiceEntity = productServiceEntityOptional.get();
+		// for auditing purpose for DELETE
+		productServiceEntity.setEntityId(serviceId);
+		productServiceEntity.setRecordBefore(JsonConverter.objectToJson(productServiceEntity));
+		productServiceEntity.setRecordAfter(null);
+		productServiceEntity.setRequestDump(serviceId);
+		
+		try {
+			productServiceRepository.delete(productServiceEntity);
+			//productServiceRepository.deleteById(serviceId)
+		} catch (Exception ex) {
+			log.error("Error occurred while deleting product service entity from database", ex);
+			throw new FraudEngineException(AppConstant.ERROR_DELETING_FROM_DATABASE);
+		}
 		return true;
 	}
 
 	@Transactional(readOnly = true)
-	@PreAuthorize("hasAuthority('PRODUCT.SERVICE.READ')")
+	//@PreAuthorize("hasAuthority('PRODUCT.SERVICE.READ')")
 	public Page<ProductServiceEntity> queryAllProductService(String productCode){
 		Page<ProductServiceEntity> productServiceEntityPage;
 		List<ProductServiceEntity> productServiceEntityList = productServiceRepository.findAll();
@@ -467,7 +501,7 @@ public class ProductService {
 	}
 
 	@Transactional(readOnly = true)
-	@PreAuthorize("hasAuthority('PRODUCT.SERVICE.READ')")
+	//@PreAuthorize("hasAuthority('PRODUCT.SERVICE.READ')")
 	public ProductServiceResponse getServiceByCodeAndServiceId(String code, String serviceId){
 		ProductServiceEntity productServiceEntity = productServiceRepository.findByServiceIdAndProductCode(serviceId, code)
 													.orElseThrow(() -> new ResourceNotFoundException(" code and serviceId not found"));
@@ -475,13 +509,13 @@ public class ProductService {
 	}
 
 	private ProductServiceResponse outputCreatedProductService(ProductServiceEntity productEntityService) {
-		saveProductServiceEntityToRedis(productEntityService);
+		addProductServiceEntityToRedis(productEntityService);
 		ProductServiceResponse productResponse = new ProductServiceResponse();
 		BeanUtils.copyProperties(productEntityService, productResponse, "productEntity", "productDataset");
 		return productResponse;
 	}
 
-	private void saveProductServiceEntityToRedis(ProductServiceEntity alreadyPersistedProductServiceEntity) {
+	private void addProductServiceEntityToRedis(ProductServiceEntity alreadyPersistedProductServiceEntity) {
 		try {
 			productServiceRedisRepository.setHashOperations(redisTemplate);
 			productServiceRedisRepository.update(alreadyPersistedProductServiceEntity);

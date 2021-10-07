@@ -4,11 +4,11 @@ package com.etz.fraudeagleeyemanager.service;
 import java.util.Objects;
 import java.util.Optional;
 
-import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.Page;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.etz.fraudeagleeyemanager.constant.AppConstant;
 import com.etz.fraudeagleeyemanager.dto.request.CreateParameterRequest;
@@ -22,29 +22,29 @@ import com.etz.fraudeagleeyemanager.util.AppUtil;
 import com.etz.fraudeagleeyemanager.util.JsonConverter;
 import com.etz.fraudeagleeyemanager.util.PageRequestUtil;
 
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
 @Service
 @AllArgsConstructor
 public class ParameterService {
 
+	private final AppUtil appUtil;
 	private final RedisTemplate<String, Object> redisTemplate;
 	private final ParameterRedisRepository parameterRedisRepository;
 	private final ParameterRepository parameterRepository;
 
 	@Transactional(rollbackFor = Throwable.class)
-	public Parameter createParameter(CreateParameterRequest request) {
+	public Parameter addParameter(CreateParameterRequest request) {
 		if (Boolean.TRUE.equals(parameterRepository.existsByNameAndOperator(request.getName(), request.getOperator()))){
 			throw new FraudEngineException("The name and operator already exists in Parameter table ");
 		}
 
-
 		Parameter parameterEntity = new Parameter();
 		parameterEntity.setName(request.getName());
 		parameterEntity.setOperator(AppUtil.checkParameterOperator(request.getOperator()));
-		parameterEntity.setAuthorised(request.getAuthorised());
+		parameterEntity.setAuthorised(false);
 		parameterEntity.setRequireValue(request.getRequireValue());
 		parameterEntity.setCreatedBy(request.getCreatedBy());
 
@@ -53,12 +53,12 @@ public class ParameterService {
 		parameterEntity.setRecordBefore(null);
 		parameterEntity.setRequestDump(request);
 
-		return saveInternalWatchlistEntityToDatabase(parameterEntity);
+		return addInternalWatchlistEntityToDatabase(parameterEntity, parameterEntity.getUpdatedBy());
 	}
 
 	@Transactional(rollbackFor = Throwable.class)
 	public Parameter updateParameter(UpdateParameterRequest request) {
-		Parameter parameterEntity = findById(request.getParamId()).get();
+		Parameter parameterEntity = findById(request.getParamId());
 
 		// for auditing purpose for UPDATE
 		parameterEntity.setEntityId(request.getParamId().toString());
@@ -68,10 +68,10 @@ public class ParameterService {
 		parameterEntity.setName(request.getName());
 		parameterEntity.setOperator(AppUtil.checkParameterOperator(request.getOperator()));
 		parameterEntity.setRequireValue(request.getRequireValue());
-		parameterEntity.setAuthorised(request.getAuthorised());
+		parameterEntity.setAuthorised(false);
 		parameterEntity.setUpdatedBy(request.getUpdatedBy());
 
-		return saveInternalWatchlistEntityToDatabase(parameterEntity);
+		return addInternalWatchlistEntityToDatabase(parameterEntity, parameterEntity.getUpdatedBy());
 	}
 
 	// todo disable parameter
@@ -82,7 +82,7 @@ public class ParameterService {
 			throw new FraudEngineException("parameterId cannot be null");
 		}
 
-		Parameter parameter = findById(parameterId).get();
+		Parameter parameter = findById(parameterId);
 		// for auditing purpose for DELETE
 		parameter.setEntityId(String.valueOf(parameterId));
 		parameter.setRecordBefore(JsonConverter.objectToJson(parameter));
@@ -111,37 +111,38 @@ public class ParameterService {
 		if (Objects.isNull(paramId)) {
 			return parameterRepository.findAll(PageRequestUtil.getPageRequest());
 		}
-		Optional<Parameter> parameterEntityOptional  = findById(paramId);
-		return parameterRepository.findAll(Example.of(parameterEntityOptional.get()), PageRequestUtil.getPageRequest());
+		Parameter parameterEntityOptional  = findById(paramId);
+		return parameterRepository.findAll(Example.of(parameterEntityOptional), PageRequestUtil.getPageRequest());
 	}
 
-	private Optional<Parameter> findById(Long paramId) {
+	private Parameter findById(Long paramId) {
 		Optional<Parameter> parameterEntityOptional = parameterRepository.findById(paramId);
 		if(!parameterEntityOptional.isPresent()) {
 			throw new ResourceNotFoundException("Parameter Not found for ID " + paramId);
 		}
-		return parameterEntityOptional;
+		return parameterEntityOptional.get();
 	}
 	
-	private Parameter saveInternalWatchlistEntityToDatabase(Parameter parameterEntity) {
+	private Parameter addInternalWatchlistEntityToDatabase(Parameter parameterEntity, String createdBy) {
 		Parameter persistedParameterEntity;
 		try {
 			persistedParameterEntity = parameterRepository.save(parameterEntity);
 		} catch(Exception ex){
-			log.error("Error occurred while saving Internal Watchlist entity to database" , ex);
+			log.error("Error occurred while saving Parameter entity to database" , ex);
 			throw new FraudEngineException(AppConstant.ERROR_SAVING_TO_DATABASE);
 		}
-		saveParameterEntityToRedis(persistedParameterEntity);
+		addParameterEntityToRedis(persistedParameterEntity);
+		// create & user notification
+		appUtil.createUserNotification(AppConstant.PARAMETER, persistedParameterEntity.getId().toString(), createdBy);
 		return persistedParameterEntity;
 	}
 	
-	private void saveParameterEntityToRedis(Parameter alreadyPersistedParameterEntity) {
+	private void addParameterEntityToRedis(Parameter alreadyPersistedParameterEntity) {
 		try {
 			parameterRedisRepository.setHashOperations(redisTemplate);
 			parameterRedisRepository.update(alreadyPersistedParameterEntity);
 		} catch(Exception ex){
-			//TODO actually delete already saved entity from the database (NOT SOFT DELETE)
-			log.error("Error occurred while saving Internal Watchlist entity to Redis" , ex);
+			log.error("Error occurred while saving Parameter entity to Redis" , ex);
 			throw new FraudEngineException(AppConstant.ERROR_SAVING_TO_REDIS);
 		}
 	}

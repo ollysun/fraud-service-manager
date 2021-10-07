@@ -1,6 +1,8 @@
 package com.etz.fraudeagleeyemanager.config;
 
 import com.etz.fraudeagleeyemanager.constant.AppConstant;
+import com.etz.fraudeagleeyemanager.util.RequestUtil;
+
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.SignatureException;
@@ -27,11 +29,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest req, HttpServletResponse res, FilterChain chain) throws IOException, ServletException, ServletException, IOException {
 
         String authToken = getAuthToken(req.getHeader(AppConstant.AUTHORIZATION)).orElse(null);
-        String username = getUsername(authToken).orElse(null);
-        if(username != null){
-            req.setAttribute(AppConstant.USERNAME, username);
-        }
-
+        getUsername(authToken).ifPresent(username -> req.setAttribute(AppConstant.USERNAME, username));
+        RequestUtil.setToken(authToken);
+        
         chain.doFilter(req, res);
     }
 

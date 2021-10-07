@@ -39,6 +39,9 @@ public class Parameter extends BaseAuditEntity implements Serializable {
 	
 	@Column(name = "authorised")
 	private Boolean authorised;
+	
+	@Column(name = "authoriser", length=100)
+	private String authoriser;
 
 	@Override
 	public boolean equals(Object o) {

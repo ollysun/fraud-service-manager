@@ -5,6 +5,7 @@ import org.springframework.dao.DuplicateKeyException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.validation.FieldError;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -67,16 +68,27 @@ public class ControllerExceptionHandler extends ResponseEntityExceptionHandler {
         return new ResponseEntity<>(exceptionResponse, HttpStatus.CONFLICT);
     }
 
-    @ExceptionHandler(Exception.class)
-    public ResponseEntity<Object> handleAllException(Exception ex, WebRequest request) {
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<Object> handleAccessDeniedException(Exception ex, WebRequest request) {
         List<String> details = new ArrayList<>();
         details.add(ex.getLocalizedMessage());
         ex.printStackTrace();
         final ExceptionResponse exceptionResponse = new ExceptionResponse(
-                new Date(), "Something went wrong while trying to process your request",
-                HttpStatus.INTERNAL_SERVER_ERROR,
-                details);
-        return new ResponseEntity<>(exceptionResponse, HttpStatus.INTERNAL_SERVER_ERROR);
+                new Date(), "You do not have the needed permission to access the endpoint",
+                HttpStatus.FORBIDDEN, details);
+        return new ResponseEntity<>(exceptionResponse, HttpStatus.FORBIDDEN);
+    }
+    
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<Object> handleAllException(Exception ex, WebRequest request) {
+    	List<String> details = new ArrayList<>();
+    	details.add(ex.getLocalizedMessage());
+    	ex.printStackTrace();
+    	final ExceptionResponse exceptionResponse = new ExceptionResponse(
+    			new Date(), "Something went wrong while trying to process your request",
+    			HttpStatus.INTERNAL_SERVER_ERROR,
+    			details);
+    	return new ResponseEntity<>(exceptionResponse, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
 

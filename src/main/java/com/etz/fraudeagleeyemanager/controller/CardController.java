@@ -2,12 +2,19 @@ package com.etz.fraudeagleeyemanager.controller;
 
 import javax.validation.Valid;
 
-import com.etz.fraudeagleeyemanager.constant.AppConstant;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestAttribute;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
+import com.etz.fraudeagleeyemanager.constant.AppConstant;
 import com.etz.fraudeagleeyemanager.dto.request.CardRequest;
 import com.etz.fraudeagleeyemanager.dto.request.CardToProductRequest;
 import com.etz.fraudeagleeyemanager.dto.request.UpdateCardProductRequest;
@@ -33,10 +40,10 @@ public class CardController {
 	private final CardService cardService;
 	
 	@PostMapping
-	public ResponseEntity<ModelResponse<CardResponse>> createCard(@RequestBody @Valid CardRequest request,
+	public ResponseEntity<ModelResponse<CardResponse>> addCard(@RequestBody @Valid CardRequest request,
 																  @ApiIgnore @RequestAttribute(AppConstant.USERNAME) String username){
 		request.setCreatedBy(username);
-		ModelResponse<CardResponse> response = new ModelResponse<>(cardService.createCard(request), HttpStatus.CREATED);
+		ModelResponse<CardResponse> response = new ModelResponse<>(cardService.addCard(request), HttpStatus.CREATED);
 		return ResponseEntity.status(HttpStatus.valueOf(response.getStatus())).body(response);
 	}
 		
@@ -60,7 +67,7 @@ public class CardController {
 
 	
 	@PutMapping("/product")
-	public CollectionResponse<CardProductResponse> updateCardProduct(@RequestBody UpdateCardProductRequest request,
+	public CollectionResponse<CardProductResponse> updateCardProduct(@RequestBody @Valid UpdateCardProductRequest request,
 																	 @ApiIgnore @RequestAttribute(AppConstant.USERNAME) String username){
 		request.setUpdatedBy(username);
 		return new CollectionResponse<>(cardService.updateCardProduct(request));

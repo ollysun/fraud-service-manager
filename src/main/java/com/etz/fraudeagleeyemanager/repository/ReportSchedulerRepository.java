@@ -1,10 +1,11 @@
 package com.etz.fraudeagleeyemanager.repository;
 
-import com.etz.fraudeagleeyemanager.entity.ReportScheduler;
+import java.util.List;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import java.util.List;
+import com.etz.fraudeagleeyemanager.entity.ReportScheduler;
 
 @Repository
 public interface ReportSchedulerRepository extends JpaRepository<ReportScheduler, Long>{

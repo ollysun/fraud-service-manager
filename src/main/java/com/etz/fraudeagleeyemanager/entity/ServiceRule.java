@@ -46,6 +46,9 @@ public class ServiceRule extends BaseAuditVersionEntity<ProductRuleId> implement
 	
 	@Column(nullable = false, name = "authorised", columnDefinition = "TINYINT", length = 1)
 	private Boolean authorised;
+	
+	@Column(name = "authoriser", length=100)
+	private String authoriser;
 
 	@JsonBackReference
 	@OneToOne(fetch = FetchType.LAZY)

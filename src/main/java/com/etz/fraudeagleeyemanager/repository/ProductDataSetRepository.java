@@ -10,8 +10,8 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.etz.fraudeagleeyemanager.entity.ServiceDataSet;
 import com.etz.fraudeagleeyemanager.entity.ProductDatasetId;
+import com.etz.fraudeagleeyemanager.entity.ServiceDataSet;
 
 @Repository
 public interface ProductDataSetRepository extends JpaRepository<ServiceDataSet, ProductDatasetId> {

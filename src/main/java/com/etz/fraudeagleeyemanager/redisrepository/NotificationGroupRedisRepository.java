@@ -2,17 +2,18 @@ package com.etz.fraudeagleeyemanager.redisrepository;
 
 import java.util.Map;
 
-import com.etz.fraudeagleeyemanager.exception.FraudEngineException;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.HashOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import com.etz.fraudeagleeyemanager.entity.NotificationGroup;
 import com.etz.fraudeagleeyemanager.enums.FraudRedisKey;
+import com.etz.fraudeagleeyemanager.exception.FraudEngineException;
 import com.etz.fraudeagleeyemanager.repository.RedisRepository;
-import org.springframework.transaction.support.TransactionSynchronization;
-import org.springframework.transaction.support.TransactionSynchronizationManager;
+
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Repository

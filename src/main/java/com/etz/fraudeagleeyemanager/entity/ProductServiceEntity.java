@@ -23,7 +23,9 @@ import java.util.Set;
 @ToString
 @AllArgsConstructor
 @NoArgsConstructor
-public class ProductServiceEntity extends BaseAuditEntity implements Serializable {
+public class ProductServiceEntity  extends BaseAuditVersionEntity<String> implements Serializable {
+	private static final long serialVersionUID = 1L;
+	
     @Id
     @Column(name = "service_id", nullable = false)
     private String serviceId;
@@ -57,4 +59,8 @@ public class ProductServiceEntity extends BaseAuditEntity implements Serializabl
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private Set<ServiceDataSet> serviceDataset;
 
+	@Override
+	public String getId() {
+		return serviceId;
+	}
 }

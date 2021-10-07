@@ -2,6 +2,7 @@ package com.etz.fraudeagleeyemanager.service;
 
 import java.time.LocalDateTime;
 
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import com.etz.fraudeagleeyemanager.entity.BaseAuditEntity;
@@ -17,6 +18,7 @@ public class AuditTrailService {
 
 	private final EventLogRepository eventLogRepository;
 	
+	@Async
 	public void save(BaseAuditEntity baseAuditEntity) {
 		EventLogEntity eventLogEntity = new EventLogEntity();
 		eventLogEntity.setEntity(baseAuditEntity.getEntity());

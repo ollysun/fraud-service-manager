@@ -6,8 +6,9 @@ import org.springframework.data.redis.connection.jedis.JedisConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.repository.configuration.EnableRedisRepositories;
 import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
-import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
+import org.springframework.transaction.annotation.EnableTransactionManagement;
+import lombok.RequiredArgsConstructor;
 
 
 
@@ -15,8 +16,8 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
 @Configuration
 @EnableRedisRepositories
 @RequiredArgsConstructor
+@EnableTransactionManagement
 public class RedisConfig {
-
 
     private final JedisConnectionFactory fraudEngineConnectionFactory;
 
@@ -28,14 +29,7 @@ public class RedisConfig {
         return template;
     }
 
-
     private void setSerializer(RedisTemplate<String, Object> template) {
-//    	template.setDefaultSerializer(new Jackson2JsonRedisSerializer<>(String.class));
-//        template.setKeySerializer(new Jackson2JsonRedisSerializer<>(String.class));
-//        template.setValueSerializer(new Jackson2JsonRedisSerializer<>(Object.class));
-//        template.setStringSerializer(new Jackson2JsonRedisSerializer<>(String.class));
-//    	template.setHashKeySerializer(new Jackson2JsonRedisSerializer<>(String.class));
-//        template.setHashValueSerializer(new Jackson2JsonRedisSerializer<>(Object.class));
         template.setDefaultSerializer(new Jackson2JsonRedisSerializer<>(String.class));
         template.setKeySerializer(new Jackson2JsonRedisSerializer<>(String.class));
         template.setValueSerializer(new Jackson2JsonRedisSerializer<>(Object.class));

@@ -1,5 +1,13 @@
 package com.etz.fraudeagleeyemanager.service;
 
+import java.util.List;
+import java.util.Objects;
+
+import org.springframework.data.domain.Example;
+import org.springframework.data.domain.Page;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.etz.fraudeagleeyemanager.constant.AppConstant;
 import com.etz.fraudeagleeyemanager.dto.request.CreateReportRequest;
 import com.etz.fraudeagleeyemanager.dto.request.CreateReportSchedulerRequest;
@@ -16,15 +24,9 @@ import com.etz.fraudeagleeyemanager.repository.ReportRepository;
 import com.etz.fraudeagleeyemanager.repository.ReportSchedulerRepository;
 import com.etz.fraudeagleeyemanager.util.AppUtil;
 import com.etz.fraudeagleeyemanager.util.PageRequestUtil;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Example;
-import org.springframework.data.domain.Page;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
-import java.util.Objects;
 
 @Slf4j
 @Service
@@ -86,7 +88,9 @@ public class ReportingService {
         reportScheduler.setEntityId(null);
         reportScheduler.setRecordBefore(null);
         reportScheduler.setRequestDump(request);
-        return reportSchedulerRepository.save(reportScheduler);
+        ReportScheduler reportSchedulerResult;
+        reportSchedulerResult = reportSchedulerRepository.save(reportScheduler);
+        return reportSchedulerResult;
     }
 
     @Transactional(rollbackFor = Throwable.class)
@@ -112,7 +116,10 @@ public class ReportingService {
         reportScheduler.setEntityId(null);
         reportScheduler.setRecordBefore(null);
         reportScheduler.setRequestDump(request);
-        return reportSchedulerRepository.save(reportScheduler);
+
+        ReportScheduler reportSchedulerResult;
+        reportSchedulerResult = reportSchedulerRepository.save(reportScheduler);
+        return reportSchedulerResult;
     }
 
     @Transactional(readOnly = true)

@@ -4,12 +4,14 @@ import org.springframework.http.HttpStatus;
 
 import com.etz.fraudeagleeyemanager.util.RequestUtil;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
 @Getter
 @Setter
 @ToString
+@NoArgsConstructor
 public class ModelResponse<T> {
 
 
