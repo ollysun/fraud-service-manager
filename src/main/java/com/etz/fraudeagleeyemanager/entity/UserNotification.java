@@ -61,7 +61,6 @@ public class UserNotification extends BaseAuditEntity implements Serializable {
 	private Boolean system = false;
 	
 	@Column(name = "message")
-	@Type(type = "text")
 	private String message;
 	
 	@Column(name = "status", nullable = false, columnDefinition = "TINYINT", length = 1)
