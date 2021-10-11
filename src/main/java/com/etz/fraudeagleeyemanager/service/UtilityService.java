@@ -10,6 +10,7 @@ import java.util.stream.Collectors;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -69,8 +70,8 @@ public class UtilityService {
     private final AuthServerMandatoryURL authServerUrl;
 	
 
-//	@PreAuthorize("hasAnyAuthority('OFAC.APPROVE', 'WATCHLIST_INTERNAL.APPROVE', 'NOTIFICATION_GROUP.APPROVE', 'RULE.APPROVE',"
-//			+ " 'RULE.PRODUCT.APPROVE', 'PARAMETER.APPROVE', 'SERVICE.DATASET.APPROVE', 'USER.APPROVE', 'ROLE.APPROVE')")
+	@PreAuthorize("hasAnyAuthority('OFAC.APPROVE', 'WATCHLIST_INTERNAL.APPROVE', 'NOTIFICATION_GROUP.APPROVE', 'RULE.APPROVE',"
+			+ " 'RULE.PRODUCT.APPROVE', 'PARAMETER.APPROVE', 'SERVICE.DATASET.APPROVE', 'USER.APPROVE', 'ROLE.APPROVE')")
 	public Boolean approval(ApprovalRequest request) {
 
 		log.info("Approval Request: {}", request);
@@ -79,7 +80,7 @@ public class UtilityService {
 		case AppConstant.OFAC_WATCHLIST : 
 			Optional<OfacWatchlist> ofacWatchlistOptional = ofacWatchlistRepository.findById(Long.valueOf(request.getEntityId()));
 			if(!ofacWatchlistOptional.isPresent()) {
-				log.error("OfacWatlist not found for ID " + Long.valueOf(request.getEntityId()));
+				log.error("OfacWatchlist not found for ID " + Long.valueOf(request.getEntityId()));
 				throw new ResourceNotFoundException("OfacWatlist not found for ID " + Long.valueOf(request.getEntityId()));
 			}
 			OfacWatchlist ofacWatchlist = ofacWatchlistOptional.get();
