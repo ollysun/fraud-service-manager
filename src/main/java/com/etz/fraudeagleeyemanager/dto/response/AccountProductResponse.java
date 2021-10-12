@@ -13,6 +13,8 @@ import lombok.EqualsAndHashCode;
 @JsonIgnoreProperties({ "createdAt", "createdBy" })
 public class AccountProductResponse extends BaseEntity implements Serializable {
 
+	private static final long serialVersionUID = 1L;
+
 	private String productCode;
 
     private Long accountId;

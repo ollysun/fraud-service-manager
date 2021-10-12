@@ -31,6 +31,7 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class NotificationGroupService {
 
+	private final AppUtil appUtil;
 	private final RedisTemplate<String, Object> redisTemplate;
 	private final NotificationGroupRepository notificationGroupRepository;
 	private final NotificationGroupRedisRepository notificationGroupRedisRepository;
@@ -52,7 +53,7 @@ public class NotificationGroupService {
 		notificationGroup.setRecordBefore(null);
 		notificationGroup.setRequestDump(request);
 
-		return addNotificationGroupEntityToDatabase(notificationGroup);
+		return addNotificationGroupEntityToDatabase(notificationGroup, notificationGroup.getCreatedBy());
 	}
 
 	@Transactional(rollbackFor = Throwable.class)
@@ -72,10 +73,11 @@ public class NotificationGroupService {
 		notificationGroup.setPhones(AppUtil.listPhoneToString(request.getPhoneNos()));
 		notificationGroup.setEmailAlert(request.getMailAlert());
 		notificationGroup.setSmsAlert(request.getSmsAlert());
+		notificationGroup.setAuthorised(false);
 		notificationGroup.setStatus(request.getStatus());
 		notificationGroup.setUpdatedBy(request.getUpdatedBy());
 
-		return addNotificationGroupEntityToDatabase(notificationGroup);
+		return addNotificationGroupEntityToDatabase(notificationGroup, notificationGroup.getUpdatedBy());
 	}
 
 	@Transactional(readOnly = true)
@@ -103,7 +105,7 @@ public class NotificationGroupService {
 		return notificationGroupRepository.findAll(Example.of(notificationGroupOptional.get()), PageRequestUtil.getPageRequest());		
 	}
 	
-	private NotificationGroup addNotificationGroupEntityToDatabase(NotificationGroup notificationGroupEntity) {
+	private NotificationGroup addNotificationGroupEntityToDatabase(NotificationGroup notificationGroupEntity, String createdBy) {
 		NotificationGroup persistedNotificationGrouplistEntity = new NotificationGroup();
 		try {
 			persistedNotificationGrouplistEntity = notificationGroupRepository.save(notificationGroupEntity);
@@ -112,6 +114,8 @@ public class NotificationGroupService {
 			throw new FraudEngineException(AppConstant.ERROR_SAVING_TO_DATABASE);
 		}
 		addNotificationGroupEntityToRedis(persistedNotificationGrouplistEntity);
+		// create & user notification
+		appUtil.createUserNotification(AppConstant.NOTIFICATION_GROUPS, persistedNotificationGrouplistEntity.getId().toString(), createdBy);
 		return persistedNotificationGrouplistEntity;
 	}
 	
@@ -120,7 +124,6 @@ public class NotificationGroupService {
 			notificationGroupRedisRepository.setHashOperations(redisTemplate);
 			notificationGroupRedisRepository.update(alreadyPersistedNotificationGroupEntity);
 		} catch(Exception ex){
-			//TODO actually delete already saved entity from the database (NOT SOFT DELETE)
 			log.error("Error occurred while saving NotificationGroup entity to Redis" , ex);
 			throw new FraudEngineException(AppConstant.ERROR_SAVING_TO_REDIS);
 		}

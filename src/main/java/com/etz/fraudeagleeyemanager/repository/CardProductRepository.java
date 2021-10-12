@@ -1,11 +1,12 @@
 package com.etz.fraudeagleeyemanager.repository;
 
-import com.etz.fraudeagleeyemanager.entity.CardProduct;
-import com.etz.fraudeagleeyemanager.entity.CardProductId;
+import java.util.List;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import java.util.List;
+import com.etz.fraudeagleeyemanager.entity.CardProduct;
+import com.etz.fraudeagleeyemanager.entity.CardProductId;
 
 @Repository
 public interface CardProductRepository extends JpaRepository<CardProduct, CardProductId>{

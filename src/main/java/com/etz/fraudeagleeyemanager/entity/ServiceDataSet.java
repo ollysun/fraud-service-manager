@@ -49,6 +49,9 @@ public class ServiceDataSet extends BaseAuditVersionEntity<ProductDatasetId> imp
 	
 	@Column(nullable = false, name = "authorised", columnDefinition = "TINYINT", length = 1)
 	private Boolean authorised;
+	
+	@Column(name = "authoriser", length=100)
+	private String authoriser;
 
 	@ManyToOne
 	@MapsId("productCode")

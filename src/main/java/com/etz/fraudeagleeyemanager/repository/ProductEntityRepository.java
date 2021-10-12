@@ -1,13 +1,13 @@
 package com.etz.fraudeagleeyemanager.repository;
 
-import com.etz.fraudeagleeyemanager.entity.ProductEntity;
-
 import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
+
+import com.etz.fraudeagleeyemanager.entity.ProductEntity;
 
 @Repository
 public interface ProductEntityRepository extends JpaRepository<ProductEntity, String> {

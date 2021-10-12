@@ -80,6 +80,9 @@ public class Rule extends BaseAuditEntity implements Serializable {
 	
 	@Column(name = "authorised")
 	private Boolean authorised;
+	
+	@Column(name = "authoriser", length=100)
+	private String authoriser;
 
 	@OneToMany(mappedBy = "rule",fetch = FetchType.LAZY,
 			cascade = CascadeType.ALL, orphanRemoval = true)

@@ -9,6 +9,8 @@ import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
 import com.etz.fraudeagleeyemanager.constant.AppConstant;
+import static com.etz.fraudeagleeyemanager.constant.AppConstant.ACCESS_TOKEN_CLAIM;
+import static com.etz.fraudeagleeyemanager.constant.AppConstant.ACCESS_TOKEN;
 
 public class RequestUtil {
 
@@ -102,17 +104,25 @@ public class RequestUtil {
     @SuppressWarnings("unchecked")
 	public static void setAccessTokenClaim(OAuth2Authentication authentication) {
     	Map<String, Object> claims = (Map<String, Object>) authentication.getDetails();
-    	getRequest().setAttribute("access_token_claim", claims);
+    	getRequest().setAttribute(ACCESS_TOKEN_CLAIM, claims);
     }
     
     @SuppressWarnings("unchecked")
 	public static String getAccessTokenClaim(String claim) {
-    	Map<String, Object> claims = (Map<String, Object>)getRequest().getAttribute("access_token_claim");
+    	Map<String, Object> claims = (Map<String, Object>)getRequest().getAttribute(ACCESS_TOKEN_CLAIM);
     	String claimValue = "";
     	if (claims.containsKey(claim)) {
-    		claimValue = (String) claims.get(claim);
+    		claimValue = String.valueOf(claims.get(claim));
     	}
     	return claimValue;
+    }
+    
+    public static void setToken(String token) {
+    	getRequest().setAttribute(ACCESS_TOKEN, token);
+    }
+    
+    public static String getToken() {
+    	return (String) getRequest().getAttribute(ACCESS_TOKEN);
     }
     
 }

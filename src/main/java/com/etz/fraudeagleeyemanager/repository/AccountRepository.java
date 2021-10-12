@@ -1,10 +1,11 @@
 package com.etz.fraudeagleeyemanager.repository;
 
-import com.etz.fraudeagleeyemanager.entity.Account;
+import java.util.Optional;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import java.util.Optional;
+import com.etz.fraudeagleeyemanager.entity.Account;
 
 @Repository
 public interface AccountRepository extends JpaRepository<Account, Long>{

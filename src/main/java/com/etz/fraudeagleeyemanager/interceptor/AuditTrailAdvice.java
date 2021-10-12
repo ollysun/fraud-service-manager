@@ -6,6 +6,7 @@ import org.aspectj.lang.annotation.Aspect;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.etz.fraudeagleeyemanager.constant.AppConstant;
 import com.etz.fraudeagleeyemanager.entity.BaseAuditEntity;
 import com.etz.fraudeagleeyemanager.enums.CrudOperation;
 import com.etz.fraudeagleeyemanager.service.AuditTrailService;
@@ -63,7 +64,7 @@ public class AuditTrailAdvice {
 			baseAuditEntity.setEntity(entity.getClass().getSimpleName());
 			baseAuditEntity.setEventDescription(eventDescription);
 			baseAuditEntity.setEndpoint(RequestUtil.getSourceURL());
-			baseAuditEntity.setUserId(0L);//Long.valueOf(RequestUtil.getAccessTokenClaim("userId")));
+			baseAuditEntity.setUserId(Long.valueOf(RequestUtil.getAccessTokenClaim(AppConstant.USER_ID).isEmpty()? "0" : RequestUtil.getAccessTokenClaim(AppConstant.USER_ID)));
 			baseAuditEntity.setEventType(eventType);
 
 			if (baseAuditEntity.getRecordAfter() != null) {

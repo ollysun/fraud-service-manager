@@ -25,4 +25,11 @@ public class BooleanResponse {
         setMessage(RequestUtil.getMessage());
         setData((Boolean) data);
     }
+    
+    public BooleanResponse(Object data, String message) {
+    	setStatus(200);
+    	setExecTime((System.nanoTime() - RequestUtil.getStartTime()) / 100000000);
+    	setMessage(message);
+    	setData((Boolean) data);
+    }
 }

@@ -1,8 +1,6 @@
 package com.etz.fraudeagleeyemanager.repository;
 
 
-import com.etz.fraudeagleeyemanager.util.JsonConverter;
-import org.springframework.stereotype.Repository;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -12,6 +10,8 @@ import java.util.Set;
 import org.springframework.data.redis.core.Cursor;
 import org.springframework.data.redis.core.HashOperations;
 import org.springframework.data.redis.core.ScanOptions;
+
+import com.etz.fraudeagleeyemanager.util.JsonConverter;
 
 
 public interface RedisRepository<T, U> {

@@ -8,6 +8,7 @@ import org.springframework.data.domain.Example;
 import org.springframework.data.domain.Page;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.etz.fraudeagleeyemanager.constant.AppConstant;
 import com.etz.fraudeagleeyemanager.dto.request.InternalWatchlistRequest;
@@ -17,18 +18,19 @@ import com.etz.fraudeagleeyemanager.exception.FraudEngineException;
 import com.etz.fraudeagleeyemanager.exception.ResourceNotFoundException;
 import com.etz.fraudeagleeyemanager.redisrepository.InternalWatchlistRedisRepository;
 import com.etz.fraudeagleeyemanager.repository.InternalWatchlistRepository;
+import com.etz.fraudeagleeyemanager.util.AppUtil;
 import com.etz.fraudeagleeyemanager.util.JsonConverter;
 import com.etz.fraudeagleeyemanager.util.PageRequestUtil;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class InternalWatchlistService {
 
+	private final AppUtil appUtil;
 	private final RedisTemplate<String, Object> redisTemplate;
 	private final InternalWatchlistRepository internalWatchlistRepository;
 	private final InternalWatchlistRedisRepository internalWatchlistRedisRepository;
@@ -47,7 +49,7 @@ public class InternalWatchlistService {
 		internalWatchlist.setRecordBefore(null);
 		internalWatchlist.setRequestDump(request);
 
-		return addInternalWatchlistEntityToDatabase(internalWatchlist);
+		return addInternalWatchlistEntityToDatabase(internalWatchlist, internalWatchlist.getCreatedBy());
 	}
 
 	@Transactional(rollbackFor = Throwable.class)
@@ -61,9 +63,10 @@ public class InternalWatchlistService {
 		internalWatchlist.setBvn(request.getBvn());
 		internalWatchlist.setComments(request.getComments());
 		internalWatchlist.setStatus(request.getStatus());
+		internalWatchlist.setAuthorised(false);
 		internalWatchlist.setUpdatedBy(request.getUpdatedBy());
 
-		return addInternalWatchlistEntityToDatabase(internalWatchlist);
+		return addInternalWatchlistEntityToDatabase(internalWatchlist, internalWatchlist.getUpdatedBy());
 	}
 
 	private InternalWatchlist findById(Long watchId) {
@@ -107,7 +110,7 @@ public class InternalWatchlistService {
 		return Boolean.TRUE;
 	}
 	
-	private InternalWatchlist addInternalWatchlistEntityToDatabase(InternalWatchlist internalWatchlistEntity) {
+	private InternalWatchlist addInternalWatchlistEntityToDatabase(InternalWatchlist internalWatchlistEntity, String createdBy) {
 		InternalWatchlist persistedInternalWatchlistEntity;
 		try {
 			persistedInternalWatchlistEntity = internalWatchlistRepository.save(internalWatchlistEntity);
@@ -116,6 +119,8 @@ public class InternalWatchlistService {
 			throw new FraudEngineException(AppConstant.ERROR_SAVING_TO_DATABASE);
 		}
 		addInternalWatchlistEntityToRedis(persistedInternalWatchlistEntity);
+		// create & user notification
+		appUtil.createUserNotification(AppConstant.INTERNAL_WATCHLIST, persistedInternalWatchlistEntity.getId().toString(), createdBy);
 		return persistedInternalWatchlistEntity;
 	}
 	
@@ -124,8 +129,7 @@ public class InternalWatchlistService {
 			internalWatchlistRedisRepository.setHashOperations(redisTemplate);
 			internalWatchlistRedisRepository.update(alreadyPersistedInternalWatchlistEntity);
 		} catch(Exception ex){
-			//TODO actually delete already saved entity from the database (NOT SOFT DELETE)
-			//log.error("Error occurred while saving Internal Watchlist entity to Redis" , ex);
+			log.error("Error occurred while saving Internal Watchlist entity to Redis" , ex);
 			throw new FraudEngineException(AppConstant.ERROR_SAVING_TO_REDIS);
 		}
 	}
