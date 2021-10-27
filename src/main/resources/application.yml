@@ -81,7 +81,7 @@ spring:
 
   authorisation-service:
     userAuthoriserUrl: http://localhost:9191/api/v1/users/authoriser
-    roleAuthoriserUrl: http://localhost:9191api/v1/roles/authoriser
+    roleAuthoriserUrl: http://localhost:9191/api/v1/roles/authoriser
     roleIdsByPermissionNameUrl: http://localhost:9191/api/v1/roles/permissionroles
 
 #  second-datasource:
