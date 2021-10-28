@@ -15,11 +15,11 @@ public class DashBrdTransactionPerProduct {
 	private BigDecimal totalTransaction;
 	
 	@JsonProperty("transaction_count")
-	private int transactionCount;
+	private long transactionCount;
 	
 	@JsonProperty("total_flagged")
-	private int totalFlagged;
+	private long totalFlagged;
 	
 	@JsonProperty("total_unflagged")
-	private int totalUnflagged;
+	private long totalUnflagged;
 }

@@ -10,8 +10,8 @@ import lombok.Data;
 public class DashboardRequest implements Serializable{
 
 	private static final long serialVersionUID = 1L;
-	private String start;
-	private String end;
+	private String startDate;
+	private String endDate;
 	private String productCode;
 	//private int limit;
 }

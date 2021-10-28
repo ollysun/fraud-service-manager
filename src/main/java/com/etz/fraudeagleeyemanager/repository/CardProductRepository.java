@@ -11,4 +11,6 @@ import com.etz.fraudeagleeyemanager.entity.CardProductId;
 @Repository
 public interface CardProductRepository extends JpaRepository<CardProduct, CardProductId>{
         List<CardProduct> findByCardId(Long cardId);
+        
+        List<CardProduct> findByProductCode(String productCode);
 }
