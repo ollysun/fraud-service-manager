@@ -10,7 +10,7 @@ import com.etz.fraudeagleeyemanager.dto.response.CollectionResponse;
 import com.etz.fraudeagleeyemanager.dto.response.DashBrdCustomersResponse;
 import com.etz.fraudeagleeyemanager.dto.response.DashBrdOverallTransactionResponse;
 import com.etz.fraudeagleeyemanager.dto.response.DashBrdRecentTransaction;
-import com.etz.fraudeagleeyemanager.dto.response.DashBrdTransactionPerProduct;
+import com.etz.fraudeagleeyemanager.dto.response.DashBrdTransactionPerProdResponse;
 import com.etz.fraudeagleeyemanager.dto.response.ModelResponse;
 import com.etz.fraudeagleeyemanager.service.DashboardService;
 
@@ -36,9 +36,9 @@ public class DashboardController {
 	}
 	
 	@GetMapping("/transaction/product")
-	public CollectionResponse<DashBrdTransactionPerProduct> queryTransactionPerProduct(@RequestParam(required = false) String start, @RequestParam(required = false) String end, 
+	public DashBrdTransactionPerProdResponse queryTransactionPerProduct(@RequestParam(required = false) String start, @RequestParam(required = false) String end, 
 			@RequestParam(required = false) String product) {
-		return new CollectionResponse<>(dashboardService.getTransactionPerProduct(new DashboardRequest(start, end, product)));
+		return dashboardService.getTransactionPerProduct(new DashboardRequest(start, end, product));
 	}
 	
 	@GetMapping("/transaction/recent")
