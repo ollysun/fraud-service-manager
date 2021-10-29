@@ -2,12 +2,16 @@ package com.etz.fraudeagleeyemanager.dto.response;
 
 import java.math.BigDecimal;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import lombok.Data;
 
 @Data
 public class DashBrdTransactionPerProduct {
+	
+	@JsonIgnore
+	private String productCode;
 	
 	private String name;
 	

@@ -6,6 +6,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -59,9 +60,11 @@ public class DashboardService {
 		if(Objects.nonNull(dashboardRequest.getProductCode()) && productRepository.findById(dashboardRequest.getProductCode()).isPresent()) {
 			allTrasactions = transactionLogRepository.findByProductCode(dashboardRequest.getProductCode());
 			log.info("Number of transactions filtered by productCode: {}", allTrasactions.size());
+		
 		} else if(Objects.nonNull(dashboardRequest.getProductCode()) && !productRepository.findById(dashboardRequest.getProductCode()).isPresent()) {
 			log.error("ProductCode {} does not exist", dashboardRequest.getProductCode());
 			throw new FraudEngineException("Product with Code " + dashboardRequest.getProductCode() + " does not exist");
+		
 		} else {
 			allTrasactions = transactionLogRepository.findAll();
 			log.info("Number of all transactions: {}", allTrasactions.size());
@@ -76,44 +79,57 @@ public class DashboardService {
 		log.info("totalAmount: {}, totalAmountToday: {}, totalCount: {}, totalCountToday: {}", totalAmount, totalAmountToday, totalCount, totalCountToday);
 		LocalDate startDate;
 		LocalDate endDate;
-		if(Objects.nonNull(dashboardRequest.getStartDate()) && Objects.nonNull(dashboardRequest.getEndDate())) {
-			startDate = LocalDate.parse(dashboardRequest.getStartDate(), DateTimeFormatter.ofPattern(DASHBOARD_REQ_DATE_FORMAT));
-			endDate = LocalDate.parse(dashboardRequest.getEndDate(), DateTimeFormatter.ofPattern(DASHBOARD_REQ_DATE_FORMAT));
-			
-			if(startDate.isAfter(endDate)) {
-				log.error("Start date, {}, cannot be after the end date {}", dashboardRequest.getStartDate(), dashboardRequest.getEndDate());
-				throw new FraudEngineException("Start date cannot be after end date");
-			}
-			
-			totalAmount = allTrasactions.stream().filter(transaction -> transaction.getCreatedAt().toLocalDate().compareTo(startDate) >= 0)
-					.filter(transaction -> transaction.getCreatedAt().toLocalDate().compareTo(endDate) <= 0)
-					.map(TransactionLogEntity::getAmount).reduce(BigDecimal.ZERO, BigDecimal::add).setScale(0, RoundingMode.HALF_UP);
-			
-			totalCount = allTrasactions.stream().filter(transaction -> transaction.getCreatedAt().toLocalDate().compareTo(startDate) >= 0)
-					.filter(transaction -> transaction.getCreatedAt().toLocalDate().compareTo(endDate) <= 0).count();
-			
-			log.info("Start date: {}    End date: {}", startDate, endDate);
-			log.info("Get Overall Transaction Stats After Date filter");
-			log.info("totalAmount: {}, totalAmountToday: {}, totalCount: {}, totalCountToday: {}", totalAmount, totalAmountToday, totalCount, totalCountToday);
-			
-		} else if (Objects.nonNull(dashboardRequest.getStartDate()) && Objects.isNull(dashboardRequest.getEndDate())) {
-			startDate = LocalDate.parse(dashboardRequest.getStartDate(), DateTimeFormatter.ofPattern(DASHBOARD_REQ_DATE_FORMAT));
-			endDate = LocalDate.parse(String.valueOf(LocalDate.now()), DateTimeFormatter.ofPattern(DASHBOARD_REQ_DATE_FORMAT));
+		try {
+			if (Objects.nonNull(dashboardRequest.getStartDate()) && Objects.nonNull(dashboardRequest.getEndDate())) {
+				startDate = LocalDate.parse(dashboardRequest.getStartDate(), DateTimeFormatter.ofPattern(DASHBOARD_REQ_DATE_FORMAT));
+				endDate = LocalDate.parse(dashboardRequest.getEndDate(), DateTimeFormatter.ofPattern(DASHBOARD_REQ_DATE_FORMAT));
 
-			totalAmount = allTrasactions.stream().filter(transaction -> transaction.getCreatedAt().toLocalDate().compareTo(startDate) >= 0)
-					.filter(transaction -> transaction.getCreatedAt().toLocalDate().compareTo(endDate) <= 0)
-					.map(TransactionLogEntity::getAmount).reduce(BigDecimal.ZERO, BigDecimal::add).setScale(0, RoundingMode.HALF_UP);
-			
-			totalCount = allTrasactions.stream().filter(transaction -> transaction.getCreatedAt().toLocalDate().compareTo(startDate) >= 0)
-					.filter(transaction -> transaction.getCreatedAt().toLocalDate().compareTo(endDate) <= 0).count();
-			
-			log.info("Start date: {}    End date: {}", startDate, endDate);
-			log.info("Get Overall Transaction Stats After Date filter");
-			log.info("totalAmount: {}, totalAmountToday: {}, totalCount: {}, totalCountToday: {}", totalAmount, totalAmountToday, totalCount, totalCountToday);
-			
-		} else if (Objects.isNull(dashboardRequest.getStartDate()) && Objects.nonNull(dashboardRequest.getEndDate())) {
-			log.error("Start date must be specified alongside the end date {}", dashboardRequest.getEndDate());
-			throw new FraudEngineException("Start date must be specified alongside the end date");
+				if (startDate.isAfter(endDate)) {
+					log.error("Start date, {}, cannot be after the end date {}", dashboardRequest.getStartDate(), dashboardRequest.getEndDate());
+					throw new FraudEngineException("Start date cannot be after end date");
+				}
+
+				totalAmount = allTrasactions.stream()
+						.filter(transaction -> transaction.getCreatedAt().toLocalDate().compareTo(startDate) >= 0)
+						.filter(transaction -> transaction.getCreatedAt().toLocalDate().compareTo(endDate) <= 0)
+						.map(TransactionLogEntity::getAmount).reduce(BigDecimal.ZERO, BigDecimal::add)
+						.setScale(0, RoundingMode.HALF_UP);
+
+				totalCount = allTrasactions.stream()
+						.filter(transaction -> transaction.getCreatedAt().toLocalDate().compareTo(startDate) >= 0)
+						.filter(transaction -> transaction.getCreatedAt().toLocalDate().compareTo(endDate) <= 0)
+						.count();
+
+				log.info("Start date: {}    End date: {}", startDate, endDate);
+				log.info("Get Overall Transaction Stats After Date filter");
+				log.info("totalAmount: {}, totalAmountToday: {}, totalCount: {}, totalCountToday: {}", totalAmount, totalAmountToday, totalCount, totalCountToday);
+
+			} else if (Objects.nonNull(dashboardRequest.getStartDate()) && Objects.isNull(dashboardRequest.getEndDate())) {
+				startDate = LocalDate.parse(dashboardRequest.getStartDate(), DateTimeFormatter.ofPattern(DASHBOARD_REQ_DATE_FORMAT));
+				endDate = LocalDate.parse(DateTimeFormatter.ofPattern(DASHBOARD_REQ_DATE_FORMAT).format(LocalDate.now()), DateTimeFormatter.ofPattern(DASHBOARD_REQ_DATE_FORMAT));
+
+				totalAmount = allTrasactions.stream()
+						.filter(transaction -> transaction.getCreatedAt().toLocalDate().compareTo(startDate) >= 0)
+						.filter(transaction -> transaction.getCreatedAt().toLocalDate().compareTo(endDate) <= 0)
+						.map(TransactionLogEntity::getAmount).reduce(BigDecimal.ZERO, BigDecimal::add)
+						.setScale(0, RoundingMode.HALF_UP);
+
+				totalCount = allTrasactions.stream()
+						.filter(transaction -> transaction.getCreatedAt().toLocalDate().compareTo(startDate) >= 0)
+						.filter(transaction -> transaction.getCreatedAt().toLocalDate().compareTo(endDate) <= 0)
+						.count();
+
+				log.info("Start date: {}    End date: {}", startDate, endDate);
+				log.info("Get Overall Transaction Stats After Date filter");
+				log.info("totalAmount: {}, totalAmountToday: {}, totalCount: {}, totalCountToday: {}", totalAmount, totalAmountToday, totalCount, totalCountToday);
+
+			} else if (Objects.isNull(dashboardRequest.getStartDate()) && Objects.nonNull(dashboardRequest.getEndDate())) {
+				log.error("Start date must be specified alongside the end date {}", dashboardRequest.getEndDate());
+				throw new FraudEngineException("Start date must be specified alongside the end date");
+			}
+		} catch (DateTimeParseException dtpEx) {
+			log.error("Wrong date format was received as input: {}", dtpEx.getLocalizedMessage());
+			throw new FraudEngineException("Start and End dates should be in the format " + DASHBOARD_REQ_DATE_FORMAT);
 		}
 		
 		DashBrdOverallTransactionResponse response = new DashBrdOverallTransactionResponse();
@@ -162,42 +178,55 @@ public class DashboardService {
 		log.info("totalCard: {}, totalCardToday: {}, totalAccount: {}, totalAccountToday: {}", totalCard, totalCardToday, totalAccount, totalAccountToday);
 		LocalDate startDate;
 		LocalDate endDate;
-		if(Objects.nonNull(dashboardRequest.getStartDate()) && Objects.nonNull(dashboardRequest.getEndDate())) {
-			startDate = LocalDate.parse(dashboardRequest.getStartDate(), DateTimeFormatter.ofPattern(DASHBOARD_REQ_DATE_FORMAT));
-			endDate = LocalDate.parse(dashboardRequest.getEndDate(), DateTimeFormatter.ofPattern(DASHBOARD_REQ_DATE_FORMAT));
-			
-			if(startDate.isAfter(endDate)) {
-				log.error("Start date, {}, cannot be after the end date {}", dashboardRequest.getStartDate(), dashboardRequest.getEndDate());
-				throw new FraudEngineException("Start date cannot be after end date");
-			}
-			
-			totalCard = allCards.stream().filter(transaction -> transaction.getCreatedAt().toLocalDate().compareTo(startDate) >= 0)
-					.filter(transaction -> transaction.getCreatedAt().toLocalDate().compareTo(endDate) <= 0).distinct().count();
-			
-			totalAccount = allCards.stream().filter(transaction -> transaction.getCreatedAt().toLocalDate().compareTo(startDate) >= 0)
-					.filter(transaction -> transaction.getCreatedAt().toLocalDate().compareTo(endDate) <= 0).distinct().count();
-			
-			log.info("Start date: {}    End date: {}", startDate, endDate);
-			log.info("Get Customer Stats After Date filter");
-			log.info("totalCard: {}, totalCardToday: {}, totalAccount: {}, totalAccountToday: {}", totalCard, totalCardToday, totalAccount, totalAccountToday);
-			
-		} else if (Objects.nonNull(dashboardRequest.getStartDate()) && Objects.isNull(dashboardRequest.getEndDate())) {
-			startDate = LocalDate.parse(dashboardRequest.getStartDate(), DateTimeFormatter.ofPattern(DASHBOARD_REQ_DATE_FORMAT));
-			endDate = LocalDate.parse(String.valueOf(LocalDate.now()), DateTimeFormatter.ofPattern(DASHBOARD_REQ_DATE_FORMAT));
+		try {
+			if (Objects.nonNull(dashboardRequest.getStartDate()) && Objects.nonNull(dashboardRequest.getEndDate())) {
+				startDate = LocalDate.parse(dashboardRequest.getStartDate(), DateTimeFormatter.ofPattern(DASHBOARD_REQ_DATE_FORMAT));
+				endDate = LocalDate.parse(dashboardRequest.getEndDate(), DateTimeFormatter.ofPattern(DASHBOARD_REQ_DATE_FORMAT));
 
-			totalCard = allCards.stream().filter(transaction -> transaction.getCreatedAt().toLocalDate().compareTo(startDate) >= 0)
-					.filter(transaction -> transaction.getCreatedAt().toLocalDate().compareTo(endDate) <= 0).distinct().count();
-			
-			totalAccount = allCards.stream().filter(transaction -> transaction.getCreatedAt().toLocalDate().compareTo(startDate) >= 0)
-					.filter(transaction -> transaction.getCreatedAt().toLocalDate().compareTo(endDate) <= 0).distinct().count();
-			
-			log.info("Start date: {}    End date: {}", startDate, endDate);
-			log.info("Get Customer Stats After Date filter");
-			log.info("totalCard: {}, totalCardToday: {}, totalAccount: {}, totalAccountToday: {}", totalCard, totalCardToday, totalAccount, totalAccountToday);
-			
-		} else if (Objects.isNull(dashboardRequest.getStartDate()) && Objects.nonNull(dashboardRequest.getEndDate())) {
-			log.error("Start date must be specified alongside the end date {}", dashboardRequest.getEndDate());
-			throw new FraudEngineException("Start date must be specified alongside the end date");
+				if (startDate.isAfter(endDate)) {
+					log.error("Start date, {}, cannot be after the end date {}", dashboardRequest.getStartDate(), dashboardRequest.getEndDate());
+					throw new FraudEngineException("Start date cannot be after end date");
+				}
+
+				totalCard = allCards.stream()
+						.filter(transaction -> transaction.getCreatedAt().toLocalDate().compareTo(startDate) >= 0)
+						.filter(transaction -> transaction.getCreatedAt().toLocalDate().compareTo(endDate) <= 0)
+						.distinct().count();
+
+				totalAccount = allCards.stream()
+						.filter(transaction -> transaction.getCreatedAt().toLocalDate().compareTo(startDate) >= 0)
+						.filter(transaction -> transaction.getCreatedAt().toLocalDate().compareTo(endDate) <= 0)
+						.distinct().count();
+
+				log.info("Start date: {}    End date: {}", startDate, endDate);
+				log.info("Get Customer Stats After Date filter");
+				log.info("totalCard: {}, totalCardToday: {}, totalAccount: {}, totalAccountToday: {}", totalCard, totalCardToday, totalAccount, totalAccountToday);
+
+			} else if (Objects.nonNull(dashboardRequest.getStartDate()) && Objects.isNull(dashboardRequest.getEndDate())) {
+				startDate = LocalDate.parse(dashboardRequest.getStartDate(), DateTimeFormatter.ofPattern(DASHBOARD_REQ_DATE_FORMAT));
+				endDate = LocalDate.parse(DateTimeFormatter.ofPattern(DASHBOARD_REQ_DATE_FORMAT).format(LocalDate.now()), DateTimeFormatter.ofPattern(DASHBOARD_REQ_DATE_FORMAT));
+
+				totalCard = allCards.stream()
+						.filter(transaction -> transaction.getCreatedAt().toLocalDate().compareTo(startDate) >= 0)
+						.filter(transaction -> transaction.getCreatedAt().toLocalDate().compareTo(endDate) <= 0)
+						.distinct().count();
+
+				totalAccount = allCards.stream()
+						.filter(transaction -> transaction.getCreatedAt().toLocalDate().compareTo(startDate) >= 0)
+						.filter(transaction -> transaction.getCreatedAt().toLocalDate().compareTo(endDate) <= 0)
+						.distinct().count();
+
+				log.info("Start date: {}    End date: {}", startDate, endDate);
+				log.info("Get Customer Stats After Date filter");
+				log.info("totalCard: {}, totalCardToday: {}, totalAccount: {}, totalAccountToday: {}", totalCard, totalCardToday, totalAccount, totalAccountToday);
+
+			} else if (Objects.isNull(dashboardRequest.getStartDate()) && Objects.nonNull(dashboardRequest.getEndDate())) {
+				log.error("Start date must be specified alongside the end date {}", dashboardRequest.getEndDate());
+				throw new FraudEngineException("Start date must be specified alongside the end date");
+			}
+		} catch (DateTimeParseException dtpEx) {
+			log.error("Wrong date format was received as input: {}", dtpEx.getLocalizedMessage());
+			throw new FraudEngineException("Start and End dates should be in the format " + DASHBOARD_REQ_DATE_FORMAT);
 		}
 		
 		DashBrdCustomersResponse response = new DashBrdCustomersResponse();
@@ -215,11 +244,56 @@ public class DashboardService {
 		long totalFlaggedTransaction = allTrasactions.stream().filter(TransactionLogEntity::getIsFraud).count();
 		
 		Map<String, List<TransactionLogEntity>> groupedTransactionsByProductCode = allTrasactions.stream().collect(Collectors.groupingBy(TransactionLogEntity::getProductCode));
+
+		log.info("Number of GroupedTransactionsByProductCode before date filter: {}", groupedTransactionsByProductCode.size());
+		
+		LocalDate startDate;
+		LocalDate endDate;
+		try {
+			if (Objects.nonNull(dashboardRequest.getStartDate()) && Objects.nonNull(dashboardRequest.getEndDate())) {
+				startDate = LocalDate.parse(dashboardRequest.getStartDate(), DateTimeFormatter.ofPattern(DASHBOARD_REQ_DATE_FORMAT));
+				endDate = LocalDate.parse(dashboardRequest.getEndDate(), DateTimeFormatter.ofPattern(DASHBOARD_REQ_DATE_FORMAT));
+
+				if (startDate.isAfter(endDate)) {
+					log.error("Start date, {}, cannot be after the end date {}", dashboardRequest.getStartDate(), dashboardRequest.getEndDate());
+					throw new FraudEngineException("Start date cannot be after end date");
+				}
+
+				groupedTransactionsByProductCode = allTrasactions.stream()
+						.filter(transaction -> transaction.getCreatedAt().toLocalDate().compareTo(startDate) >= 0)
+						.filter(transaction -> transaction.getCreatedAt().toLocalDate().compareTo(endDate) <= 0)
+						.collect(Collectors.groupingBy(TransactionLogEntity::getProductCode));
+
+				log.info("Start date: {}    End date: {}", startDate, endDate);
+				log.info("Number of GroupedTransactionsByProductCode after date filter: {}", groupedTransactionsByProductCode.size());
+
+			} else if (Objects.nonNull(dashboardRequest.getStartDate()) && Objects.isNull(dashboardRequest.getEndDate())) {
+				startDate = LocalDate.parse(dashboardRequest.getStartDate(), DateTimeFormatter.ofPattern(DASHBOARD_REQ_DATE_FORMAT));
+				endDate = LocalDate.parse(DateTimeFormatter.ofPattern(DASHBOARD_REQ_DATE_FORMAT).format(LocalDate.now()), DateTimeFormatter.ofPattern(DASHBOARD_REQ_DATE_FORMAT));
+
+				groupedTransactionsByProductCode = allTrasactions.stream()
+						.filter(transaction -> transaction.getCreatedAt().toLocalDate().compareTo(startDate) >= 0)
+						.filter(transaction -> transaction.getCreatedAt().toLocalDate().compareTo(endDate) <= 0)
+						.collect(Collectors.groupingBy(TransactionLogEntity::getProductCode));
+
+				log.info("Start date: {}    End date: {}", startDate, endDate);
+				log.info("Number of GroupedTransactionsByProductCode after date filter: {}", groupedTransactionsByProductCode.size());
+				
+			} else if (Objects.isNull(dashboardRequest.getStartDate()) && Objects.nonNull(dashboardRequest.getEndDate())) {
+				log.error("Start date must be specified alongside the end date {}", dashboardRequest.getEndDate());
+				throw new FraudEngineException("Start date must be specified alongside the end date");
+			}
+		} catch (DateTimeParseException dtpEx) {
+			log.error("Wrong date format was received as input: {}", dtpEx.getLocalizedMessage());
+			throw new FraudEngineException("Start and End dates should be in the format " + DASHBOARD_REQ_DATE_FORMAT);
+		}
 		
 		List<DashBrdTransactionPerProduct> transactionPerProducts = new ArrayList<>();
 		for(Map.Entry<String, List<TransactionLogEntity>> entry : groupedTransactionsByProductCode.entrySet()) {
+			log.info("[{}] Number of transactions for productCode {}", entry.getValue().stream().count(), entry.getKey());
 			
 			DashBrdTransactionPerProduct transactionPerProd = new DashBrdTransactionPerProduct();
+			transactionPerProd.setProductCode(entry.getKey());
 			transactionPerProd.setName(productRepository.findById(entry.getKey()).map(ProductEntity::getName).get());
 			transactionPerProd.setTotalTransaction(entry.getValue().stream().map(TransactionLogEntity::getAmount).reduce(BigDecimal.ZERO, BigDecimal::add).setScale(0, RoundingMode.HALF_UP));
 			transactionPerProd.setTransactionCount(entry.getValue().stream().count());
@@ -229,11 +303,25 @@ public class DashboardService {
 			transactionPerProducts.add(transactionPerProd);
 		}
 		
+		log.info("[{}] Number of transactions per product before product filter", transactionPerProducts.size());
+		if(Objects.nonNull(dashboardRequest.getProductCode()) && productRepository.findById(dashboardRequest.getProductCode()).isPresent()) {
+			
+			transactionPerProducts = transactionPerProducts.stream()
+					.filter(transactionPerProd -> transactionPerProd.getProductCode().equals(dashboardRequest.getProductCode())).collect(Collectors.toList());
+
+			log.info("[{}] Number of transactions per product after product filter", transactionPerProducts.size());
+			
+		} else if(Objects.nonNull(dashboardRequest.getProductCode()) && !productRepository.findById(dashboardRequest.getProductCode()).isPresent()) {
+			log.error("ProductCode {} does not exist", dashboardRequest.getProductCode());
+			throw new FraudEngineException("Product with Code " + dashboardRequest.getProductCode() + " does not exist");
+		}
+		
 		DashBrdTransactionPerProdResponse response = new DashBrdTransactionPerProdResponse();
 		response.setStatus(200);
 		response.setTotalFlagged(totalFlaggedTransaction);
 		response.setData(transactionPerProducts);
 		
+		log.info("DashBrdTransactionPerProdResponse object - {}", response);
 		return response;
 	}
 	
@@ -258,34 +346,44 @@ public class DashboardService {
 		
 		LocalDate startDate;
 		LocalDate endDate;
-		if(Objects.nonNull(dashboardRequest.getStartDate()) && Objects.nonNull(dashboardRequest.getEndDate())) {
-			startDate = LocalDate.parse(dashboardRequest.getStartDate(), DateTimeFormatter.ofPattern(DASHBOARD_REQ_DATE_FORMAT));
-			endDate = LocalDate.parse(dashboardRequest.getEndDate(), DateTimeFormatter.ofPattern(DASHBOARD_REQ_DATE_FORMAT));
-			
-			if(startDate.isAfter(endDate)) {
-				log.error("Start date, {}, cannot be after the end date {}", dashboardRequest.getStartDate(), dashboardRequest.getEndDate());
-				throw new FraudEngineException("Start date cannot be after end date");
+		try {
+			if (Objects.nonNull(dashboardRequest.getStartDate()) && Objects.nonNull(dashboardRequest.getEndDate())) {
+				startDate = LocalDate.parse(dashboardRequest.getStartDate(), DateTimeFormatter.ofPattern(DASHBOARD_REQ_DATE_FORMAT));
+				endDate = LocalDate.parse(dashboardRequest.getEndDate(), DateTimeFormatter.ofPattern(DASHBOARD_REQ_DATE_FORMAT));
+
+				if (startDate.isAfter(endDate)) {
+					log.error("Start date, {}, cannot be after the end date {}", dashboardRequest.getStartDate(), dashboardRequest.getEndDate());
+					throw new FraudEngineException("Start date cannot be after end date");
+				}
+
+				allTrasactions = allTrasactions.stream()
+						.filter(transaction -> transaction.getCreatedAt().toLocalDate().compareTo(startDate) >= 0)
+						.filter(transaction -> transaction.getCreatedAt().toLocalDate().compareTo(endDate) <= 0)
+						.sorted(Comparator.comparingLong(TransactionLogEntity::getId).reversed()).limit(limit)
+						.collect(Collectors.toList());
+
+				log.info("Start date: {}    End date: {}", startDate, endDate);
+				log.info("Number of recent transactions After date filter: {}, limit: {}", allTrasactions.size(),
+						limit);
+			} else if (Objects.nonNull(dashboardRequest.getStartDate()) && Objects.isNull(dashboardRequest.getEndDate())) {
+				startDate = LocalDate.parse(dashboardRequest.getStartDate(), DateTimeFormatter.ofPattern(DASHBOARD_REQ_DATE_FORMAT));
+				endDate = LocalDate.parse(DateTimeFormatter.ofPattern(DASHBOARD_REQ_DATE_FORMAT).format(LocalDate.now()), DateTimeFormatter.ofPattern(DASHBOARD_REQ_DATE_FORMAT));
+
+				allTrasactions = allTrasactions.stream()
+						.filter(transaction -> transaction.getCreatedAt().toLocalDate().compareTo(startDate) >= 0)
+						.filter(transaction -> transaction.getCreatedAt().toLocalDate().compareTo(endDate) <= 0)
+						.sorted(Comparator.comparingLong(TransactionLogEntity::getId).reversed()).limit(limit)
+						.collect(Collectors.toList());
+
+				log.info("Start date: {}    End date: {}", startDate, endDate);
+				log.info("Number of recent transactions After date filter: {}, limit: {}", allTrasactions.size(), limit);
+			} else if (Objects.isNull(dashboardRequest.getStartDate()) && Objects.nonNull(dashboardRequest.getEndDate())) {
+				log.error("Start date must be specified alongside the end date {}", dashboardRequest.getEndDate());
+				throw new FraudEngineException("Start date must be specified alongside the end date");
 			}
-			
-			allTrasactions = allTrasactions.stream().filter(transaction -> transaction.getCreatedAt().toLocalDate().compareTo(startDate) >= 0)
-					.filter(transaction -> transaction.getCreatedAt().toLocalDate().compareTo(endDate) <= 0)
-					.sorted(Comparator.comparingLong(TransactionLogEntity::getId).reversed()).limit(limit).collect(Collectors.toList());
-
-			log.info("Start date: {}    End date: {}", startDate, endDate);
-			log.info("Number of recent transactions After date filter: {}, limit: {}", allTrasactions.size(), limit);
-		} else if (Objects.nonNull(dashboardRequest.getStartDate()) && Objects.isNull(dashboardRequest.getEndDate())) {
-			startDate = LocalDate.parse(dashboardRequest.getStartDate(), DateTimeFormatter.ofPattern(DASHBOARD_REQ_DATE_FORMAT));
-			endDate = LocalDate.parse(String.valueOf(LocalDate.now()), DateTimeFormatter.ofPattern(DASHBOARD_REQ_DATE_FORMAT));
-
-			allTrasactions = allTrasactions.stream().filter(transaction -> transaction.getCreatedAt().toLocalDate().compareTo(startDate) >= 0)
-					.filter(transaction -> transaction.getCreatedAt().toLocalDate().compareTo(endDate) <= 0)
-					.sorted(Comparator.comparingLong(TransactionLogEntity::getId).reversed()).limit(limit).collect(Collectors.toList());
-
-			log.info("Start date: {}    End date: {}", startDate, endDate);
-			log.info("Number of recent transactions After date filter: {}, limit: {}", allTrasactions.size(), limit);
-		} else if (Objects.isNull(dashboardRequest.getStartDate()) && Objects.nonNull(dashboardRequest.getEndDate())) {
-			log.error("Start date must be specified alongside the end date {}", dashboardRequest.getEndDate());
-			throw new FraudEngineException("Start date must be specified alongside the end date");
+		} catch (DateTimeParseException dtpEx) {
+			log.error("Wrong date format was received as input: {}", dtpEx.getLocalizedMessage());
+			throw new FraudEngineException("Start and End dates should be in the format " + DASHBOARD_REQ_DATE_FORMAT);
 		}
 		
 		List<DashBrdRecentTransaction> recentTransactions = new ArrayList<>();
