@@ -77,9 +77,9 @@ spring:
     initialization-mode: always
 
   authorisation-service:
-    userAuthoriserUrl: http://localhost:9191/api/v1/users/authoriser
-    roleAuthoriserUrl: http://localhost:9191/api/v1/roles/authoriser
-    roleIdsByPermissionNameUrl: http://localhost:9191/api/v1/roles/permissionroles
+    userAuthoriserUrl: http://172.17.10.83:9191/api/v1/users/authoriser
+    roleAuthoriserUrl: http://172.17.10.83:9191/api/v1/roles/authoriser
+    roleIdsByPermissionNameUrl: http://172.17.10.83:9191/api/v1/roles/permissionroles
 
 #  second-datasource:
 #    username: root
