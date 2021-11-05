@@ -81,7 +81,7 @@ public class ReportSchedulerService {
             trigger = newTrigger()
                     .forJob(jobDetail)
                     .withIdentity(jobDetail.getKey().getName(), "report-triggers")
-                    .withSchedule(dailyAtHourAndMinute(10, 45))
+                    .withSchedule(dailyAtHourAndMinute(23, 59))
                     .build();
         }else if(request.getIntervalType().equals(IntervalType.MINUTE) && request.getReportLoop().equals(Boolean.TRUE)){
             trigger = newTrigger()
@@ -114,13 +114,13 @@ public class ReportSchedulerService {
         }else if(request.getIntervalType().equals(IntervalType.WEEK)){
             trigger = newTrigger()
                     .withIdentity(jobDetail.getKey().getName(), "report-triggers")
-                    .withSchedule(weeklyOnDayAndHourAndMinute(DateBuilder.FRIDAY, 10, 42))
+                    .withSchedule(weeklyOnDayAndHourAndMinute(DateBuilder.SATURDAY, 23, 42))
                     .forJob(jobDetail)
                     .build();
         }else if(request.getIntervalType().equals(IntervalType.MONTH)){
             trigger = newTrigger()
                     .withIdentity(jobDetail.getKey().getName(), "report-triggers")
-                    .withSchedule(monthlyOnDayAndHourAndMinute(request.getIntervalValue(),10, 10))
+                    .withSchedule(monthlyOnDayAndHourAndMinute(29,23, 10))
                     .forJob(jobDetail)
                     .build();
         }
