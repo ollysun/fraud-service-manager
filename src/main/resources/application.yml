@@ -50,8 +50,8 @@ spring:
 
   redis:
     client-type: jedis
-#    host: 172.17.10.16
-    host: 127.0.0.1
+    host: 172.17.10.16
+    #host: 127.0.0.1
     port: 6379
     database: 0
 #    password: visionsvisions
@@ -70,19 +70,16 @@ spring:
       type: web
 
   datasource:
-#    username: eagleeye_user
-#    password: T@w!d2021
-#    url: jdbc:mysql://172.17.10.83:3306/eagle_eye?createDatabaseIfNotExist=true&useLegacyDatetimeCode=false&serverTimezone=Africa/Lagos
-    username: root
-    password: root
-    url: jdbc:mysql://localhost:3306/eagle_eye?createDatabaseIfNotExist=true&useLegacyDatetimeCode=false&serverTimezone=Africa/Lagos
+    username: eagleeye_user
+    password: T@w!d2021
+    url: jdbc:mysql://172.17.10.83:3306/eagle_eye?createDatabaseIfNotExist=true&useLegacyDatetimeCode=false&serverTimezone=Africa/Lagos
     driverClassName: com.mysql.cj.jdbc.Driver
     initialization-mode: always
 
   authorisation-service:
-    userAuthoriserUrl: http://localhost:9191/api/v1/users/authoriser
-    roleAuthoriserUrl: http://localhost:9191/api/v1/roles/authoriser
-    roleIdsByPermissionNameUrl: http://localhost:9191/api/v1/roles/permissionroles
+    userAuthoriserUrl: http://172.17.10.83:9191/api/v1/users/authoriser
+    roleAuthoriserUrl: http://172.17.10.83:9191/api/v1/roles/authoriser
+    roleIdsByPermissionNameUrl: http://172.17.10.83:9191/api/v1/roles/permissionroles
 
 #  second-datasource:
 #    username: root
