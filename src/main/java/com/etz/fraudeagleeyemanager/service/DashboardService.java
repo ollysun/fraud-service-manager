@@ -108,6 +108,11 @@ public class DashboardService {
 				startDate = LocalDate.parse(dashboardRequest.getStartDate(), DateTimeFormatter.ofPattern(DASHBOARD_REQ_DATE_FORMAT));
 				endDate = LocalDate.parse(DateTimeFormatter.ofPattern(DASHBOARD_REQ_DATE_FORMAT).format(LocalDate.now()), DateTimeFormatter.ofPattern(DASHBOARD_REQ_DATE_FORMAT));
 
+				if (startDate.isAfter(endDate)) {
+					log.error("Start date, {}, cannot be after the end date {}", dashboardRequest.getStartDate(), dashboardRequest.getEndDate());
+					throw new FraudEngineException("Start date cannot be after end date");
+				}
+
 				totalAmount = allTrasactions.stream()
 						.filter(transaction -> transaction.getCreatedAt().toLocalDate().compareTo(startDate) >= 0)
 						.filter(transaction -> transaction.getCreatedAt().toLocalDate().compareTo(endDate) <= 0)
@@ -126,6 +131,8 @@ public class DashboardService {
 			} else if (Objects.isNull(dashboardRequest.getStartDate()) && Objects.nonNull(dashboardRequest.getEndDate())) {
 				log.error("Start date must be specified alongside the end date {}", dashboardRequest.getEndDate());
 				throw new FraudEngineException("Start date must be specified alongside the end date");
+			}else{
+
 			}
 		} catch (DateTimeParseException dtpEx) {
 			log.error("Wrong date format was received as input: {}", dtpEx.getLocalizedMessage());
@@ -282,6 +289,8 @@ public class DashboardService {
 			} else if (Objects.isNull(dashboardRequest.getStartDate()) && Objects.nonNull(dashboardRequest.getEndDate())) {
 				log.error("Start date must be specified alongside the end date {}", dashboardRequest.getEndDate());
 				throw new FraudEngineException("Start date must be specified alongside the end date");
+			}else{
+
 			}
 		} catch (DateTimeParseException dtpEx) {
 			log.error("Wrong date format was received as input: {}", dtpEx.getLocalizedMessage());

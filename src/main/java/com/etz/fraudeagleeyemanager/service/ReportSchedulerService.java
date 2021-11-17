@@ -6,21 +6,19 @@ import com.etz.fraudeagleeyemanager.entity.Report;
 import com.etz.fraudeagleeyemanager.entity.ReportScheduler;
 import com.etz.fraudeagleeyemanager.enums.ExportType;
 import com.etz.fraudeagleeyemanager.enums.IntervalType;
+import com.etz.fraudeagleeyemanager.exception.FraudEngineException;
 import com.etz.fraudeagleeyemanager.exception.ResourceNotFoundException;
 import com.etz.fraudeagleeyemanager.repository.NotificationGroupRepository;
 import com.etz.fraudeagleeyemanager.repository.ReportRepository;
 import com.etz.fraudeagleeyemanager.repository.ReportSchedulerRepository;
-import com.etz.fraudeagleeyemanager.scheduler.ReportJob;
+import com.etz.fraudeagleeyemanager.job.ReportJob;
 import com.etz.fraudeagleeyemanager.util.AppUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.quartz.*;
-import org.quartz.impl.triggers.CronTriggerImpl;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.ZonedDateTime;
-import java.util.Date;
 import java.util.UUID;
 
 import static org.quartz.CronScheduleBuilder.*;
@@ -37,6 +35,9 @@ public class ReportSchedulerService {
     private final ReportRepository reportRepository;
     private final NotificationGroupRepository notificationGroupRepository;
     private final ReportSchedulerRepository reportSchedulerRepository;
+
+
+    private final  Scheduler scheduler;
 
     @Transactional(rollbackFor = Throwable.class)
     public ReportScheduler createReportScheduler(CreateReportSchedulerRequest request) {
@@ -59,12 +60,20 @@ public class ReportSchedulerService {
         reportScheduler.setEntityId(null);
         reportScheduler.setRecordBefore(null);
         reportScheduler.setRequestDump(request);
-        ReportScheduler reportSchedulerResult;
-        reportSchedulerResult = reportSchedulerRepository.save(reportScheduler);
+        ReportScheduler reportSchedulerResult = reportSchedulerRepository.save(reportScheduler);
+        JobDetail jobDetail = buildJobDetail(reportSchedulerResult);
+        Trigger trigger = buildJobTrigger(jobDetail, reportSchedulerResult);
+        try {
+            scheduler.scheduleJob(jobDetail, trigger);
+        } catch (SchedulerException e) {
+            log.error("Error scheduling email", e);
+            throw new FraudEngineException("Error scheduling email : " + e.getMessage());
+        }
+
         return reportSchedulerResult;
     }
 
-    private JobDetail buildJobDetail(CreateReportSchedulerRequest request){
+    private JobDetail buildJobDetail(ReportScheduler request){
 
         JobDataMap jobDataMap = new JobDataMap();
         jobDataMap.put("Report", "ReportJob");
@@ -76,7 +85,7 @@ public class ReportSchedulerService {
                 .build();
     }
 
-    private Trigger buildJobTrigger(JobDetail jobDetail, ZonedDateTime startAt, ReportScheduler request) {
+    private Trigger buildJobTrigger(JobDetail jobDetail, ReportScheduler request) {
         if (request.getIntervalType().equals(IntervalType.DAY)) {
             trigger = newTrigger()
                     .forJob(jobDetail)

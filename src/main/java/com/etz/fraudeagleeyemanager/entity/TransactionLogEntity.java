@@ -1,23 +1,21 @@
 package com.etz.fraudeagleeyemanager.entity;
 
+import lombok.*;
+import org.hibernate.Hibernate;
+import org.hibernate.annotations.Type;
+
+import javax.persistence.*;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.Table;
-
-import org.hibernate.annotations.Type;
-
-import lombok.Data;
+import java.util.Objects;
 
 @Entity
 @Table(name = "transaction_log")
-@Data
+@Getter
+@Setter
+@ToString
+@RequiredArgsConstructor
 public class TransactionLogEntity implements Serializable {
 
 	private static final long serialVersionUID = 1L;
@@ -72,5 +70,17 @@ public class TransactionLogEntity implements Serializable {
 	
 	@Column(name = "created_at", nullable = false)
 	private LocalDateTime createdAt;
-	
+
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) return true;
+		if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
+		TransactionLogEntity that = (TransactionLogEntity) o;
+		return id != null && Objects.equals(id, that.id);
+	}
+
+	@Override
+	public int hashCode() {
+		return getClass().hashCode();
+	}
 }
