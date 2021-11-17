@@ -53,7 +53,7 @@ public class ParameterService {
 		parameterEntity.setRecordBefore(null);
 		parameterEntity.setRequestDump(request);
 
-		return addInternalWatchlistEntityToDatabase(parameterEntity, parameterEntity.getUpdatedBy());
+		return addInternalWatchlistEntityToDatabase(parameterEntity, parameterEntity.getCreatedBy());
 	}
 
 	@Transactional(rollbackFor = Throwable.class)
