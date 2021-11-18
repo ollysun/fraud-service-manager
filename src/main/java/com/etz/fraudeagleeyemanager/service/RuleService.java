@@ -255,7 +255,7 @@ public class RuleService {
 	}
 
 	@Transactional(rollbackFor = Throwable.class)
-	public ServiceRule mapRuleToService(MapRuleToServiceRequest request) {
+	public List<ProductRuleResponse> mapRuleToService(MapRuleToServiceRequest request) {
 		List<String> datasetList = new ArrayList<>();
 		Optional<ProductServiceEntity> productServiceEntityOptional = productServiceRepository.findById(request.getServiceId());
 		if (!productServiceEntityOptional.isPresent()){
@@ -271,11 +271,7 @@ public class RuleService {
 			datasetList.add(sd.getFieldName());
 		}
 
-		Optional<Rule> ruleEntityOptional = ruleRepository.findById(request.getRuleId());
-		if (!ruleEntityOptional.isPresent()) {
-			throw new ResourceNotFoundException("Rule Not found for Id " + request.getRuleId());
-		}
-//remove the restriction
+
 //		for(String name: datasetList) {
 //			if (ruleEntityOptional.get().getDataSourceValOne().equalsIgnoreCase("Transactional")
 //					&& !(name.equalsIgnoreCase(ruleEntityOptional.get().getSourceValueOne()))) {
@@ -293,27 +289,38 @@ public class RuleService {
 		}
 
 		ServiceRule serviceRuleEntity = new ServiceRule();
-		try {
-			serviceRuleEntity.setServiceId(request.getServiceId());
-			serviceRuleEntity.setRuleId(request.getRuleId());
-			serviceRuleEntity.setNotifyAdmin(request.getNotifyAdmin());
-			if (Boolean.TRUE.equals(request.getNotifyAdmin())){
-				serviceRuleEntity.setNotificationGroupId(request.getNotificationGroupId());
+		List<ServiceRule> createdServiceRuleEntity = new ArrayList<>();
+
+		for (Long id: request.getRuleId()){
+			Optional<Rule> ruleEntityOptional = ruleRepository.findById(id);
+			if (!ruleEntityOptional.isPresent()) {
+				throw new ResourceNotFoundException("Rule Not found for Id " + request.getRuleId());
 			}
-			serviceRuleEntity.setNotifyCustomer(request.getNotifyCustomer());
-			serviceRuleEntity.setStatus(Boolean.TRUE);
-			serviceRuleEntity.setAuthorised(false);
-			serviceRuleEntity.setCreatedBy(request.getCreatedBy());
-		
-		// for auditing purpose for CREATE
-			serviceRuleEntity.setEntityId(null);
-			serviceRuleEntity.setRecordBefore(null);
-			serviceRuleEntity.setRequestDump(request);
-		} catch (Exception ex) {
-			log.error("Error occurred while creating Product Rule entity object", ex);
-			throw new FraudEngineException(AppConstant.ERROR_SETTING_PROPERTY);
+			try {
+				serviceRuleEntity.setServiceId(request.getServiceId());
+				serviceRuleEntity.setRuleId(id);
+				serviceRuleEntity.setNotifyAdmin(request.getNotifyAdmin());
+				if (Boolean.TRUE.equals(request.getNotifyAdmin())){
+					serviceRuleEntity.setNotificationGroupId(request.getNotificationGroupId());
+				}
+				serviceRuleEntity.setNotifyCustomer(request.getNotifyCustomer());
+				serviceRuleEntity.setStatus(Boolean.TRUE);
+				serviceRuleEntity.setAuthorised(false);
+				serviceRuleEntity.setCreatedBy(request.getCreatedBy());
+
+				// for auditing purpose for CREATE
+				serviceRuleEntity.setEntityId(null);
+				serviceRuleEntity.setRecordBefore(null);
+				serviceRuleEntity.setRequestDump(request);
+			} catch (Exception ex) {
+				log.error("Error occurred while creating Product Rule entity object", ex);
+				throw new FraudEngineException(AppConstant.ERROR_SETTING_PROPERTY);
+			}
+			createdServiceRuleEntity.add(saveRuleServiceEntityToDatabase(serviceRuleEntity, serviceRuleEntity.getCreatedBy()));
 		}
-		return saveRuleServiceEntityToDatabase(serviceRuleEntity, serviceRuleEntity.getCreatedBy());
+		return outputProductRuleResponseList(createdServiceRuleEntity);
+
+		//return saveRuleServiceEntityToDatabase(serviceRuleEntity, serviceRuleEntity.getCreatedBy());
 	}
 
 	@Transactional(rollbackFor = Throwable.class)
