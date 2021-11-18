@@ -1,6 +1,7 @@
 package com.etz.fraudeagleeyemanager.dto.request;
 
 import java.io.Serializable;
+import java.util.List;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
@@ -15,7 +16,7 @@ public class MapRuleToServiceRequest implements Serializable {
 	@NotBlank(message="serviceId cannot be empty")
 	private String serviceId;
 	@NotNull(message="ruleId cannot be empty")
-	private Long ruleId;
+	private List<Long> ruleId;
 	private Boolean notifyAdmin;
 	private Long notificationGroupId;
 	private Boolean notifyCustomer;

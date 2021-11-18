@@ -71,11 +71,10 @@ public class RuleController {
 	}
 	
 	@PostMapping("/service")
-	public ResponseEntity<ModelResponse<ServiceRule>> mapRuleToService(@RequestBody @Valid MapRuleToServiceRequest request,
+	public CollectionResponse<ProductRuleResponse> mapRuleToService(@RequestBody @Valid MapRuleToServiceRequest request,
 																	   @ApiIgnore @RequestAttribute(AppConstant.USERNAME) String username){
 		request.setCreatedBy(username);
-		ModelResponse<ServiceRule> response = new ModelResponse<>(ruleService.mapRuleToService(request), HttpStatus.CREATED);
-		return ResponseEntity.status(HttpStatus.valueOf(response.getStatus())).body(response);
+		return new CollectionResponse<>(ruleService.mapRuleToService(request), HttpStatus.CREATED.toString());
 	}
 	
 	@PutMapping("/service")
