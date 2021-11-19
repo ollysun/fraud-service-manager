@@ -264,12 +264,12 @@ public class RuleService {
 
 		// verify the dataset on rule
 		List<ServiceDataSet> serviceDataSetList = productDataSetRepository.findByServiceId(request.getServiceId());
-//		if (serviceDataSetList.isEmpty()){
-//			throw new ResourceNotFoundException("Service Dataset  not found for serviceId " + request.getServiceId());
-//		}
-//		for (ServiceDataSet sd: serviceDataSetList){
-//			datasetList.add(sd.getFieldName());
-//		}
+		if (serviceDataSetList.isEmpty()){
+			throw new ResourceNotFoundException("Service Dataset  not found for serviceId " + request.getServiceId());
+		}
+		for (ServiceDataSet sd: serviceDataSetList){
+			datasetList.add(sd.getFieldName());
+		}
 
 
 //		for(String name: datasetList) {
@@ -284,9 +284,9 @@ public class RuleService {
 //		}
 
 		
-//		if (!Objects.isNull(request.getNotificationGroupId()) && !notificationGroupRepository.findById(request.getNotificationGroupId()).isPresent()) {
-//			throw new ResourceNotFoundException("Notification Group Id Not found for Id " + request.getNotificationGroupId());
-//		}
+		if (!Objects.isNull(request.getNotificationGroupId()) && !notificationGroupRepository.findById(request.getNotificationGroupId()).isPresent()) {
+			throw new ResourceNotFoundException("Notification Group Id Not found for Id " + request.getNotificationGroupId());
+		}
 
 		ServiceRule serviceRuleEntity = new ServiceRule();
 		List<ServiceRule> createdServiceRuleEntity = new ArrayList<>();
@@ -320,7 +320,6 @@ public class RuleService {
 		}
 		return outputProductRuleResponseList(createdServiceRuleEntity);
 
-		//return saveRuleServiceEntityToDatabase(serviceRuleEntity, serviceRuleEntity.getCreatedBy());
 	}
 
 	@Transactional(rollbackFor = Throwable.class)
