@@ -9,6 +9,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
 import javax.persistence.TypedQuery;
 
 import org.apache.commons.lang3.StringUtils;
@@ -65,7 +66,7 @@ public class RuleService {
 	private final ProductServiceRepository productServiceRepository;
 	private final ProductDataSetRepository productDataSetRepository;
 
-	//@PersistenceContext(unitName = "primary")
+	@PersistenceContext
 	private EntityManager em;
 
 	@CacheEvict(value = "product", allEntries=true)
@@ -405,8 +406,7 @@ public class RuleService {
 					"rl.suspicionLevel, rl.action, rl.status, rl.authorised,sr.serviceId as serviceId, sr.ruleId as serviceRuleId)"
 					+ " FROM Rule rl inner JOIN rl.serviceRule sr "
 					+ " WHERE sr.serviceId = :serviceId";
-			ruleProductResponseTypedQuery =  em.createQuery(sqlString.trim(), RuleProductResponse.class)
-					                     .setParameter("serviceId",serviceId);
+			ruleProductResponseTypedQuery =  em.createQuery(sqlString.trim(), RuleProductResponse.class).setParameter("serviceId",serviceId);
 			ruleProductResponseList = ruleProductResponseTypedQuery.getResultList();
 		}
 		return ruleProductResponseList;
