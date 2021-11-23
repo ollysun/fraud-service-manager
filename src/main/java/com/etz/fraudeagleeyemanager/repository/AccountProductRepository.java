@@ -11,4 +11,6 @@ import com.etz.fraudeagleeyemanager.entity.AccountProductId;
 @Repository
 public interface AccountProductRepository extends JpaRepository<AccountProduct, AccountProductId> {
     List<AccountProduct> findByAccountId(Long accountId);
+    
+    List<AccountProduct> findByProductCode(String productCode);
 }

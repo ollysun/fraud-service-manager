@@ -12,6 +12,7 @@ public final class AppConstant {
 	public static final String UPDATED_AT = "updated_at";
 
 	public static final String DATE_FORMAT = "EEE, dd MMM yyyy HH:mm:ss zzz";
+	public static final String DASHBOARD_REQ_DATE_FORMAT = "dd-MM-yyyy";
     
 	public static final String ALL = "*";
 	public static final String ALL_LINKS = "/**";

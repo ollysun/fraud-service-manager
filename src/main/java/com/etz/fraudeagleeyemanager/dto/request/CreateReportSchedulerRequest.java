@@ -11,7 +11,7 @@ import lombok.ToString;
 public class CreateReportSchedulerRequest {
     private Long reportId;
     private Long notificationId;
-    private Integer integer;
+    private Integer integerValue;
     private String intervalType;
     private Boolean loop;
     private String exportType;
