@@ -5,6 +5,7 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Positive;
 
+import com.etz.fraudeagleeyemanager.dto.request.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -20,10 +21,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.etz.fraudeagleeyemanager.constant.AppConstant;
-import com.etz.fraudeagleeyemanager.dto.request.CreateRuleRequest;
-import com.etz.fraudeagleeyemanager.dto.request.MapRuleToServiceRequest;
-import com.etz.fraudeagleeyemanager.dto.request.UpdateMapRuleToServiceRequest;
-import com.etz.fraudeagleeyemanager.dto.request.UpdateRuleRequest;
 import com.etz.fraudeagleeyemanager.dto.response.BooleanResponse;
 import com.etz.fraudeagleeyemanager.dto.response.CollectionResponse;
 import com.etz.fraudeagleeyemanager.dto.response.ModelResponse;
@@ -83,10 +80,9 @@ public class RuleController {
 		request.setUpdatedBy(username);
 		return new CollectionResponse<>(ruleService.updateServiceRule(request));
 	}
-
-	@DeleteMapping("/service/{serviceId}/ruleId/{ruleId}")
-	public BooleanResponse deleteServiceRule(@PathVariable @NotNull @Positive Long ruleId, @PathVariable @NotNull String serviceId){
-		return new BooleanResponse(ruleService.deleteServiceRule(ruleId, serviceId));
+	@DeleteMapping("/service")
+	public BooleanResponse deleteServiceRule(@RequestBody @Valid UnmapServiceRuleRequest unmapServiceRuleRequest){
+		return new BooleanResponse(ruleService.deleteServiceRule(unmapServiceRuleRequest));
 	}
 
 	@GetMapping("/service/{serviceId}")
