@@ -12,6 +12,7 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -60,7 +61,7 @@ public class ProductService {
 
 	@CacheEvict(value = "product", allEntries=true)
 	@Transactional(rollbackFor = Throwable.class)
-	//@PreAuthorize("hasAuthority('PRODUCT.CREATE')")
+	@PreAuthorize("hasAuthority('PRODUCT.CREATE')")
 	public ProductResponse addProduct(CreateProductRequest request) {
 		ProductEntity productEntity = new ProductEntity();
 		if (productEntityRepository.findCountByCode(request.getProductCode()) > 0){
@@ -122,7 +123,7 @@ public class ProductService {
 
 	@Cacheable(value="product")
 	@Transactional(readOnly = true)
-	//@PreAuthorize("hasAuthority('PRODUCT.READ')")
+	@PreAuthorize("hasAuthority('PRODUCT.READ')")
 	public List<ProductResponse> getProduct(String productCode) {
 		if (Objects.isNull(productCode)) {
 			return outputCreateProduct(productEntityRepository.findAllByDeletedFalse());
@@ -146,7 +147,7 @@ public class ProductService {
 
 	@CacheEvict(value = "product", allEntries=true)
 	@Transactional(rollbackFor = Throwable.class)
-	//@PreAuthorize("hasAuthority('PRODUCT.UPDATE')")
+	@PreAuthorize("hasAuthority('PRODUCT.UPDATE')")
 	public ProductResponse updateProduct(UpdateProductRequest request) {
 		ProductEntity productEntity = findByCode(request.getProductCode()).get();
 
@@ -179,7 +180,7 @@ public class ProductService {
 
 	@CacheEvict(value = "product")
 	@Transactional(rollbackFor = Throwable.class)
-	//@PreAuthorize("hasAuthority('PRODUCT.DELETE')")
+	@PreAuthorize("hasAuthority('PRODUCT.DELETE')")
 	public Boolean deleteProduct(String productCode) {
 		Optional<ProductEntity> productEntityOptional = findByCode(productCode);
 		ProductEntity productEntity = productEntityOptional.get();
@@ -215,7 +216,7 @@ public class ProductService {
 	}
 
 	@Transactional(rollbackFor = Throwable.class)
-	//@PreAuthorize("hasAnyAuthority('SERVICE.DATASET.CREATE','SERVICE.DATASET.APPROVE')")
+	@PreAuthorize("hasAnyAuthority('SERVICE.DATASET.CREATE','SERVICE.DATASET.APPROVE')")
 	public ServiceDataSet addServiceDataset(DatasetProductRequest request) {
 		List<ServiceDataSet> serviceDataSetList = new ArrayList<>();
 
@@ -261,7 +262,7 @@ public class ProductService {
 	}
 
 	@Transactional(readOnly = true, rollbackFor = Throwable.class)
-	//@PreAuthorize("hasAuthority('SERVICE.DATASET.READ')")
+	@PreAuthorize("hasAuthority('SERVICE.DATASET.READ')")
 	public ServiceDataSetResponse getServiceDatasetByIds(Long datasetId, String productCode, String serviceId){
 		ServiceDataSet serviceDataSet = productDataSetRepository.findByIds(datasetId,productCode,serviceId)
 										.orElseThrow(() -> new ResourceNotFoundException("Service Dataset Details not found"));
@@ -299,7 +300,7 @@ public class ProductService {
 	}
 
 	@Transactional(rollbackFor = Throwable.class)
-	//@PreAuthorize("hasAnyAuthority('SERVICE.DATASET.UPDATE','SERVICE.DATASET.APPROVE')")
+	@PreAuthorize("hasAnyAuthority('SERVICE.DATASET.UPDATE','SERVICE.DATASET.APPROVE')")
 	public ServiceDataSetResponse updateServiceDataset(UpdateDataSetRequest request) {
 
 		ServiceDataSet serviceDataSet = productDataSetRepository.findByIds(request.getDatasetId(), request.getProductCode(),
@@ -335,7 +336,7 @@ public class ProductService {
 	}
 
 	@Transactional(rollbackFor = Throwable.class)
-	//@PreAuthorize("hasAnyAuthority('SERVICE.DATASET.DELETE','SERVICE.DATASET.APPROVE')")
+	@PreAuthorize("hasAnyAuthority('SERVICE.DATASET.DELETE','SERVICE.DATASET.APPROVE')")
 	public boolean deleteServiceDataset(Long datasetId, String serviceId, String code) {
 		ServiceDataSet serviceDataSet = productDataSetRepository.findByIds(datasetId, code, serviceId)
 				.orElseThrow(() -> new ResourceNotFoundException("Service Dataset Details not found"));
@@ -401,7 +402,7 @@ public class ProductService {
 
 	@CacheEvict(value = "Service", allEntries=true)
 	@Transactional(rollbackFor = Throwable.class)
-	//@PreAuthorize("hasAuthority('PRODUCT.SERVICE.CREATE')")
+	@PreAuthorize("hasAuthority('PRODUCT.SERVICE.CREATE')")
 	public ProductServiceResponse addProductService(CreateProductServiceDto request) {
 		Optional<ProductEntity> productEntityOptional = productEntityRepository.findByCodeAndDeletedFalse(request.getProductCode());
 		if (!productEntityOptional.isPresent()) {
@@ -436,7 +437,7 @@ public class ProductService {
 	}
 	
 	@Transactional(rollbackFor = Throwable.class)
-	//@PreAuthorize("hasAuthority('PRODUCT.SERVICE.UPDATE')")
+	@PreAuthorize("hasAuthority('PRODUCT.SERVICE.UPDATE')")
 	public ProductServiceResponse updateProductService(UpdateProductServiceDto request) {
 		Optional<ProductEntity> productEntityOptional = productEntityRepository.findByCodeAndDeletedFalse(request.getProductCode());
 		if (!productEntityOptional.isPresent()) {
@@ -460,7 +461,7 @@ public class ProductService {
 	}
 
 	@Transactional(rollbackFor = Throwable.class)
-	//@PreAuthorize("hasAuthority('PRODUCT.SERVICE.DELETE')")
+	@PreAuthorize("hasAuthority('PRODUCT.SERVICE.DELETE')")
 	public Boolean deactivateProductService(String serviceId){
 		Optional<ProductServiceEntity> productServiceEntityOptional = productServiceRepository.findById(serviceId);
 		if (!productServiceEntityOptional.isPresent()) {
@@ -485,7 +486,7 @@ public class ProductService {
 	}
 
 	@Transactional(readOnly = true)
-	//@PreAuthorize("hasAuthority('PRODUCT.SERVICE.READ')")
+	@PreAuthorize("hasAuthority('PRODUCT.SERVICE.READ')")
 	public Page<ProductServiceEntity> queryAllProductService(String productCode){
 		Page<ProductServiceEntity> productServiceEntityPage;
 		List<ProductServiceEntity> productServiceEntityList = productServiceRepository.findAll();
