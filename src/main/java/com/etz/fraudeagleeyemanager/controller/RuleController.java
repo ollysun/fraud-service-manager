@@ -74,12 +74,13 @@ public class RuleController {
 		return new CollectionResponse<>(ruleService.mapRuleToService(request), HttpStatus.CREATED.toString());
 	}
 	
-	@PutMapping("/service")
-	public CollectionResponse<ProductRuleResponse> updateServiceRule(@RequestBody @Valid UpdateMapRuleToServiceRequest request,
-																	 @ApiIgnore @RequestAttribute(AppConstant.USERNAME) String username){
-		request.setUpdatedBy(username);
-		return new CollectionResponse<>(ruleService.updateServiceRule(request));
-	}
+//	@PutMapping("/service")
+//	public CollectionResponse<ProductRuleResponse> updateServiceRule(@RequestBody @Valid UpdateMapRuleToServiceRequest request,
+//																	 @ApiIgnore @RequestAttribute(AppConstant.USERNAME) String username){
+//		request.setUpdatedBy(username);
+//		return new CollectionResponse<>(ruleService.updateServiceRule(request));
+//	}
+
 	@DeleteMapping("/service")
 	public BooleanResponse deleteServiceRule(@RequestBody @Valid UnmapServiceRuleRequest unmapServiceRuleRequest){
 		return new BooleanResponse(ruleService.deleteServiceRule(unmapServiceRuleRequest));

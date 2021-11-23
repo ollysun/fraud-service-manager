@@ -321,42 +321,43 @@ public class RuleService {
 
 	}
 
-	@Transactional(rollbackFor = Throwable.class)
-	public List<ProductRuleResponse> updateServiceRule(UpdateMapRuleToServiceRequest request) {
-		List<ServiceRule> prodRuleEntityList = serviceRuleRepository.findByRuleId(request.getServiceRuleId());
-		if(prodRuleEntityList.isEmpty()){
-			throw new FraudEngineException("ServiceRule Not found for Id " + request.getServiceRuleId());
-		}
-		
-		if (!Objects.isNull(request.getNotificationGroupId()) && !notificationGroupRepository.findById(request.getNotificationGroupId()).isPresent()) {
-			throw new ResourceNotFoundException("Notification Group Id Not found for Id " + request.getNotificationGroupId());
-		}
-
-
-		List<ServiceRule> updatedServiceRuleEntity = new ArrayList<>();
-		for (ServiceRule serviceRuleEntity:prodRuleEntityList) {
-			try {
-				// for auditing purpose for UPDATE
-				serviceRuleEntity.setEntityId("ruleId: " + serviceRuleEntity.getRuleId() + " serviceId: " + serviceRuleEntity.getServiceId());
-				serviceRuleEntity.setRecordBefore(JsonConverter.objectToJson(serviceRuleEntity));
-				serviceRuleEntity.setRequestDump(request);
-
-				serviceRuleEntity.setNotifyAdmin(request.getNotifyAdmin());
-				if (Boolean.TRUE.equals(request.getNotifyAdmin())){
-					serviceRuleEntity.setNotificationGroupId(request.getNotificationGroupId());
-				}
-				serviceRuleEntity.setNotifyCustomer(request.getNotifyCustomer());
-				serviceRuleEntity.setStatus(request.getStatus());
-				serviceRuleEntity.setAuthorised(false);
-				serviceRuleEntity.setUpdatedBy(request.getUpdatedBy());
-			} catch (Exception ex) {
-				log.error("Error occurred while creating Product Rule entity object", ex);
-				throw new FraudEngineException(AppConstant.ERROR_SETTING_PROPERTY);
-			}
-			updatedServiceRuleEntity.add(saveRuleServiceEntityToDatabase(serviceRuleEntity, serviceRuleEntity.getUpdatedBy()));
-		}
-		return outputProductRuleResponseList(updatedServiceRuleEntity);
-	}
+	// not require anymore
+//	@Transactional(rollbackFor = Throwable.class)
+//	public List<ProductRuleResponse> updateServiceRule(UpdateMapRuleToServiceRequest request) {
+//		List<ServiceRule> prodRuleEntityList = serviceRuleRepository.findByRuleId(request.getServiceRuleId());
+//		if(prodRuleEntityList.isEmpty()){
+//			throw new FraudEngineException("ServiceRule Not found for Id " + request.getServiceRuleId());
+//		}
+//
+//		if (!Objects.isNull(request.getNotificationGroupId()) && !notificationGroupRepository.findById(request.getNotificationGroupId()).isPresent()) {
+//			throw new ResourceNotFoundException("Notification Group Id Not found for Id " + request.getNotificationGroupId());
+//		}
+//
+//
+//		List<ServiceRule> updatedServiceRuleEntity = new ArrayList<>();
+//		for (ServiceRule serviceRuleEntity:prodRuleEntityList) {
+//			try {
+//				// for auditing purpose for UPDATE
+//				serviceRuleEntity.setEntityId("ruleId: " + serviceRuleEntity.getRuleId() + " serviceId: " + serviceRuleEntity.getServiceId());
+//				serviceRuleEntity.setRecordBefore(JsonConverter.objectToJson(serviceRuleEntity));
+//				serviceRuleEntity.setRequestDump(request);
+//
+//				serviceRuleEntity.setNotifyAdmin(request.getNotifyAdmin());
+//				if (Boolean.TRUE.equals(request.getNotifyAdmin())){
+//					serviceRuleEntity.setNotificationGroupId(request.getNotificationGroupId());
+//				}
+//				serviceRuleEntity.setNotifyCustomer(request.getNotifyCustomer());
+//				serviceRuleEntity.setStatus(request.getStatus());
+//				serviceRuleEntity.setAuthorised(false);
+//				serviceRuleEntity.setUpdatedBy(request.getUpdatedBy());
+//			} catch (Exception ex) {
+//				log.error("Error occurred while creating Product Rule entity object", ex);
+//				throw new FraudEngineException(AppConstant.ERROR_SETTING_PROPERTY);
+//			}
+//			updatedServiceRuleEntity.add(saveRuleServiceEntityToDatabase(serviceRuleEntity, serviceRuleEntity.getUpdatedBy()));
+//		}
+//		return outputProductRuleResponseList(updatedServiceRuleEntity);
+//	}
 
 	@Transactional(rollbackFor = Throwable.class)
 	public boolean deleteServiceRule(UnmapServiceRuleRequest unmapServiceRuleRequest) {
