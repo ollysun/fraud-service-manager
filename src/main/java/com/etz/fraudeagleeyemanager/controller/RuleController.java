@@ -81,8 +81,8 @@ public class RuleController {
 //		return new CollectionResponse<>(ruleService.updateServiceRule(request));
 //	}
 
-	@DeleteMapping("/service")
-	public BooleanResponse deleteServiceRule(@RequestBody @Valid UnmapServiceRuleRequest unmapServiceRuleRequest){
+	@PutMapping("/unmap/service")
+	public BooleanResponse unmapServiceRule(@RequestBody @Valid UnmapServiceRuleRequest unmapServiceRuleRequest){
 		return new BooleanResponse(ruleService.deleteServiceRule(unmapServiceRuleRequest));
 	}
 
