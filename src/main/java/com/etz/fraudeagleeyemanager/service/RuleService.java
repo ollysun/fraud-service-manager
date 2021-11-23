@@ -12,6 +12,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.TypedQuery;
 
+import com.etz.fraudeagleeyemanager.dto.request.*;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.cache.annotation.CacheEvict;
@@ -21,10 +22,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.etz.fraudeagleeyemanager.constant.AppConstant;
-import com.etz.fraudeagleeyemanager.dto.request.CreateRuleRequest;
-import com.etz.fraudeagleeyemanager.dto.request.MapRuleToServiceRequest;
-import com.etz.fraudeagleeyemanager.dto.request.UpdateMapRuleToServiceRequest;
-import com.etz.fraudeagleeyemanager.dto.request.UpdateRuleRequest;
 import com.etz.fraudeagleeyemanager.dto.response.ProductRuleResponse;
 import com.etz.fraudeagleeyemanager.dto.response.RuleProductResponse;
 import com.etz.fraudeagleeyemanager.dto.response.RuleResponse;
@@ -362,36 +359,46 @@ public class RuleService {
 	}
 
 	@Transactional(rollbackFor = Throwable.class)
-	public boolean deleteServiceRule(Long ruleId, String serviceId) {
-		if (Objects.isNull(ruleId) && Objects.isNull(serviceId)){
-			throw new FraudEngineException("Please enter value for serviceId and ruleId");
+	public boolean deleteServiceRule(UnmapServiceRuleRequest unmapServiceRuleRequest) {
+		if (Objects.isNull(unmapServiceRuleRequest.getRuleId()) && Objects.isNull(unmapServiceRuleRequest.getServiceId())){
+			throw new FraudEngineException("Please enter value for serviceId and ruleIds");
 		}
-		Optional<ServiceRule> productRuleOptional = serviceRuleRepository.findById(new ProductRuleId(ruleId, serviceId));
+		for(Long id : unmapServiceRuleRequest.getRuleId()){
+			Optional<ServiceRule> productRuleOptional = serviceRuleRepository.findById(new ProductRuleId(id, unmapServiceRuleRequest.getServiceId()));
+			if (Boolean.FALSE.equals(productRuleOptional.isPresent())){
+				throw new ResourceNotFoundException(" No service rule found for rule Id: " +id + "service id: " + unmapServiceRuleRequest.getServiceId());
+			}
+		}
+		try {
+			serviceRuleRepository.deleteByRuleIdSAndServiceId(unmapServiceRuleRequest.getServiceId(),
+					unmapServiceRuleRequest.getRuleId());
+		} catch (Exception ex) {
+			log.error("Error occurred while deleting service rule entity from the database", ex);
+			throw new FraudEngineException(AppConstant.ERROR_DELETING_FROM_DATABASE);
+		}
 		productRuleRedisRepository.setHashOperations(redisTemplate);
-		if(productRuleOptional.isPresent()){
-			ServiceRule serviceRule = productRuleOptional.get();
-			// for auditing purpose for DELETE
-			serviceRule.setEntityId("ruleId: " + ruleId + " serviceId: " + serviceId);
-			serviceRule.setRecordBefore(JsonConverter.objectToJson(serviceRule));
-			serviceRule.setRecordAfter(null);
-			serviceRule.setRequestDump("ruleId:" + ruleId + " serviceId:" + serviceId);
 
-			try {
-				serviceRuleRepository.deleteByRuleIdAndServiceId(ruleId, serviceId);
-			} catch (Exception ex) {
-				log.error("Error occurred while deleting service rule entity from the database", ex);
-				throw new FraudEngineException(AppConstant.ERROR_DELETING_FROM_DATABASE);
+		for(Long id : unmapServiceRuleRequest.getRuleId()){
+			Optional<ServiceRule> productRuleOptional = serviceRuleRepository.findById(new ProductRuleId(id, unmapServiceRuleRequest.getServiceId()));
+			if(productRuleOptional.isPresent()){
+				ServiceRule serviceRule = productRuleOptional.get();
+				// for auditing purpose for DELETE
+				serviceRule.setEntityId("ruleId: " + id + " serviceId: " + unmapServiceRuleRequest.getServiceId());
+				serviceRule.setRecordBefore(JsonConverter.objectToJson(serviceRule));
+				serviceRule.setRecordAfter(null);
+				serviceRule.setRequestDump("ruleId:" + id + " serviceId:" + unmapServiceRuleRequest.getServiceId());
+
+
+				try {
+					String redisId = unmapServiceRuleRequest.getServiceId() + ":"+id;
+					productRuleRedisRepository.delete(redisId);
+				} catch (Exception ex) {
+					log.error("Error occurred while deleting service rule entity from Redis", ex);
+					throw new FraudEngineException(AppConstant.ERROR_DELETING_FROM_REDIS);
+				}
 			}
-			try {
-				String redisId = serviceId + ":"+ruleId;
-				productRuleRedisRepository.delete(redisId);
-			} catch (Exception ex) {
-				log.error("Error occurred while deleting service rule entity from Redis", ex);
-				throw new FraudEngineException(AppConstant.ERROR_DELETING_FROM_REDIS);
-			}
-		}else {
-			throw new ResourceNotFoundException("ServiceRule Not found for ruleId " + ruleId + " and serviceId " + serviceId);
 		}
+
 		return true;
 	}
 
