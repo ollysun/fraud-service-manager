@@ -43,7 +43,7 @@ public class DashboardController {
 	
 	@GetMapping("/transaction/recent")
 	public CollectionResponse<DashBrdRecentTransaction> queryRecentTransaction(@RequestParam(required = false) String start, @RequestParam(required = false) String end, 
-			@RequestParam(required = false) String product, @RequestParam(required = true) Long limit) {
+			@RequestParam(required = false) String product, @RequestParam Long limit) {
 		return new CollectionResponse<>(dashboardService.getRecentTransaction(new DashboardRequest(start, end, product), limit < 0 ? 0 : limit));
 	}
 }

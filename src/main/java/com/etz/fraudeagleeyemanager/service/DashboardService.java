@@ -72,11 +72,11 @@ public class DashboardService {
 		
 		BigDecimal totalAmount = allTrasactions.stream().map(TransactionLogEntity::getAmount).reduce(BigDecimal.ZERO, BigDecimal::add).setScale(0, RoundingMode.HALF_UP);
 		BigDecimal totalAmountToday = allTrasactions.stream().filter(t -> t.getCreatedAt().toLocalDate().isEqual(LocalDate.now())).map(TransactionLogEntity::getAmount).reduce(BigDecimal.ZERO, BigDecimal::add).setScale(0, RoundingMode.HALF_UP);
-		Long totalCount = allTrasactions.stream().count();
-		Long totalCountToday = allTrasactions.stream().filter(t -> t.getCreatedAt().toLocalDate().isEqual(LocalDate.now())).count();
-		
-		log.info("Get Overall Transaction Stats Before Date filter");
-		log.info("totalAmount: {}, totalAmountToday: {}, totalCount: {}, totalCountToday: {}", totalAmount, totalAmountToday, totalCount, totalCountToday);
+		//Long totalCount = allTrasactions.stream().count();
+		//Long totalCountToday = allTrasactions.stream().filter(t -> t.getCreatedAt().toLocalDate().isEqual(LocalDate.now())).count();
+		long totalCount;
+		long totalCountToday = 0;
+
 		LocalDate startDate;
 		LocalDate endDate;
 		try {
@@ -102,7 +102,7 @@ public class DashboardService {
 
 				log.info("Start date: {}    End date: {}", startDate, endDate);
 				log.info("Get Overall Transaction Stats After Date filter");
-				log.info("totalAmount: {}, totalAmountToday: {}, totalCount: {}, totalCountToday: {}", totalAmount, totalAmountToday, totalCount, totalCountToday);
+				//log.info("totalAmount: {}, totalAmountToday: {}, totalCount: {}, totalCountToday: {}", totalAmount, totalAmountToday, totalCount, totalCountToday);
 
 			} else if (Objects.nonNull(dashboardRequest.getStartDate()) && Objects.isNull(dashboardRequest.getEndDate())) {
 				startDate = LocalDate.parse(dashboardRequest.getStartDate(), DateTimeFormatter.ofPattern(DASHBOARD_REQ_DATE_FORMAT));
@@ -132,6 +132,12 @@ public class DashboardService {
 				log.error("Start date must be specified alongside the end date {}", dashboardRequest.getEndDate());
 				throw new FraudEngineException("Start date must be specified alongside the end date");
 			}else{
+				//Long totalCount = allTrasactions.stream().count();
+				//Long totalCountToday = allTrasactions.stream().filter(t -> t.getCreatedAt().toLocalDate().isEqual(LocalDate.now())).count();
+				totalCount = allTrasactions.stream().count();
+				totalCountToday = allTrasactions.stream().filter(t -> t.getCreatedAt().toLocalDate().isEqual(LocalDate.now())).count();
+				log.info("Get Overall Transaction Stats Before Date filter");
+				log.info("totalAmount: {}, totalAmountToday: {}, totalCount: {}, totalCountToday: {}", totalAmount, totalAmountToday, totalCount, totalCountToday);
 
 			}
 		} catch (DateTimeParseException dtpEx) {
@@ -289,8 +295,6 @@ public class DashboardService {
 			} else if (Objects.isNull(dashboardRequest.getStartDate()) && Objects.nonNull(dashboardRequest.getEndDate())) {
 				log.error("Start date must be specified alongside the end date {}", dashboardRequest.getEndDate());
 				throw new FraudEngineException("Start date must be specified alongside the end date");
-			}else{
-
 			}
 		} catch (DateTimeParseException dtpEx) {
 			log.error("Wrong date format was received as input: {}", dtpEx.getLocalizedMessage());
