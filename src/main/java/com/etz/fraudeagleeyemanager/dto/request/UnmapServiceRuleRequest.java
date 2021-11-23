@@ -16,6 +16,5 @@ public class UnmapServiceRuleRequest {
 	private String serviceId;
 
 	@NotNull(message="Please enter the rule Ids")
-	@Positive(message="Please enter number only")
 	private List<Long> ruleId;
 }
