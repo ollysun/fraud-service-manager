@@ -286,7 +286,6 @@ public class RuleService {
 			throw new ResourceNotFoundException("Notification Group Id Not found for Id " + request.getNotificationGroupId());
 		}
 
-		ServiceRule serviceRuleEntity = new ServiceRule();
 		List<ServiceRule> createdServiceRuleEntity = new ArrayList<>();
 
 		for (Long id: request.getRuleId()){
@@ -294,6 +293,7 @@ public class RuleService {
 			if (!ruleEntityOptional.isPresent()) {
 				throw new ResourceNotFoundException("Rule Not found for Id " + request.getRuleId());
 			}
+			ServiceRule serviceRuleEntity = new ServiceRule();
 			try {
 				serviceRuleEntity.setServiceId(request.getServiceId());
 				serviceRuleEntity.setRuleId(id);

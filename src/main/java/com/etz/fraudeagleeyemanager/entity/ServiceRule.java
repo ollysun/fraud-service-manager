@@ -52,8 +52,7 @@ public class ServiceRule extends BaseAuditVersionEntity<ProductRuleId> implement
 
 	@JsonBackReference
 	@OneToOne(fetch = FetchType.LAZY)
-	@MapsId("notificationGroupId")
-	@JoinColumn(name = "notification_group_id", foreignKey = @ForeignKey(name = "FK_PRODUCT_RULE_NOTIFICATION_GROUP_ID"))
+	@JoinColumn(name = "notification_group_id", insertable = false, updatable = false)
 	@ToString.Exclude
 	private NotificationGroup notificationGroup;
 
