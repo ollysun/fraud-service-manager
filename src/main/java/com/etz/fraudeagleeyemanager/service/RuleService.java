@@ -70,9 +70,6 @@ public class RuleService {
 	@Transactional(rollbackFor = Throwable.class)
 	public Rule addRule(CreateRuleRequest request) {
 		Rule ruleEntity = new Rule();
-			if (Boolean.TRUE.equals(ruleRepository.existsByName(request.getRuleName()))){
-				throw new FraudEngineException("Similar record already exists");
-			}
 			ruleEntity.setName(request.getRuleName());
 			ruleEntity.setValueOneDataType(AppUtil.checkDataType(request.getFirstDataType()));
 			ruleEntity.setSourceValueOne(request.getFirstSourceVal());

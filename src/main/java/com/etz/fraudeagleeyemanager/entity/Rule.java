@@ -19,8 +19,7 @@ import java.util.Objects;
 import java.util.Set;
 
 @Entity
-@Table(name = "rule",uniqueConstraints = @UniqueConstraint(name="UQ_RULE",
-		columnNames = {"rule_name"}))
+@Table(name = "rule")
 @SQLDelete(sql = "UPDATE rule SET deleted = true, status=0 WHERE id = ?", check = ResultCheckStyle.COUNT)
 @Where(clause = "deleted=false")
 @Getter
@@ -34,7 +33,7 @@ public class Rule extends BaseAuditEntity implements Serializable {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
-	@Column(name = "rule_name", nullable=false)
+	@Column(name = "rule_name")
 	private String name;
 	
 	@Column(name = "source_value_1", nullable=false)
