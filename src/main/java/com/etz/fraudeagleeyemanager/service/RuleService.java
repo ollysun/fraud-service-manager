@@ -287,6 +287,10 @@ public class RuleService {
 		}
 
 		List<ServiceRule> createdServiceRuleEntity = new ArrayList<>();
+		boolean bad = request.getRuleId().stream().anyMatch(s -> (s == null || s.equals("")));
+		if(bad){
+			throw new FraudEngineException("Please enter number to the rule list");
+		}
 
 		for (Long id: request.getRuleId()){
 			Optional<Rule> ruleEntityOptional = ruleRepository.findById(id);
@@ -360,9 +364,15 @@ public class RuleService {
 
 	@Transactional(rollbackFor = Throwable.class)
 	public boolean deleteServiceRule(UnmapServiceRuleRequest unmapServiceRuleRequest) {
-		if (Objects.isNull(unmapServiceRuleRequest.getRuleId()) && Objects.isNull(unmapServiceRuleRequest.getServiceId())){
+		if (Objects.isNull(unmapServiceRuleRequest.getRuleId()) || Objects.isNull(unmapServiceRuleRequest.getServiceId())){
 			throw new FraudEngineException("Please enter value for serviceId and ruleIds");
 		}
+
+		boolean bad = unmapServiceRuleRequest.getRuleId().stream().anyMatch(s -> (s == null || s.equals("")));
+		if(bad){
+			throw new FraudEngineException("Please enter number to the rule list");
+		}
+
 		for(Long id : unmapServiceRuleRequest.getRuleId()){
 			Optional<ServiceRule> productRuleOptional = serviceRuleRepository.findById(new ProductRuleId(id, unmapServiceRuleRequest.getServiceId()));
 			if (Boolean.FALSE.equals(productRuleOptional.isPresent())){
