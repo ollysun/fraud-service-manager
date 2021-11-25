@@ -25,7 +25,7 @@ public class TransactionLogEntity implements Serializable {
 	@Column(name = "id")
 	private Long id;
 
-	@Column(name = "transaction_id", unique = true, nullable = false)
+	@Column(name = "transaction_id", unique = false, nullable = false)
 	private String transactionId;
 
 	@Column(name = "source_url", nullable = false)
