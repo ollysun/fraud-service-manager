@@ -4,16 +4,7 @@ import java.io.Serializable;
 import java.util.Objects;
 import java.util.Set;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
-import javax.persistence.Table;
+import javax.persistence.*;
 
 import org.hibernate.Hibernate;
 import org.hibernate.annotations.ResultCheckStyle;
@@ -73,8 +64,13 @@ public class NotificationGroup extends BaseAuditEntity implements Serializable {
 	private Boolean status;
 
 	@ToString.Exclude
-	@OneToOne(mappedBy = "notificationGroup", fetch = FetchType.LAZY,
-			cascade = CascadeType.ALL)
+	//@OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+//	@JoinColumns({
+//			@JoinColumn(name = "service_id", referencedColumnName = "service_id"),
+//			@JoinColumn(name = "rule_id", referencedColumnName = "rule_id")
+//	})
+	@OneToOne(mappedBy = "notificationGroup", cascade = CascadeType.ALL)
+	@PrimaryKeyJoinColumn
 	@JsonManagedReference
 	@JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
 	private ServiceRule serviceRule;

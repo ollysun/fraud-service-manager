@@ -290,9 +290,9 @@ public class RuleService {
 		}
 
 		for (Long id: request.getRuleId()){
-			Optional<Rule> ruleEntityOptional = ruleRepository.findById(id);
-			if (!ruleEntityOptional.isPresent()) {
-				throw new ResourceNotFoundException("Rule Not found for Id " + request.getRuleId());
+			boolean responseExist = ruleRepository.existsById(id);
+			if(Boolean.FALSE.equals(responseExist)){
+				throw new ResourceNotFoundException("Rule Not found for Id " + id);
 			}
 			ServiceRule serviceRuleEntity = new ServiceRule();
 			try {
@@ -371,9 +371,9 @@ public class RuleService {
 		}
 
 		for(Long id : unmapServiceRuleRequest.getRuleId()){
-			Optional<ServiceRule> productRuleOptional = serviceRuleRepository.findById(new ProductRuleId(id, unmapServiceRuleRequest.getServiceId()));
-			if (Boolean.FALSE.equals(productRuleOptional.isPresent())){
-				throw new ResourceNotFoundException(" No service rule found for rule Id: " +id + "service id: " + unmapServiceRuleRequest.getServiceId());
+			boolean checkExist = serviceRuleRepository.existsByRuleIdAndServiceId(id, unmapServiceRuleRequest.getServiceId());
+			if (Boolean.FALSE.equals(checkExist)){
+				throw new ResourceNotFoundException(" No service rule found for rule Id: " + id + " service id: " + unmapServiceRuleRequest.getServiceId());
 			}
 		}
 		try {

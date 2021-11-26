@@ -9,4 +9,6 @@ import com.etz.fraudeagleeyemanager.entity.Rule;
 @Repository
 public interface RuleRepository extends JpaRepository<Rule, Long> {
     boolean existsByName(String name);
+
+    boolean existsById(Long ruleId);
 }

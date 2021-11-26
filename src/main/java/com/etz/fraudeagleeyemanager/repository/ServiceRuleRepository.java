@@ -23,4 +23,7 @@ public interface ServiceRuleRepository extends JpaRepository<ServiceRule, Produc
     @Transactional
     @Query(value="DELETE FROM ServiceRule WHERE serviceId = (:serviceId) and ruleId IN (:ruleIds)")
     void deleteByRuleIdSAndServiceId(@Param("serviceId") String serviceId, @Param("ruleIds") List<Long> ruleId);
+
+    boolean existsByRuleIdAndServiceId(Long id, String serviceId);
+
 }
