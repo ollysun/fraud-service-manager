@@ -50,7 +50,6 @@ public class ServiceRule extends BaseAuditVersionEntity<ProductRuleId> implement
 	@Column(name = "authoriser", length=100)
 	private String authoriser;
 
-	//@OneToOne(fetch = FetchType.LAZY, mappedBy = "serviceRule")
 	@OneToOne
 	@MapsId
 	@JoinColumn(name = "service_id")

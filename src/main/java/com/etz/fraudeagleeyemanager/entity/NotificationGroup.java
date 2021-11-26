@@ -64,11 +64,6 @@ public class NotificationGroup extends BaseAuditEntity implements Serializable {
 	private Boolean status;
 
 	@ToString.Exclude
-	//@OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-//	@JoinColumns({
-//			@JoinColumn(name = "service_id", referencedColumnName = "service_id"),
-//			@JoinColumn(name = "rule_id", referencedColumnName = "rule_id")
-//	})
 	@OneToOne(mappedBy = "notificationGroup", cascade = CascadeType.ALL)
 	@PrimaryKeyJoinColumn
 	@JsonManagedReference
