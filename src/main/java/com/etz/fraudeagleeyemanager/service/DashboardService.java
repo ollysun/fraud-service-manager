@@ -300,14 +300,16 @@ public class DashboardService {
 			log.error("Wrong date format was received as input: {}", dtpEx.getLocalizedMessage());
 			throw new FraudEngineException("Start and End dates should be in the format " + DASHBOARD_REQ_DATE_FORMAT);
 		}
-		
+
 		List<DashBrdTransactionPerProduct> transactionPerProducts = new ArrayList<>();
 		for(Map.Entry<String, List<TransactionLogEntity>> entry : groupedTransactionsByProductCode.entrySet()) {
 			log.info("[{}] Number of transactions for productCode {}", entry.getValue().stream().count(), entry.getKey());
 			
 			DashBrdTransactionPerProduct transactionPerProd = new DashBrdTransactionPerProduct();
 			transactionPerProd.setProductCode(entry.getKey());
-			transactionPerProd.setName(productRepository.findById(entry.getKey()).map(ProductEntity::getName).get());
+			if (productRepository.findById(entry.getKey()).map(ProductEntity::getName).isPresent()) {
+				transactionPerProd.setName(productRepository.findById(entry.getKey()).map(ProductEntity::getName).get());
+			}
 			transactionPerProd.setTotalTransaction(entry.getValue().stream().map(TransactionLogEntity::getAmount).reduce(BigDecimal.ZERO, BigDecimal::add).setScale(0, RoundingMode.HALF_UP));
 			transactionPerProd.setTransactionCount(entry.getValue().stream().count());
 			transactionPerProd.setTotalFlagged(entry.getValue().stream().filter(TransactionLogEntity::getIsFraud).count());
@@ -403,7 +405,9 @@ public class DashboardService {
 		allTrasactions.stream().forEach(transaction ->{
 			DashBrdRecentTransaction recentTransaction = new DashBrdRecentTransaction();
 			recentTransaction.setTransactionId(transaction.getTransactionId());
-			recentTransaction.setProduct(transaction.getProductCode());
+			if(productRepository.findById(transaction.getProductCode()).isPresent()) {
+				recentTransaction.setProduct(productRepository.findById(transaction.getProductCode()).get().getName());
+			}
 			recentTransaction.setService(transaction.getServiceId());
 			recentTransaction.setChannel(transaction.getChannel());
 			recentTransaction.setAmount(transaction.getAmount());
