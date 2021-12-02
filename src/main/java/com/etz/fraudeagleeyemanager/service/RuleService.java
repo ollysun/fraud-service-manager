@@ -70,10 +70,8 @@ public class RuleService {
 	@Transactional(rollbackFor = Throwable.class)
 	public Rule addRule(CreateRuleRequest request) {
 		Rule ruleEntity = new Rule();
-			ruleEntity.setName(request.getRuleName());
 			ruleEntity.setValueOneDataType(AppUtil.checkDataType(request.getFirstDataType()));
 			ruleEntity.setSourceValueOne(request.getFirstSourceVal());
-
 			// check the operator
 			ruleEntity.setOperatorOne(AppUtil.checkOperator(request.getFirstDataType(),request.getFirstOperator()));
 
@@ -95,6 +93,9 @@ public class RuleService {
 				ruleEntity.setCompareValueTwo(request.getSecondCompareVal());
 			}
 			ruleEntity.setDataSourceValTwo(AppUtil.checkDataSource(request.getSecondDataSourceVal()));
+			if (request.getSuspicion() == 0){
+				throw new FraudEngineException("Suspicion level cannot be 0");
+			}
 			ruleEntity.setSuspicionLevel(request.getSuspicion());
 		    ruleEntity.setAction(AppUtil.getLevelAction(request.getSuspicion()));
 			ruleEntity.setAuthorised(false);
@@ -150,7 +151,6 @@ public class RuleService {
 			ruleEntity.setAuthorised(false);
 			ruleEntity.setStatus(request.getStatus());
 			ruleEntity.setUpdatedBy(request.getUpdatedBy());
-
 		return outputUpdatedRuleResponse(addRuleEntityToDatabase(ruleEntity, ruleEntity.getUpdatedBy()));
 	}
 
@@ -295,6 +295,10 @@ public class RuleService {
 				throw new ResourceNotFoundException("Rule Not found for Id " + id);
 			}
 			ServiceRule serviceRuleEntity = new ServiceRule();
+			log.info("service rule " + serviceRuleRepository.existsById(new ProductRuleId(id,request.getServiceId())));
+			if(serviceRuleRepository.existsById(new ProductRuleId(id,request.getServiceId()))){
+				throw new FraudEngineException("Similar record exist for rule id:  " + id + " and ServiceId: " + request.getServiceId());
+			}
 			try {
 				serviceRuleEntity.setServiceId(request.getServiceId());
 				serviceRuleEntity.setRuleId(id);
@@ -371,8 +375,7 @@ public class RuleService {
 		}
 
 		for(Long id : unmapServiceRuleRequest.getRuleId()){
-			boolean checkExist = serviceRuleRepository.existsByRuleIdAndServiceId(id, unmapServiceRuleRequest.getServiceId());
-			if (Boolean.FALSE.equals(checkExist)){
+			if (Boolean.FALSE.equals(serviceRuleRepository.existsById(new ProductRuleId(id,unmapServiceRuleRequest.getServiceId())))){
 				throw new ResourceNotFoundException(" No service rule found for rule Id: " + id + " service id: " + unmapServiceRuleRequest.getServiceId());
 			}
 		}

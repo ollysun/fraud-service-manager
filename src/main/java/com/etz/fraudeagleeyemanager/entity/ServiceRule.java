@@ -50,10 +50,11 @@ public class ServiceRule extends BaseAuditVersionEntity<ProductRuleId> implement
 	@Column(name = "authoriser", length=100)
 	private String authoriser;
 
-	@OneToOne
-	@MapsId
-	@JoinColumn(name = "service_id")
+
 	@JsonBackReference
+	@ManyToOne(fetch = FetchType.LAZY)
+	@MapsId("notificationGroupId")
+	@JoinColumn(name = "notification_group_id")
 	@ToString.Exclude
 	private NotificationGroup notificationGroup;
 
