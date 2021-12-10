@@ -34,10 +34,10 @@ spring:
         password: password
   ## MailProperties
   mail:
-    host: smtp.gmail.com
-    port: 587
-    username: ollysun@gmail.com
-    password:
+    host: mail.etranzact.com
+    port: 25
+    username: eagleeye@etranzactng.com
+    password: Etz@1234
     properties:
       mail:
         smtp:

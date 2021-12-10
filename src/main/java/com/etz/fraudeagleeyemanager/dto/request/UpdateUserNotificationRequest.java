@@ -11,6 +11,6 @@ public class UpdateUserNotificationRequest {
 	@NotNull
 	@JsonAlias("notificationId")
 	private Long id;
-	private Long userId;
+//	private Long userId;
 	private String updatedBy;
 }
